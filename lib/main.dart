@@ -1,15 +1,16 @@
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'clickerbloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 double TILE_LENGTH;
-List tileTypes = ["loot", "fight", "puzzle"];
-var r = Random();
-int randnum;
+List eventTypes = ["loot", "fight", "puzzle"];
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  final ClickerBloc _clickerBloc = ClickerBloc();
+  final DungeonBloc _dungeonBloc = DungeonBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: DungeonList(),
+      home: BlocProviderTree(
+        blocProviders: <BlocProvider>[
+          BlocProvider<ClickerBloc>(bloc: _clickerBloc),
+          BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
+        ],
+        child: DungeonList(),
+      ),
       );
   }
 }
@@ -32,29 +39,26 @@ class DungeonList extends StatefulWidget {
 class DungeonListState extends State<DungeonList> {
   ScrollController _scrollController = ScrollController();
   List<DungeonTile> _dungeonTiles = [
-    DungeonTile(event: DungeonEvent(eventType: "loot", length: 100)),
-    DungeonTile(event: DungeonEvent(eventType: "fight", length: 100)),
-    DungeonTile(event: DungeonEvent(eventType: "puzzle", length: 100))
+    DungeonTile(event: DungeonEvent(eventType: "loot", length: 10)),
+    DungeonTile(event: DungeonEvent(eventType: "fight", length: 10)),
+    DungeonTile(event: DungeonEvent(eventType: "puzzle", length: 10))
   ];
 
   _scrollToMiddle() {
     _scrollController.jumpTo(MediaQuery.of(context).size.width/4);
-    print("BEGGINING OFFSET IS ${_scrollController.offset}");
+    print("OFFSET IS ${_scrollController.offset}");
   }
 
-  _scrollToNextRoom() {
-    randnum = r.nextInt(tileTypes.length);
-    setState(() {
-      _scrollToMiddle();
-      _dungeonTiles.add(DungeonTile(event: DungeonEvent(eventType: tileTypes[randnum], length: 100)));
-      _scrollController.animateTo(
-          _scrollController.offset + MediaQuery.of(context).size.width/2,
-          duration: Duration(seconds: 1),
-          curve: Curves.ease
-      ).then((data) {
-        _dungeonTiles.removeAt(0);
-        print(_dungeonTiles);
-      });
+  _scrollToNextRoom(bloc) {
+    _scrollToMiddle();
+    print(_scrollController.offset);
+    bloc.dispatch(_dungeonTiles);
+    _scrollController.animateTo(
+      90.0 + MediaQuery.of(context).size.width/2,
+      duration: Duration(seconds: 1),
+      curve: Curves.ease
+    ).then((data) {
+      bloc.dispatch(_dungeonTiles);
     });
   }
 
@@ -67,13 +71,15 @@ class DungeonListState extends State<DungeonList> {
   @override
   Widget build(BuildContext context) {
     TILE_LENGTH = MediaQuery.of(context).size.width/2;
+    final ClickerBloc _clickerBloc = BlocProvider.of<ClickerBloc>(context);
+    final DungeonBloc _dungeonBloc = BlocProvider.of<DungeonBloc>(context);
     return Scaffold(
       body: Column(
         children: <Widget>[
           Expanded(
             child: GestureDetector(
               onTap: () {
-                _scrollToNextRoom();
+                _clickerBloc.dispatch(_dungeonTiles[1].event);
               },
               child: Center(
                 child: Stack(
@@ -83,14 +89,21 @@ class DungeonListState extends State<DungeonList> {
                       constraints: BoxConstraints(
                           maxHeight: 200.0
                       ),
-                      child: ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        controller: _scrollController,
-                        padding: EdgeInsets.all(0.0),
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemCount: _dungeonTiles.length,
-                        itemBuilder: (BuildContext, int index) => _dungeonTiles[index],
+                      child: BlocBuilder(
+                          bloc: _dungeonBloc,
+                          builder: (BuildContext context, List<DungeonTile> l) {
+                            print("BLOCBUILDER GETS CALLED");
+                            _dungeonTiles = l;
+                            return ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              controller: _scrollController,
+                              padding: EdgeInsets.all(0.0),
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              itemCount: _dungeonTiles.length,
+                              itemBuilder: (BuildContext, int index) => _dungeonTiles[index],
+                            );
+                          }
                       ),
                     ),
                     Text("Hero")
@@ -98,6 +111,18 @@ class DungeonListState extends State<DungeonList> {
                 ),
               ),
             ),
+          ),
+          BlocBuilder(
+              bloc: _clickerBloc,
+              builder: (BuildContext context, double progress) {
+                print(progress);
+                if (progress == -1) {
+                  _scrollToNextRoom(_dungeonBloc);
+                }
+                return LinearProgressIndicator(
+                  value: progress,
+                );
+              }
           ),
           Row(
             children: <Widget>[
@@ -135,5 +160,6 @@ class DungeonTile extends StatelessWidget {
 class DungeonEvent {
   String eventType;
   int length;
-  DungeonEvent({@required this.eventType, @required this.length});
+  int progress;
+  DungeonEvent({@required this.eventType, @required this.length, this.progress=0});
 }
