@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'clickerbloc.dart';
+import 'backdrop.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'dart:math';
 
+enum FrontPanels {characterPage, inventoryPage, skillsPage}
 List eventTypes = ["loot", "fight", "puzzle"];
 double TILE_LENGTH;
-int heroGold = 0;
+Hero hero = Hero();
+bool isScrolling = false;
+bool isMenu = false;
 
 class MyBlocDelegate extends BlocDelegate {
   @override
@@ -35,12 +41,14 @@ class MyAppState extends State<MyApp> {
   DungeonBloc _dungeonBloc;
   ClickerBloc _clickerBloc;
   GoldBloc _goldBloc;
+  TapAnimationBloc _tapAnimationBloc;
 
   @override
   void initState() {
     _goldBloc = GoldBloc();
     _dungeonBloc = DungeonBloc();
     _clickerBloc = ClickerBloc(goldBloc: _goldBloc);
+    _tapAnimationBloc = TapAnimationBloc();
     super.initState();
   }
 
@@ -56,9 +64,10 @@ class MyAppState extends State<MyApp> {
         blocProviders: <BlocProvider>[
           BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
           BlocProvider<ClickerBloc>(bloc: _clickerBloc),
-          BlocProvider<GoldBloc>(bloc: _goldBloc)
+          BlocProvider<GoldBloc>(bloc: _goldBloc),
+          BlocProvider<TapAnimationBloc>(bloc: _tapAnimationBloc)
         ],
-        child: DungeonList(),
+        child: ComplexExample(),
       ),
     );
   }
@@ -91,6 +100,7 @@ class DungeonListState extends State<DungeonList> {
     ).then((data) {
       bloc.dispatch(_dungeonTiles);
       _scrollToMiddle();
+      isScrolling = false;
     });
   }
 
@@ -106,56 +116,272 @@ class DungeonListState extends State<DungeonList> {
     final DungeonBloc _dungeonBloc = BlocProvider.of<DungeonBloc>(context);
     final ClickerBloc _clickerBloc = BlocProvider.of<ClickerBloc>(context);
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
+    final TapAnimationBloc _tapAnimationBloc = BlocProvider.of<TapAnimationBloc>(context);
     return Scaffold(
-      body: GestureDetector(
-        onTap: () {
-          _clickerBloc.dispatch(_dungeonTiles[1].event);
-        },
-        child: Column(
-          children: <Widget>[
-            BlocBuilder(
-            bloc: _goldBloc,
-            builder: (BuildContext context, int gold) {
-              heroGold = gold;
-              return Text("Gold: " + gold.toString());
-            }
+      body: Stack(
+        children: <Widget>[
+          GestureDetector(
+            onTap: () {
+              if (!isScrolling) {
+                _clickerBloc.dispatch(_dungeonTiles[1].event);
+              }
+            },
+            onTapDown: (TapDownDetails details) {
+              List<dynamic> data = _onTapDown(details);
+              dynamic event = _dungeonTiles[1].event.eventType;
+              data.add(event);
+              _tapAnimationBloc.dispatch(data);
+            },
+            child: Column(
+              children: <Widget>[
+                BlocBuilder(
+                    bloc: _goldBloc,
+                    builder: (BuildContext context, int gold) {
+                      hero.gold = gold;
+                      return Text("Gold: " + gold.toString());
+                    }
+                ),
+                Expanded(
+                  child: BlocBuilder(
+                    bloc: _dungeonBloc,
+                    builder: (BuildContext context, List<DungeonTile> l) {
+                      _dungeonTiles = l;
+                      return ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        controller: _scrollController,
+                        padding: EdgeInsets.all(0.0),
+                        scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
+                        itemCount: _dungeonTiles.length,
+                        itemBuilder: (BuildContext context, int index) =>
+                        _dungeonTiles[index],
+                      );
+                    },
+                  ),
+                ),
+                BlocBuilder(
+                    bloc: _clickerBloc,
+                    builder: (BuildContext context, double progress) {
+                      if (isMenu == false) {
+                        if (progress == -1) {
+                          isScrolling = true;
+                          _scrollDungeon(_dungeonBloc);
+                        }
+                      }
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: <Widget>[
+                          Container(
+                            height: 30.0,
+                            child: LinearProgressIndicator(
+                              value: progress,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(_dungeonTiles[1].event.progress.toString()),
+                              Text(" / "),
+                              Text(_dungeonTiles[1].event.length.toString()),
+
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                )
+              ],
             ),
-            Expanded(
-              child: BlocBuilder(
-                bloc: _dungeonBloc,
-                builder: (BuildContext context, List<DungeonTile> l) {
-                  print("BLOCBUILDER GETS CALLED");
-                  _dungeonTiles = l;
-                  return ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    controller: _scrollController,
-                    padding: EdgeInsets.all(0.0),
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    itemCount: _dungeonTiles.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                    _dungeonTiles[index],
+          ),
+          BlocBuilder(
+              bloc: _tapAnimationBloc,
+              builder: (BuildContext context, List tapData) {
+                if (tapData.length == 3) {
+                  return Positioned(
+                      left: tapData[0],
+                      top: tapData[1],
+                      child: Container(
+                        width: 20.0,
+                        height: 20.0,
+                        padding: EdgeInsets.only(left: tapData[0], top: tapData[1]),
+                        color: Colors.grey,
+                        child: Text(tapData[2].toString()),
+                      )
                   );
-                },
-              ),
-            ),
-            BlocBuilder(
-                bloc: _clickerBloc,
-                builder: (BuildContext context, double progress) {
-                  print(progress);
-                  if (progress == -1) {
-                    _scrollDungeon(_dungeonBloc);
-                  }
-                  return LinearProgressIndicator(
-                    value: progress,
-                  );
+                } else {
+                  return Container(child: null);
                 }
-            )
-          ],
-        ),
+              }
+          )
+        ],
       ),
     );
   }
+}
+
+class FrontPanelModel extends Model {
+  FrontPanelModel(this._activePanel);
+  FrontPanels _activePanel;
+
+  FrontPanels get activePanelType => _activePanel;
+
+  Widget get activePanel {
+    if (_activePanel == FrontPanels.characterPage) {
+      return CharacterScreen();
+    } else if (_activePanel == FrontPanels.inventoryPage) {
+      return InventoryScreen();
+    } else if (_activePanel == FrontPanels.skillsPage) {
+      return SkillsScreen();
+    }
+  }
+
+  void activate(FrontPanels panel) {
+    _activePanel = panel;
+    notifyListeners();
+  }
+}
+
+class ComplexExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => ScopedModel(
+        model: FrontPanelModel(FrontPanels.characterPage),
+        child: Scaffold(body: SafeArea(child: Panels())));
+}
+
+class Panels extends StatelessWidget {
+  final frontPanelVisible = ValueNotifier<bool>(false);
+
+  @override
+  Widget build(BuildContext context) {
+    return ScopedModelDescendant<FrontPanelModel>(
+      builder: (context, _, model) => Backdrop(
+        menuRow: MenuRow(
+          frontPanelOpen: frontPanelVisible,
+        ),
+        frontLayer: model.activePanel,
+        backLayer: DungeonList(),
+        panelVisible: frontPanelVisible,
+        frontPanelOpenHeight: 40.0,
+        frontHeaderHeight: 0.0,
+      ),
+    );
+  }
+}
+
+class MenuRow extends StatefulWidget {
+  MenuRow({@required this.frontPanelOpen});
+  final ValueNotifier<bool> frontPanelOpen;
+
+  MenuRowState createState() => MenuRowState();
+}
+
+class MenuRowState extends State<MenuRow> {
+  bool panelOpen;
+
+  @override
+  initState() {
+    super.initState();
+    panelOpen = widget.frontPanelOpen.value;
+    widget.frontPanelOpen.addListener(_subscribeToValueNotifier);
+  }
+
+  void _subscribeToValueNotifier() =>
+      setState(() => panelOpen = widget.frontPanelOpen.value);
+
+  /// Required for resubscribing when hot reload occurs
+  @override
+  void didUpdateWidget(MenuRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    oldWidget.frontPanelOpen.removeListener(_subscribeToValueNotifier);
+    widget.frontPanelOpen.addListener(_subscribeToValueNotifier);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        ScopedModelDescendant<FrontPanelModel>(
+        rebuildOnChange: false,
+          builder: (context, _, model) => MaterialButton(
+            color: model._activePanel == FrontPanels.characterPage &&
+                widget.frontPanelOpen.value ?
+            Colors.lightGreenAccent :
+            Colors.white,
+            child: Text("Character"),
+            onPressed: () {
+              if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.characterPage) {
+                toggleBackdropPanelVisibility(widget.frontPanelOpen.value);
+                isMenu = false;
+              } else {
+                isMenu = true;
+                model.activate(FrontPanels.characterPage);
+                widget.frontPanelOpen.value = true;
+              }
+            },
+          )
+        ),
+        ScopedModelDescendant<FrontPanelModel>(
+          rebuildOnChange: false,
+          builder: (context, _, model) => MaterialButton(
+            color: model._activePanel == FrontPanels.inventoryPage &&
+                widget.frontPanelOpen.value ?
+            Colors.lightGreenAccent :
+            Colors.white,
+            child: Text("Inventory"),
+            onPressed: () {
+              if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.inventoryPage) {
+                toggleBackdropPanelVisibility(widget.frontPanelOpen.value);
+                isMenu = false;
+              }  else {
+                isMenu = true;
+                model.activate(FrontPanels.inventoryPage);
+                widget.frontPanelOpen.value = true;
+              }
+            },
+            )
+        ),
+        ScopedModelDescendant<FrontPanelModel>(
+            rebuildOnChange: false,
+            builder: (context, _, model) => MaterialButton(
+              color: model._activePanel == FrontPanels.skillsPage &&
+                  widget.frontPanelOpen.value ?
+              Colors.lightGreenAccent :
+              Colors.white,
+              child: Text("Skills"),
+              onPressed: () {
+                if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.skillsPage) {
+                  toggleBackdropPanelVisibility(widget.frontPanelOpen.value);
+                  isMenu = false;
+                }  else {
+                  isMenu = true;
+                  model.activate(FrontPanels.skillsPage);
+                  widget.frontPanelOpen.value = true;
+                }
+              },
+            )
+        )
+      ],
+    );
+  }
+}
+
+class CharacterScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) =>
+      Container(color: Colors.teal, child: Center(child: Text('CharacterScreen')));
+}
+
+class InventoryScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) =>
+      Container(color: Colors.lime, child: Center(child: Text('InventoryScreen')));
+}
+
+class SkillsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) =>
+      Container(color: Colors.cyan, child: Center(child: Text('SkillsScreen')));
 }
 
 class DungeonTile extends StatelessWidget {
@@ -168,7 +394,7 @@ class DungeonTile extends StatelessWidget {
     return Center(
       child: Container(
         width: TILE_LENGTH,
-        height: 100.0,
+        height: 200.0,
         decoration: BoxDecoration(
             image: DecorationImage(image: AssetImage("assets/mayclover_meadow_example.png"), fit: BoxFit.cover),
             border: new Border.all(color: Colors.blueAccent)
@@ -189,13 +415,58 @@ class DungeonEvent {
   String eventType;
   int length;
   int progress;
+  int loot;
   DungeonEvent({
     @required this.eventType,
     @required this.length,
     this.progress = 0,
+    this.loot = 1
   });
 
   @override
   String toString() =>
       'DungeonEvent { evenType: $eventType, length: $length, progress: $progress }';
+}
+
+class Hero {
+  int gold;
+  int hp;
+  int attack;
+  int looting;
+  int intelligence;
+  int exp;
+  int expCap;
+  List skills;
+  List inventory;
+
+  Hero({this.gold = 0,
+    this.hp = 100,
+    this.attack = 1,
+    this.intelligence = 1,
+    this.looting = 1,
+    this.exp = 0,
+    this.expCap = 100,
+    this.skills,
+    this.inventory
+  });
+}
+
+DungeonTile generateDungeon() {
+  int dungeonType = Random().nextInt(eventTypes.length);
+  int lootAmount = randomRange(1, 10);
+  int length = randomRange(10, 20);
+  
+  return DungeonTile(event: DungeonEvent(eventType: eventTypes[dungeonType], length: length, loot: lootAmount));
+}
+
+int randomRange(int min, int max) => min + Random().nextInt(max - min);
+
+void levelUp() {
+  // TODO
+}
+
+_onTapDown(TapDownDetails details) {
+    var x = details.globalPosition.dx;
+    var y = details.globalPosition.dy;
+    return <dynamic>[x, y];
 }
