@@ -27,39 +27,47 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   }
 }
 
-class ClickerBloc extends Bloc<DungeonEvent, double> {
+class ClickerBloc extends Bloc<List<DungeonTile>, double> {
   double get initialState => 0.0;
   final GoldBloc goldBloc;
 
   ClickerBloc({this.goldBloc}) : assert(goldBloc != null);
 
   @override
-  Stream<double> mapEventToState(DungeonEvent event) async* {
+  Stream<double> mapEventToState(List<DungeonTile> event) async* {
+    final DungeonEvent currEvent = event[1].event;
+
     print(isMenu.toString());
-    switch(event.eventType) {
+    switch(currEvent.eventType) {
       case "fight":
-        event.progress++;
-        if (event.progress == event.length) {
+        currEvent.progress++;
+        if (currEvent.progress == currEvent.length) {
+          currEvent.progress = 0;
+          currEvent.length = event[2].event.length;
           yield -1;
         } else {
-          yield event.progress / event.length;
+          yield currEvent.progress / currEvent.length;
         }
         break;
       case "loot":
-        event.progress++;
-        if (event.progress == event.length) {
-          goldBloc.dispatch(event.loot);
+        currEvent.progress++;
+        if (currEvent.progress == currEvent.length) {
+          currEvent.progress = 0;
+          currEvent.length = event[2].event.length;
+          goldBloc.dispatch(currEvent.loot);
           yield -1;
         } else {
-          yield event.progress / event.length;
+          yield currEvent.progress / currEvent.length;
         }
         break;
       case "puzzle":
-        event.progress++;
-        if (event.progress == event.length) {
+        currEvent.progress++;
+        if (currEvent.progress == currEvent.length) {
+          currEvent.progress = 0;
+          currEvent.length = event[2].event.length;
           yield -1;
         } else {
-          yield event.progress / event.length;
+          yield currEvent.progress / currEvent.length;
         }
         break;
     }
@@ -72,26 +80,25 @@ class GoldBloc extends Bloc<int, int> {
   @override
   Stream<int> mapEventToState(int gold) async* {
     int newGold = gold;
-    newGold = newGold + hero.gold;
     yield newGold;
   }
 }
 
-class HeroHpBloc extends Bloc<String, int> {
-  int get initialState => hero.hp;
+class HeroHpBloc extends Bloc<String, double> {
+  double get initialState => 1.0;
 
   @override
-  Stream<int> mapEventToState(String event) async* {
-
+  Stream<double> mapEventToState(String event) async* {
+    yield hero.hp / hero.hpCap;
   }
 }
 
-class HeroExpBloc extends Bloc<String, int> {
-  int get initialState => hero.exp;
+class HeroExpBloc extends Bloc<String, double> {
+  double get initialState => 0.0;
 
   @override
-  Stream<int> mapEventToState(String event) async* {
-
+  Stream<double> mapEventToState(String event) async* {
+    yield hero.exp / hero.expCap;
   }
 }
 

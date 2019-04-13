@@ -7,7 +7,7 @@ import 'backdrop.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:math';
 
-enum FrontPanels {characterPage, inventoryPage, skillsPage}
+enum FrontPanels {characterPage, shopPage, skillsPage}
 List eventTypes = ["loot", "fight", "puzzle"];
 double TILE_LENGTH;
 Hero hero = Hero();
@@ -42,6 +42,8 @@ class MyAppState extends State<MyApp> {
   ClickerBloc _clickerBloc;
   GoldBloc _goldBloc;
   TapAnimationBloc _tapAnimationBloc;
+  HeroHpBloc _heroHpBloc;
+  HeroExpBloc _heroExpBloc;
 
   @override
   void initState() {
@@ -49,6 +51,8 @@ class MyAppState extends State<MyApp> {
     _dungeonBloc = DungeonBloc();
     _clickerBloc = ClickerBloc(goldBloc: _goldBloc);
     _tapAnimationBloc = TapAnimationBloc();
+    _heroHpBloc = HeroHpBloc();
+    _heroExpBloc = HeroExpBloc();
     super.initState();
   }
 
@@ -65,7 +69,9 @@ class MyAppState extends State<MyApp> {
           BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
           BlocProvider<ClickerBloc>(bloc: _clickerBloc),
           BlocProvider<GoldBloc>(bloc: _goldBloc),
-          BlocProvider<TapAnimationBloc>(bloc: _tapAnimationBloc)
+          BlocProvider<TapAnimationBloc>(bloc: _tapAnimationBloc),
+          BlocProvider<HeroHpBloc>(bloc: _heroHpBloc),
+          BlocProvider<HeroExpBloc>(bloc: _heroExpBloc),
         ],
         child: ComplexExample(),
       ),
@@ -78,7 +84,7 @@ class DungeonList extends StatefulWidget {
   DungeonListState createState() => DungeonListState();
 }
 
-class DungeonListState extends State<DungeonList> {
+class DungeonListState extends State<DungeonList> with TickerProviderStateMixin {
   ScrollController _scrollController = ScrollController();
   List<DungeonTile> _dungeonTiles = [
     DungeonTile(event: DungeonEvent(eventType: "loot", length: 10)),
@@ -116,31 +122,86 @@ class DungeonListState extends State<DungeonList> {
     final DungeonBloc _dungeonBloc = BlocProvider.of<DungeonBloc>(context);
     final ClickerBloc _clickerBloc = BlocProvider.of<ClickerBloc>(context);
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
+    final HeroHpBloc _heroHpBloc = BlocProvider.of<HeroHpBloc>(context);
+    final HeroExpBloc _heroExpBloc = BlocProvider.of<HeroExpBloc>(context);
     final TapAnimationBloc _tapAnimationBloc = BlocProvider.of<TapAnimationBloc>(context);
+    final tapAnimationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    final tapAnimation = Tween(begin: 1.0, end: 0.0).animate(tapAnimationController);
+    final goldAnimationController = AnimationController(vsync: this, duration: Duration(seconds: 2));
+    final goldAnimation = Tween(begin: 1.0, end: 0.0).animate(goldAnimationController);
     return Scaffold(
       body: Stack(
         children: <Widget>[
           GestureDetector(
             onTap: () {
               if (!isScrolling) {
-                _clickerBloc.dispatch(_dungeonTiles[1].event);
+                _clickerBloc.dispatch(_dungeonTiles);
               }
             },
-            onTapDown: (TapDownDetails details) {
-              List<dynamic> data = _onTapDown(details);
-              dynamic event = _dungeonTiles[1].event.eventType;
-              data.add(event);
-              _tapAnimationBloc.dispatch(data);
+            onTapUp: (TapUpDetails details) {
+              if (!isScrolling) {
+                tapAnimationController.reset();
+                List<dynamic> data = _onTapUp(details);
+                dynamic event = _dungeonTiles[1].event.eventType;
+                data.add(event);
+                _tapAnimationBloc.dispatch(data);
+              }
             },
             child: Column(
               children: <Widget>[
                 BlocBuilder(
                     bloc: _goldBloc,
-                    builder: (BuildContext context, int gold) {
-                      hero.gold = gold;
-                      return Text("Gold: " + gold.toString());
+                    builder: (BuildContext context, int newGold) {
+                      goldAnimationController.reset();
+                      goldAnimationController.forward();
+                      hero.gold = hero.gold + newGold;
+                      return Column(
+                        children: <Widget>[
+                          Text("Gold: " + hero.gold.toString()),
+                          FadeTransition(
+                            opacity: goldAnimation,
+                            child: Text("+ " + newGold.toString(), style: TextStyle(color: Colors.amber),),
+                          )
+                        ],
+                      );
                     }
                 ),
+                BlocBuilder(
+                    bloc: _heroHpBloc,
+                    builder: (BuildContext context, double value) {
+                      return Column(
+                        children: <Widget>[
+                          Text("Health Points"),
+                          Container(
+                            width: 300.0,
+                            height: 13.0,
+                            child: LinearProgressIndicator(
+                              value: value,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          )
+                        ],
+                      );
+                }),
+                BlocBuilder(
+                    bloc: _heroExpBloc,
+                    builder: (BuildContext context, double value) {
+                      return Column(
+                        children: <Widget>[
+                          Text("Experience Points"),
+                          Container(
+                            width: 300.0,
+                            height: 13.0,
+                            child: LinearProgressIndicator(
+                              value: value,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.lightGreen),
+                              backgroundColor: Colors.lightGreenAccent,
+                            ),
+                          )
+                        ],
+                      );
+                    }),
                 Expanded(
                   child: BlocBuilder(
                     bloc: _dungeonBloc,
@@ -197,16 +258,15 @@ class DungeonListState extends State<DungeonList> {
               bloc: _tapAnimationBloc,
               builder: (BuildContext context, List tapData) {
                 if (tapData.length == 3) {
+                  tapAnimationController.forward();
+                  print(tapData[2]);
                   return Positioned(
                       left: tapData[0],
                       top: tapData[1],
-                      child: Container(
-                        width: 20.0,
-                        height: 20.0,
-                        padding: EdgeInsets.only(left: tapData[0], top: tapData[1]),
-                        color: Colors.grey,
-                        child: Text(tapData[2].toString()),
-                      )
+                      child: FadeTransition(
+                        opacity: tapAnimation,
+                        child: Text("+ " + tapData[2].toString()),
+                      ),
                   );
                 } else {
                   return Container(child: null);
@@ -228,8 +288,8 @@ class FrontPanelModel extends Model {
   Widget get activePanel {
     if (_activePanel == FrontPanels.characterPage) {
       return CharacterScreen();
-    } else if (_activePanel == FrontPanels.inventoryPage) {
-      return InventoryScreen();
+    } else if (_activePanel == FrontPanels.shopPage) {
+      return ShopScreen();
     } else if (_activePanel == FrontPanels.skillsPage) {
       return SkillsScreen();
     }
@@ -324,18 +384,18 @@ class MenuRowState extends State<MenuRow> {
         ScopedModelDescendant<FrontPanelModel>(
           rebuildOnChange: false,
           builder: (context, _, model) => MaterialButton(
-            color: model._activePanel == FrontPanels.inventoryPage &&
+            color: model._activePanel == FrontPanels.shopPage &&
                 widget.frontPanelOpen.value ?
             Colors.lightGreenAccent :
             Colors.white,
-            child: Text("Inventory"),
+            child: Text("Shop"),
             onPressed: () {
-              if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.inventoryPage) {
+              if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.shopPage) {
                 toggleBackdropPanelVisibility(widget.frontPanelOpen.value);
                 isMenu = false;
               }  else {
                 isMenu = true;
-                model.activate(FrontPanels.inventoryPage);
+                model.activate(FrontPanels.shopPage);
                 widget.frontPanelOpen.value = true;
               }
             },
@@ -372,10 +432,10 @@ class CharacterScreen extends StatelessWidget {
       Container(color: Colors.teal, child: Center(child: Text('CharacterScreen')));
 }
 
-class InventoryScreen extends StatelessWidget {
+class ShopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(color: Colors.lime, child: Center(child: Text('InventoryScreen')));
+      Container(color: Colors.lime, child: Center(child: Text('ShopScreen')));
 }
 
 class SkillsScreen extends StatelessWidget {
@@ -431,6 +491,7 @@ class DungeonEvent {
 class Hero {
   int gold;
   int hp;
+  int hpCap;
   int attack;
   int looting;
   int intelligence;
@@ -438,20 +499,24 @@ class Hero {
   int expCap;
   List skills;
   List inventory;
+  Enemy enemy;
 
   Hero({this.gold = 0,
     this.hp = 100,
+    this.hpCap = 100,
     this.attack = 1,
     this.intelligence = 1,
     this.looting = 1,
     this.exp = 0,
     this.expCap = 100,
     this.skills,
-    this.inventory
+    this.inventory,
+    this.enemy
   });
 }
 
 DungeonTile generateDungeon() {
+  int randomRange(int min, int max) => min + Random().nextInt(max - min);
   int dungeonType = Random().nextInt(eventTypes.length);
   int lootAmount = randomRange(1, 10);
   int length = randomRange(10, 20);
@@ -459,14 +524,26 @@ DungeonTile generateDungeon() {
   return DungeonTile(event: DungeonEvent(eventType: eventTypes[dungeonType], length: length, loot: lootAmount));
 }
 
-int randomRange(int min, int max) => min + Random().nextInt(max - min);
-
 void levelUp() {
   // TODO
 }
 
-_onTapDown(TapDownDetails details) {
+_onTapUp(TapUpDetails details) {
     var x = details.globalPosition.dx;
     var y = details.globalPosition.dy;
     return <dynamic>[x, y];
 }
+
+class Enemy {
+  int hp;
+  int expValue;
+  int attack;
+
+  Enemy({
+    this.hp,
+    this.expValue,
+    this.attack
+  });
+}
+
+Enemy rat = Enemy(hp: 10, expValue: 5, attack: 1);
