@@ -212,7 +212,6 @@ class _BackdropState extends State<Backdrop>
                       padding: widget.frontPanelPadding,
                     ),
                   ),
-                  // TODO: ADD MENU ROW HEREEE
                 ],
               ),
             ),
