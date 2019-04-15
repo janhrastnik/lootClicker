@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # lootclicker
 
 A flutter clicker game.
@@ -14,3 +15,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter, view our 
 [online documentation](https://flutter.io/docs), which offers tutorials, 
 samples, guidance on mobile development, and a full API reference.
+=======
+# Loot-Clicker
+Flutter mobile clicker game.
+>>>>>>> 6ad24009aa7cb2d52666a778bcb6c7690813ebbe
