@@ -9,8 +9,15 @@ import 'classes.dart';
 
 enum FrontPanels {characterPage, shopPage, skillsPage}
 Player player = Player();
-bool isScrolling = false;
 bool isMenu = false;
+bool isScrolling = false;
+double TILE_LENGTH;
+List<DungeonTile> dungeonTiles = [
+  DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat)),
+  DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat)),
+  DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat))
+];
+ScrollController scrollController = ScrollController();
 
 class MyBlocDelegate extends BlocDelegate {
   @override
@@ -49,7 +56,12 @@ class MyAppState extends State<MyApp> {
     _heroHpBloc = HeroHpBloc();
     _heroExpBloc = HeroExpBloc();
     _dungeonBloc = DungeonBloc();
-    _clickerBloc = ClickerBloc(goldBloc: _goldBloc, heroHpBloc: _heroHpBloc, heroExpBloc: _heroExpBloc);
+    _clickerBloc = ClickerBloc(
+        goldBloc: _goldBloc,
+        heroHpBloc: _heroHpBloc,
+        heroExpBloc: _heroExpBloc,
+        dungeonBloc: _dungeonBloc
+    );
     _tapAnimationBloc = TapAnimationBloc();
     super.initState();
   }
@@ -110,33 +122,6 @@ class DungeonList extends StatefulWidget {
 }
 
 class DungeonListState extends State<DungeonList> with TickerProviderStateMixin {
-  ScrollController _scrollController = ScrollController();
-
-  // TODO: generate random beggining dungeon tiles
-  List<DungeonTile> _dungeonTiles = [
-    DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat)),
-    DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat)),
-    DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat))
-  ];
-
-  // TODO: move to a new bloc maybe
-  void _scrollToMiddle() {
-    _scrollController.jumpTo(MediaQuery.of(context).size.width/4);
-  }
-
-  void _scrollDungeon(DungeonBloc bloc) {
-    _scrollToMiddle();
-    bloc.dispatch(_dungeonTiles);
-    _scrollController.animateTo(
-        _scrollController.offset + MediaQuery.of(context).size.width/2,
-        duration: Duration(seconds: 1),
-        curve: Curves.ease
-    ).then((data) {
-      bloc.dispatch(_dungeonTiles);
-      _scrollToMiddle();
-      isScrolling = false;
-    });
-  }
 
   _onTapUp(TapUpDetails details) {
     var x = details.globalPosition.dx;
@@ -147,7 +132,10 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToMiddle());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+        TILE_LENGTH = MediaQuery.of(context).size.width/2;
+        return scrollController.jumpTo(MediaQuery.of(context).size.width/4);
+    });
   }
 
   @override
@@ -166,14 +154,14 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
       body: GestureDetector(
         onTap: () {
           if (!isScrolling) {
-            _clickerBloc.dispatch(_dungeonTiles);
+            _clickerBloc.dispatch(dungeonTiles);
           }
         },
         onTapUp: (TapUpDetails details) {
           if (!isScrolling) {
             tapAnimationController.reset();
             List<dynamic> data = _onTapUp(details);
-            dynamic event = _dungeonTiles[1].event.eventType;
+            dynamic event = dungeonTiles[1].event.eventType;
             data.add(event);
             _tapAnimationBloc.dispatch(data);
           }
@@ -204,15 +192,20 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                     builder: (BuildContext context, double value) {
                       return Column(
                         children: <Widget>[
-                          Text("Health Points"),
-                          Container(
-                            width: 300.0,
-                            height: 13.0,
-                            child: LinearProgressIndicator(
-                              value: value,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                              backgroundColor: Colors.deepOrangeAccent,
-                            ),
+                          Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              Container(
+                                width: 300.0,
+                                height: 16.0,
+                                child: LinearProgressIndicator(
+                                  value: value,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                                  backgroundColor: Colors.deepOrangeAccent,
+                                ),
+                              ),
+                              Text("${player.hp} / ${player.hpCap} HP")
+                            ],
                           )
                         ],
                       );
@@ -222,15 +215,20 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                     builder: (BuildContext context, double value) {
                       return Column(
                         children: <Widget>[
-                          Text("Experience Points"),
-                          Container(
-                            width: 300.0,
-                            height: 13.0,
-                            child: LinearProgressIndicator(
-                              value: value,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                              backgroundColor: Colors.lightGreenAccent,
-                            ),
+                          Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              Container(
+                                width: 300.0,
+                                height: 16.0,
+                                child: LinearProgressIndicator(
+                                  value: value,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                  backgroundColor: Colors.lightGreenAccent,
+                                ),
+                              ),
+                              Text("${player.exp} / ${player.expCap} EXP")
+                            ],
                           )
                         ],
                       );
@@ -239,16 +237,16 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                   child: BlocBuilder(
                     bloc: _dungeonBloc,
                     builder: (BuildContext context, List<DungeonTile> l) {
-                      _dungeonTiles = l;
+                      dungeonTiles = l;
                       return ListView.builder(
                         physics: NeverScrollableScrollPhysics(),
-                        controller: _scrollController,
+                        controller: scrollController,
                         padding: EdgeInsets.all(0.0),
                         scrollDirection: Axis.horizontal,
                         shrinkWrap: true,
-                        itemCount: _dungeonTiles.length,
+                        itemCount: dungeonTiles.length,
                         itemBuilder: (BuildContext context, int index) =>
-                        _dungeonTiles[index],
+                        dungeonTiles[index],
                       );
                     },
                   ),
@@ -256,19 +254,13 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                 BlocBuilder(
                     bloc: _clickerBloc,
                     builder: (BuildContext context, double progress) {
-                      // TODO: move to blocs.dart
-                      if (isMenu == false) {
-                        if (progress == -1) {
-                          isScrolling = true;
-                          _scrollDungeon(_dungeonBloc);
-                        }
-                      }
-                      if (progress == 0.0 && _dungeonTiles[1].event.eventType == "fight") {
+                      // TODO: no need to yield -1 anymore
+                      if (progress == 0.0 && dungeonTiles[1].event.eventType == "fight") {
                         progress = 1.0;
                       }
                       if (progress == -1 &&
-                          _dungeonTiles[1].event.eventType == "fight" &&
-                          _dungeonTiles[2].event.eventType == "fight") {
+                          dungeonTiles[1].event.eventType == "fight" &&
+                          dungeonTiles[2].event.eventType == "fight") {
                         progress = 1.0;
                       }
                       return Stack(
@@ -283,11 +275,11 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              _dungeonTiles[1].event.eventType == "fight" ?
-                              Text((_dungeonTiles[1].event.length - _dungeonTiles[1].event.progress).toString())
-                              : Text(_dungeonTiles[1].event.progress.toString()),
+                              dungeonTiles[1].event.eventType == "fight" ?
+                              Text((dungeonTiles[1].event.length - dungeonTiles[1].event.progress).toString())
+                              : Text(dungeonTiles[1].event.progress.toString()),
                               Text(" / "),
-                              Text(_dungeonTiles[1].event.length.toString()),
+                              Text(dungeonTiles[1].event.length.toString()),
 
                             ],
                           ),

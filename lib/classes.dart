@@ -70,10 +70,10 @@ class Player {
     this.skills,
     this.inventory,
   });
-}
 
-void levelUp() {
-  // TODO
+  void levelUp() {
+    // TODO
+  }
 }
 
 class Enemy {
@@ -90,4 +90,6 @@ class Enemy {
   });
 }
 
-Enemy rat = Enemy(hp: 20, expValue: 5, attack: 1, name: "rat");
+// TODO: generate enemies from json file
+
+Enemy rat = Enemy(hp: 20, expValue: 50, attack: 1, name: "rat");
