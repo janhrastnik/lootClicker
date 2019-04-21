@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class DungeonTile extends StatelessWidget {
   DungeonTile({Key key, @required this.event}) : super(key: key);
@@ -72,7 +73,14 @@ class Player {
   });
 
   void levelUp() {
-    // TODO
+    this.hpCap = this.hpCap + 20;
+    this.attack = this.attack + Random().nextInt(2);
+    this.looting = this.looting + Random().nextInt(2);
+    this.intelligence = this.intelligence + Random().nextInt(2);
+    this.expCap = this.expCap * 2;
+    this.exp = 0;
+    this.hp = this.hpCap;
+    print(this.hpCap);
   }
 }
 
@@ -92,4 +100,4 @@ class Enemy {
 
 // TODO: generate enemies from json file
 
-Enemy rat = Enemy(hp: 20, expValue: 50, attack: 1, name: "rat");
+Enemy rat = Enemy(hp: 10, expValue: 50, attack: 1, name: "rat");

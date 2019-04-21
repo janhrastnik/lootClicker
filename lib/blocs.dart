@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'classes.dart';
 
+Future wait(n) async {
+  return Future.delayed(Duration(seconds: n));
+}
+
 class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   @override
-  List<DungeonTile> get initialState => [
-    DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat)),
-    DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat)),
-    DungeonTile(event: DungeonEvent(eventType: "fight", length: 10, enemy: rat))
-  ];
+  List<DungeonTile> get initialState => dungeonTiles;
 
   List eventTypes = ["loot", "fight", "puzzle"];
 
@@ -40,11 +40,21 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
       case 3:
         final List<DungeonTile> newList = List.from(event, growable: true);
         newList.add(generateDungeon());
+        dungeonTiles = newList;
         yield newList;
         break;
       case 4:
         final List<DungeonTile> newList = List.from(event);
         newList.removeAt(0);
+        dungeonTiles = newList;
+        yield newList;
+        break;
+      case 0:
+        final List<DungeonTile> newList = [];
+        newList.add(DungeonTile(event: DungeonEvent(eventType: "wall", length: null)));
+        newList.add(DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)));
+        newList.add(DungeonTile(event: DungeonEvent(eventType: "empty", length: null)));
+        dungeonTiles = newList;
         yield newList;
         break;
     }
@@ -52,7 +62,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
 }
 
 class ClickerBloc extends Bloc<List<DungeonTile>, double> {
-  double get initialState => 0.0;
+  double get initialState => 1.0;
   final GoldBloc goldBloc;
   final HeroHpBloc heroHpBloc;
   final HeroExpBloc heroExpBloc;
@@ -64,30 +74,35 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
     scrollController.jumpTo(TILE_LENGTH/2);
   }
 
-  void scrollDungeon(DungeonBloc bloc) {
+  Future scrollDungeon(DungeonBloc bloc) async {
+    progressAnimationController.forward();
     scrollToMiddle();
     bloc.dispatch(dungeonTiles);
-    scrollController.animateTo(
+    await scrollController.animateTo(
         scrollController.offset + TILE_LENGTH,
         duration: Duration(seconds: 1),
         curve: Curves.ease
-    ).then((data) {
-      bloc.dispatch(dungeonTiles);
-      scrollToMiddle();
-      isScrolling = false;
-    });
+    );
+    bloc.dispatch(dungeonTiles);
+    scrollToMiddle();
+    isScrolling = false;
+    progressAnimationController.reset();
   }
 
   @override
   Stream<double> mapEventToState(List<DungeonTile> event) async* {
     final DungeonEvent currEvent = event[1].event;
 
-    print(isMenu.toString());
     switch(currEvent.eventType) {
       case "fight":
-        currEvent.progress++;
+        currEvent.progress = currEvent.progress + player.attack;
         heroHpBloc.dispatch(currEvent.enemy.attack);
-        if (currEvent.progress == currEvent.length) {
+        if (currEvent.enemy.attack >= player.hp) {
+          print("HELLO");
+          await wait(3);
+        }
+        if (currEvent.progress >= currEvent.length) {
+          heroExpBloc.dispatch(currEvent.enemy.expValue);
           if (event[2].event.eventType == "fight") {
             currEvent.progress = 0;
           } else {
@@ -96,41 +111,54 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           currEvent.length = event[2].event.length;
           if (isMenu == false) {
             isScrolling = true;
-            scrollDungeon(dungeonBloc);
+            await scrollDungeon(dungeonBloc);
           }
-          heroExpBloc.dispatch(currEvent.enemy.expValue);
-          yield -1;
+          yield 1;
         } else {
           yield 1 - (currEvent.progress / currEvent.length);
         }
         break;
       case "loot":
-        currEvent.progress++;
-        if (currEvent.progress == currEvent.length) {
+        currEvent.progress = currEvent.progress + player.looting;
+        if (currEvent.progress >= currEvent.length) {
           currEvent.progress = 0;
           currEvent.length = event[2].event.length;
           goldBloc.dispatch(currEvent.loot);
           if (isMenu == false) {
             isScrolling = true;
-            scrollDungeon(dungeonBloc);
+            await scrollDungeon(dungeonBloc);
           }
-          yield -1;
+          yield 1;
         } else {
-          yield currEvent.progress / currEvent.length;
+          yield 1 - (currEvent.progress / currEvent.length);
         }
         break;
       case "puzzle":
-        currEvent.progress++;
-        if (currEvent.progress == currEvent.length) {
+        currEvent.progress = currEvent.progress + player.intelligence;
+        if (currEvent.progress >= currEvent.length) {
           currEvent.progress = 0;
           currEvent.length = event[2].event.length;
           if (isMenu == false) {
             isScrolling = true;
-            scrollDungeon(dungeonBloc);
+            await scrollDungeon(dungeonBloc);
           }
-          yield -1;
+          yield 1;
         } else {
-          yield currEvent.progress / currEvent.length;
+          yield 1 - (currEvent.progress / currEvent.length);
+        }
+        break;
+      case "shrine":
+        if (isMenu == false) {
+          isScrolling = true;
+          await scrollDungeon(dungeonBloc);
+        }
+        yield 2; // needs to be different than 1 otherwise doesn't yield
+        break;
+      case "empty":
+        if (isMenu == false) {
+          isScrolling = true;
+          await scrollDungeon(dungeonBloc);
+          yield 1;
         }
         break;
     }
@@ -149,15 +177,28 @@ class GoldBloc extends Bloc<int, int> {
 
 class HeroHpBloc extends Bloc<int, double> {
   double get initialState => 1.0;
+  final DungeonBloc dungeonBloc;
+
+  HeroHpBloc({this.dungeonBloc});
 
   @override
   Stream<double> mapEventToState(int event) async* {
     player.hp = player.hp - event;
     if (player.hp <= 0) {
+      isDead = true;
       print("hero hp dropped to zero.");
       player.gold = (player.gold / 2).round();
       player.hp = player.hpCap;
       // TODO: spawn player in new tile on death
+      wait(3).then((data) {
+        dungeonBloc.dispatch(<DungeonTile>[]);
+        deathAnimationController.reverse();
+        wait(3).then((data) {
+          isScrolling = false;
+        });
+      });
+      isScrolling = true;
+      deathAnimationController.forward();
     }
     yield player.hp / player.hpCap;
   }
@@ -165,14 +206,18 @@ class HeroHpBloc extends Bloc<int, double> {
 
 class HeroExpBloc extends Bloc<int, double> {
   double get initialState => 0.0;
+  final HeroHpBloc heroHpBloc;
+
+  HeroExpBloc({this.heroHpBloc});
 
   @override
   Stream<double> mapEventToState(int event) async* {
     player.exp = player.exp + event;
-    if (player.exp >= player.expCap) {
-      print("hero levels up");
+    if (player.exp >= player.expCap) { // player levels up
       player.exp = 0;
+      // increase stats
       player.levelUp();
+      heroHpBloc.dispatch(0); // update new hp on screen
     }
     yield player.exp / player.expCap;
   }

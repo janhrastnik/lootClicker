@@ -1,0 +1,22 @@
+{
+  "rat": {
+    "hp": 10,
+    "expValue": 10,
+    "attack": 1
+  },
+  "crab": {
+    "hp": 20,
+    "expValue": 15,
+    "attack": 1
+  },
+  "goblin": {
+    "hp": 15,
+    "expValue": 15,
+    "attack": 2
+  },
+  "ghost": {
+    "hp": 25,
+    "expValue": 20,
+    "attack": 2
+  }
+}
