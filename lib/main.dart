@@ -9,7 +9,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'classes.dart';
 
 enum FrontPanels {characterPage, shopPage, skillsPage}
-Player player = Player();
+Player player = Player(inventory: List.generate(30, (int index) => null));
 bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
@@ -479,7 +479,61 @@ class MenuRowState extends State<MenuRow> {
 class CharacterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(color: Colors.teal, child: Center(child: Text('CharacterScreen')));
+      Container(
+          color: Colors.teal,
+          child: Column(
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      Text("Stats"),
+                      Text("HP: ${player.hp}/${player.hpCap}"),
+                      Text("EXP: ${player.exp}/${player.expCap}"),
+                      Text("Attack: ${player.attack}"),
+                      Text("Intelligence: ${player.intelligence}"),
+                      Text("Looting: ${player.looting}")
+                    ],
+                  ),
+                  Column(
+                    children: <Widget>[
+                      Text("Equipment"),
+                      ItemSlot(),
+                      ItemSlot(),
+                      ItemSlot(),
+                      ItemSlot()
+                    ],
+                  )
+                ],
+              ),
+              Text("Inventory"),
+              Expanded(child: GridView.count(
+                  crossAxisCount: 6,
+                  children: player.inventory.map((item) {
+                    return ItemSlot();
+                  }).toList()
+              ),)
+            ],
+          )
+      );
+}
+
+class ItemSlot extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(5.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+              color: Colors.black54
+          ),
+        ),
+        width: 65.0,
+        height: 65.0,
+      ),
+    );
+  }
 }
 
 class ShopScreen extends StatelessWidget {
