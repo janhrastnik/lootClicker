@@ -1,0 +1,16 @@
+{
+  "items" : {
+    "redPotion" : {
+      "increaseHp" : {
+        "value" : 10,
+        "percentage": true
+      }
+    },
+    "herbs" : {
+      "increaseHp" : {
+        "value": 5,
+        "percentage": false
+      }
+    }
+  }
+}

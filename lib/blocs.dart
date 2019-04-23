@@ -19,17 +19,19 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
     String dungeonType = eventTypes[Random().nextInt(eventTypes.length)];
     int lootAmount = randomRange(1, 10);
     int length = randomRange(10, 20);
-    Enemy enemyTest;
+    Enemy randomEnemy;
     if (dungeonType == "fight") {
-      enemyTest = rat;
-      length = enemyTest.hp;
+      // generate a random enemy
+      String randomEnemyType = monsters.keys.toList()[Random().nextInt(monsters.keys.toList().length)];
+      randomEnemy = monsters[randomEnemyType];
+      length = randomEnemy.hp;
     }
 
     return DungeonTile(event: DungeonEvent(
         eventType: dungeonType,
         length: length,
         loot: lootAmount,
-        enemy: dungeonType == "fight" ? enemyTest : null
+        enemy: dungeonType == "fight" ? randomEnemy : null
     ));
   }
 

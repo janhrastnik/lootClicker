@@ -23,7 +23,8 @@ List<DungeonTile> dungeonTiles = [
 ScrollController scrollController = ScrollController();
 AnimationController progressAnimationController;
 AnimationController deathAnimationController;
-var monsters = {};
+Map monsters = {};
+Map items = {};
 
 class MyBlocDelegate extends BlocDelegate {
   @override
@@ -56,9 +57,9 @@ class MyAppState extends State<MyApp> {
   HeroHpBloc _heroHpBloc;
   HeroExpBloc _heroExpBloc;
 
-  Future readData() async {
+  Future readData(file) async {
     try {
-      String data  = await rootBundle.loadString("assets/monsters.json");
+      String data  = await rootBundle.loadString(file);
       return jsonDecode(data);
     } catch (e) {
       print(e);
@@ -84,9 +85,23 @@ class MyAppState extends State<MyApp> {
         dungeonBloc: _dungeonBloc
     );
     _tapAnimationBloc = TapAnimationBloc();
-    readData().then((data) {
-      monsters = data;
-      print(monsters);
+    // get monsters, items from json files, add them to globals
+    readData("assets/monsters.json").then((data) {
+      data.forEach((key, value) {
+        monsters[key] = Enemy(
+            name: key,
+            hp: value["hp"],
+            expValue: value["expValue"],
+            attack: value["attack"]
+        );
+      });
+      print(monsters.keys.toList().toString());
+    });
+    readData("assets/items.json").then((data) {
+      Map _data = data["items"];
+      _data.forEach((key, behaviours) {
+        items[key] = Item(name: key, behaviours: behaviours);
+      });
     });
     super.initState();
   }

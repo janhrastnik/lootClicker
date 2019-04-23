@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'main.dart';
 
 class DungeonTile extends StatelessWidget {
   DungeonTile({Key key, @required this.event}) : super(key: key);
@@ -98,6 +99,33 @@ class Enemy {
   });
 }
 
-// TODO: generate enemies from json file
+class Item {
+  String name;
+  Map behaviours;
 
-Enemy rat = Enemy(hp: 10, expValue: 50, attack: 1, name: "rat");
+  Item({
+   this.name,
+   this.behaviours
+});
+
+  void use() {
+    behaviours.forEach((behaviour, args) {
+      switch(behaviour) {
+        case "increaseHp":
+          increaseHp(args["value"], args["percentage"]);
+      }
+    });
+  }
+
+}
+
+void increaseHp(n, percentage) {
+  if (percentage) {
+    player.hp += player.hpCap * (n/100);
+  } else {
+    player.hp += n;
+  }
+  if (player.hp > player.hpCap) {
+    player.hp = player.hpCap;
+  }
+}
