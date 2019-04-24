@@ -60,6 +60,7 @@ class Player {
   int expCap;
   List skills;
   List inventory;
+  int numberOfItems;
 
   Player({this.gold = 0,
     this.hp = 100,
@@ -71,6 +72,7 @@ class Player {
     this.expCap = 100,
     this.skills,
     this.inventory,
+    this.numberOfItems = 0
   });
 
   void levelUp() {
@@ -87,12 +89,14 @@ class Player {
 
 class Enemy {
   String name;
+  String loot;
   int hp;
   int expValue;
   int attack;
 
   Enemy({
     this.name,
+    this.loot,
     this.hp,
     this.expValue,
     this.attack

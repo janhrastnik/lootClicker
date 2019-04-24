@@ -2,21 +2,25 @@
   "rat": {
     "hp": 10,
     "expValue": 10,
-    "attack": 1
+    "attack": 1,
+    "loot": "ratMeat"
   },
   "crab": {
     "hp": 20,
     "expValue": 15,
-    "attack": 1
+    "attack": 1,
+    "loot": "ratMeat"
   },
   "goblin": {
     "hp": 15,
     "expValue": 15,
-    "attack": 2
+    "attack": 2,
+    "loot": "ratMeat"
   },
   "ghost": {
     "hp": 25,
     "expValue": 20,
-    "attack": 2
+    "attack": 2,
+    "loot": null
   }
 }

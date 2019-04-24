@@ -89,10 +89,11 @@ class MyAppState extends State<MyApp> {
     readData("assets/monsters.json").then((data) {
       data.forEach((key, value) {
         monsters[key] = Enemy(
-            name: key,
-            hp: value["hp"],
-            expValue: value["expValue"],
-            attack: value["attack"]
+          name: key,
+          hp: value["hp"],
+          expValue: value["expValue"],
+          attack: value["attack"],
+          loot: value["loot"]
         );
       });
       print(monsters.keys.toList().toString());
@@ -298,10 +299,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                     bloc: _clickerBloc,
                     builder: (BuildContext context, double progress) {
                       // TODO: no need to yield -1 anymore
-                      print("blocbuilder gets run");
                       String eventText;
-                      // print(dungeonTiles);
-                      print("EVENT: ${dungeonTiles[1].event.eventType}");
                        if (dungeonTiles[1].event.eventType == "shrine") {
                         eventText = "Enter The Dungeon";
                       } if (dungeonTiles[1].event.eventType == "empty") {
@@ -522,30 +520,50 @@ class CharacterScreen extends StatelessWidget {
                 ],
               ),
               Text("Inventory"),
-              Expanded(child: GridView.count(
-                  crossAxisCount: 6,
-                  children: player.inventory.map((item) {
-                    return ItemSlot();
-                  }).toList()
-              ),)
+              Expanded(child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6),
+                      itemCount: player.inventory.length,
+                      itemBuilder: (BuildContext context, int index) => ItemSlot(
+                        index: index,
+                        item: items[player.inventory[index]],
+                      )
+                  )
+              ),
             ],
           )
       );
 }
 
 class ItemSlot extends StatelessWidget {
+  final Item item;
+  final int index;
+  ItemSlot({this.item, this.index});
+
   @override
   Widget build(BuildContext context) {
+    final HeroHpBloc _heroHpBloc = BlocProvider.of<HeroHpBloc>(context);
     return Padding(
       padding: EdgeInsets.all(5.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-              color: Colors.black54
+      child: GestureDetector(
+        onTap: () {
+          if (item != null) {
+            print("mate");
+            item.use();
+            player.inventory.removeAt(index);
+            player.inventory.insert(index, null);
+            player.numberOfItems--;
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+                color: Colors.black54
+            ),
           ),
+          width: 65.0,
+          height: 65.0,
+          child: item != null ? Center(child: Text(item.name),) : null
         ),
-        width: 65.0,
-        height: 65.0,
       ),
     );
   }

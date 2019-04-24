@@ -6,7 +6,7 @@
         "percentage": true
       }
     },
-    "herbs" : {
+    "ratMeat" : {
       "increaseHp" : {
         "value": 5,
         "percentage": false

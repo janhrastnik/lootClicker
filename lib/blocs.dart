@@ -100,10 +100,17 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         currEvent.progress = currEvent.progress + player.attack;
         heroHpBloc.dispatch(currEvent.enemy.attack);
         if (currEvent.enemy.attack >= player.hp) {
-          print("HELLO");
+          // print("HELLO");
           await wait(3);
         }
+        // if the player beats the monster
         if (currEvent.progress >= currEvent.length) {
+          if (currEvent.enemy.loot != null) {
+            player.inventory.insert(player.numberOfItems, currEvent.enemy.loot);
+            player.numberOfItems++;
+            player.inventory.removeAt(player.numberOfItems);
+            print(player.inventory);
+          }
           heroExpBloc.dispatch(currEvent.enemy.expValue);
           if (event[2].event.eventType == "fight") {
             currEvent.progress = 0;
@@ -191,7 +198,6 @@ class HeroHpBloc extends Bloc<int, double> {
       print("hero hp dropped to zero.");
       player.gold = (player.gold / 2).round();
       player.hp = player.hpCap;
-      // TODO: spawn player in new tile on death
       wait(3).then((data) {
         dungeonBloc.dispatch(<DungeonTile>[]);
         deathAnimationController.reverse();
