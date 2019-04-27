@@ -9,7 +9,14 @@ import 'package:scoped_model/scoped_model.dart';
 import 'classes.dart';
 
 enum FrontPanels {characterPage, shopPage, skillsPage}
-Player player = Player(inventory: List.generate(30, (int index) => null));
+Player player = Player(
+  inventory: [], equipped: {
+    "weapon": null,
+    "shield": null,
+    "helmet": null,
+    "body": null
+    }
+  );
 bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
@@ -23,6 +30,7 @@ List<DungeonTile> dungeonTiles = [
 ScrollController scrollController = ScrollController();
 AnimationController progressAnimationController;
 AnimationController deathAnimationController;
+AnimationController goldAnimationController;
 Map monsters = {};
 Map items = {};
 
@@ -100,8 +108,8 @@ class MyAppState extends State<MyApp> {
     });
     readData("assets/items.json").then((data) {
       Map _data = data["items"];
-      _data.forEach((key, behaviours) {
-        items[key] = Item(name: key, behaviours: behaviours);
+      _data.forEach((key, args) {
+        items[key] = Item(name: key, equip: args["equip"], behaviours: args);
       });
     });
     super.initState();
@@ -150,7 +158,7 @@ class Panels extends StatelessWidget {
         frontLayer: model.activePanel,
         backLayer: DungeonList(),
         panelVisible: frontPanelVisible,
-        frontPanelOpenHeight: 40.0,
+        frontPanelOpenHeight: 20.0,
         frontHeaderHeight: 0.0,
       ),
     );
@@ -189,8 +197,8 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
     final TapAnimationBloc _tapAnimationBloc = BlocProvider.of<TapAnimationBloc>(context);
     final tapAnimationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     final tapAnimation = Tween(begin: 1.0, end: 0.0).animate(tapAnimationController);
-    final goldAnimationController = AnimationController(vsync: this, duration: Duration(seconds: 2));
-    final goldAnimation = Tween(begin: 1.0, end: 0.0).animate(goldAnimationController);
+    goldAnimationController = AnimationController(vsync: this, duration: Duration(seconds: 2));
+    final goldAnimation = Tween(begin: 0.0, end: 1.0).animate(goldAnimationController);
     progressAnimationController = AnimationController(vsync: this, duration: Duration(milliseconds: 1));
     final progressAnimation = Tween(begin: 1.0, end: 0.0).animate(progressAnimationController);
     deathAnimationController = AnimationController(vsync: this, duration: Duration(seconds: 3));
@@ -218,9 +226,6 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                 BlocBuilder(
                     bloc: _goldBloc,
                     builder: (BuildContext context, int newGold) {
-                      goldAnimationController.reset();
-                      goldAnimationController.forward();
-                      player.gold = player.gold + newGold;
                       return Column(
                         children: <Widget>[
                           Text("Gold: " + player.gold.toString()),
@@ -489,7 +494,32 @@ class MenuRowState extends State<MenuRow> {
   }
 }
 
-class CharacterScreen extends StatelessWidget {
+class CharacterScreen extends StatefulWidget {
+  CharacterScreenState createState() => CharacterScreenState();
+}
+
+class CharacterScreenState extends State<CharacterScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  dynamic useItem(Item item, index) {
+    setState(() {
+        print("mate");
+        item.use(
+          BlocProvider.of<HeroHpBloc>(context),
+          BlocProvider.of<HeroExpBloc>(context),
+          BlocProvider.of<GoldBloc>(context),
+          BlocProvider.of<ClickerBloc>(context)
+        );
+        player.inventory.removeAt(index);
+        player.inventory.insert(index, null);
+        player.numberOfItems--;
+    });
+  }
+
   @override
   Widget build(BuildContext context) =>
       Container(
@@ -511,24 +541,34 @@ class CharacterScreen extends StatelessWidget {
                   Column(
                     children: <Widget>[
                       Text("Equipment"),
-                      ItemSlot(),
-                      ItemSlot(),
-                      ItemSlot(),
-                      ItemSlot()
+                      ItemSlot(item: player.equipped["weapon"],),
+                      ItemSlot(item: player.equipped["shield"]),
+                      ItemSlot(item: player.equipped["helmet"]),
+                      ItemSlot(item: player.equipped["body"])
                     ],
                   )
                 ],
               ),
               Text("Inventory"),
-              Expanded(child: GridView.builder(
+              Stack(
+                children: <Widget>[
+                  GridView.count(
+                    shrinkWrap: true,
+                    crossAxisCount: 6,
+                    children: List.generate(30, (int index) => ItemSlot()),
+                  ),
+                  GridView.builder(
+                      shrinkWrap: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6),
                       itemCount: player.inventory.length,
                       itemBuilder: (BuildContext context, int index) => ItemSlot(
                         index: index,
                         item: items[player.inventory[index]],
+                        useItem: useItem
                       )
-                  )
-              ),
+                  ),
+                ],
+              )
             ],
           )
       );
@@ -537,32 +577,28 @@ class CharacterScreen extends StatelessWidget {
 class ItemSlot extends StatelessWidget {
   final Item item;
   final int index;
-  ItemSlot({this.item, this.index});
+  dynamic useItem;
+  ItemSlot({this.item, this.index, this.useItem});
 
   @override
   Widget build(BuildContext context) {
-    final HeroHpBloc _heroHpBloc = BlocProvider.of<HeroHpBloc>(context);
     return Padding(
-      padding: EdgeInsets.all(5.0),
+      padding: EdgeInsets.all(2.0),
       child: GestureDetector(
         onTap: () {
           if (item != null) {
-            print("mate");
-            item.use();
-            player.inventory.removeAt(index);
-            player.inventory.insert(index, null);
-            player.numberOfItems--;
+            useItem(item, index);
           }
         },
         child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-                color: Colors.black54
+            decoration: BoxDecoration(
+              border: Border.all(
+                  color: Colors.black54
+              ),
             ),
-          ),
-          width: 65.0,
-          height: 65.0,
-          child: item != null ? Center(child: Text(item.name),) : null
+            width: 60.0,
+            height: 60.0,
+            child: item != null ? Center(child: Text(item.name),) : null
         ),
       ),
     );

@@ -3,24 +3,24 @@
     "hp": 10,
     "expValue": 10,
     "attack": 1,
-    "loot": "ratMeat"
+    "loot": "woodSword"
   },
   "crab": {
     "hp": 20,
     "expValue": 15,
     "attack": 1,
-    "loot": "ratMeat"
+    "loot": "woodSword"
   },
   "goblin": {
     "hp": 15,
     "expValue": 15,
     "attack": 2,
-    "loot": "ratMeat"
+    "loot": "woodSword"
   },
   "ghost": {
     "hp": 25,
     "expValue": 20,
     "attack": 2,
-    "loot": null
+    "loot": "woodSword"
   }
 }

@@ -61,6 +61,7 @@ class Player {
   List skills;
   List inventory;
   int numberOfItems;
+  Map equipped;
 
   Player({this.gold = 0,
     this.hp = 100,
@@ -72,7 +73,8 @@ class Player {
     this.expCap = 100,
     this.skills,
     this.inventory,
-    this.numberOfItems = 0
+    this.numberOfItems = 0,
+    this.equipped
   });
 
   void levelUp() {
@@ -106,30 +108,39 @@ class Enemy {
 class Item {
   String name;
   Map behaviours;
+  String equip;
 
   Item({
-   this.name,
-   this.behaviours
+    this.name,
+    this.behaviours,
+    this.equip,
 });
 
-  void use() {
+  void use(hpBloc, expBloc, clickBloc, goldBloc) {
+    if (equip != null) {
+      player.equipped[equip] = items[name];
+    }
     behaviours.forEach((behaviour, args) {
       switch(behaviour) {
-        case "increaseHp":
-          increaseHp(args["value"], args["percentage"]);
+        case "changeHp":
+          changeHp(args["value"], args["percentage"], hpBloc);
+          break;
+        case "changeAttack":
+          changeAttack(args["value"]);
       }
     });
   }
 
 }
 
-void increaseHp(n, percentage) {
+void changeHp(n, percentage, hpBloc) {
   if (percentage) {
-    player.hp += player.hpCap * (n/100);
+    hpBloc.dispatch(player.hpCap * (n/100));
   } else {
-    player.hp += n;
+    hpBloc.dispatch(n);
   }
-  if (player.hp > player.hpCap) {
-    player.hp = player.hpCap;
-  }
+}
+
+void changeAttack(n) {
+  player.attack += n;
 }

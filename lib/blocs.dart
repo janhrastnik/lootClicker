@@ -98,7 +98,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
     switch(currEvent.eventType) {
       case "fight":
         currEvent.progress = currEvent.progress + player.attack;
-        heroHpBloc.dispatch(currEvent.enemy.attack);
+        heroHpBloc.dispatch(-currEvent.enemy.attack);
         if (currEvent.enemy.attack >= player.hp) {
           // print("HELLO");
           await wait(3);
@@ -106,9 +106,8 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         // if the player beats the monster
         if (currEvent.progress >= currEvent.length) {
           if (currEvent.enemy.loot != null) {
-            player.inventory.insert(player.numberOfItems, currEvent.enemy.loot);
+            player.inventory.add(currEvent.enemy.loot);
             player.numberOfItems++;
-            player.inventory.removeAt(player.numberOfItems);
             print(player.inventory);
           }
           heroExpBloc.dispatch(currEvent.enemy.expValue);
@@ -180,6 +179,10 @@ class GoldBloc extends Bloc<int, int> {
   @override
   Stream<int> mapEventToState(int gold) async* {
     int newGold = gold;
+    goldAnimationController.reset();
+    goldAnimationController.value = 1.0;
+    goldAnimationController.reverse();
+    player.gold += newGold;
     yield newGold;
   }
 }
@@ -192,7 +195,10 @@ class HeroHpBloc extends Bloc<int, double> {
 
   @override
   Stream<double> mapEventToState(int event) async* {
-    player.hp = player.hp - event;
+    player.hp = player.hp + event;
+    if (player.hp > player.hpCap) {
+      player.hp = player.hpCap;
+    }
     if (player.hp <= 0) {
       isDead = true;
       print("hero hp dropped to zero.");

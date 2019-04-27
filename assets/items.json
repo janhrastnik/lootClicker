@@ -1,15 +1,23 @@
 {
   "items" : {
     "redPotion" : {
-      "increaseHp" : {
+      "equip": null,
+      "changeHp" : {
         "value" : 10,
         "percentage": true
       }
     },
     "ratMeat" : {
-      "increaseHp" : {
+      "equip": null,
+      "changeHp" : {
         "value": 5,
         "percentage": false
+      }
+    },
+    "woodSword": {
+      "equip": "weapon",
+      "changeAttack": {
+        "value": 1
       }
     }
   }

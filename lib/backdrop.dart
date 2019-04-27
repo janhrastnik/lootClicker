@@ -84,7 +84,7 @@ class Backdrop extends StatefulWidget {
         @required this.backLayer,
         @required this.menuRow,
         this.frontPanelOpenHeight = 0.0,
-        this.frontHeaderHeight = 48.0,
+        this.frontHeaderHeight = 0.0,
         this.frontPanelPadding = const EdgeInsets.all(0.0),
         this.frontHeaderVisibleClosed = true,
         this.panelVisible,
