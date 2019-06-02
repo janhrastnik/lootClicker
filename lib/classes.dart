@@ -109,11 +109,13 @@ class Item {
   String name;
   Map behaviours;
   String equip;
+  String description;
 
   Item({
     this.name,
     this.behaviours,
     this.equip,
+    this.description
 });
 
   void use(hpBloc, expBloc, clickBloc, goldBloc) {

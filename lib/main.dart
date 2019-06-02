@@ -109,7 +109,12 @@ class MyAppState extends State<MyApp> {
     readData("assets/items.json").then((data) {
       Map _data = data["items"];
       _data.forEach((key, args) {
-        items[key] = Item(name: key, equip: args["equip"], behaviours: args);
+        items[key] = Item(
+          name: key,
+          equip: args["equip"],
+          behaviours: args,
+          description: args["description"]
+        );
       });
     });
     super.initState();
@@ -505,7 +510,7 @@ class CharacterScreenState extends State<CharacterScreen> {
     super.initState();
   }
 
-  dynamic useItem(Item item, index) {
+  dynamic useItem(Item item, int index) {
     setState(() {
         print("mate");
         item.use(
@@ -518,6 +523,25 @@ class CharacterScreenState extends State<CharacterScreen> {
         player.inventory.insert(index, null);
         player.numberOfItems--;
     });
+  }
+
+  void showDescription(Item item, int index) {
+    AlertDialog description = AlertDialog(
+      title: Text(item.name),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(item.description),
+          FlatButton(
+            child: Text("Use Item"),
+            onPressed: () {
+              useItem(item, index);
+            },
+          )
+        ],
+      )
+    );
+    showDialog(context: context, builder: (BuildContext context) => description);
   }
 
   @override
@@ -564,7 +588,8 @@ class CharacterScreenState extends State<CharacterScreen> {
                       itemBuilder: (BuildContext context, int index) => ItemSlot(
                         index: index,
                         item: items[player.inventory[index]],
-                        useItem: useItem
+                        useItem: useItem,
+                        showDescription: showDescription,
                       )
                   ),
                 ],
@@ -578,7 +603,8 @@ class ItemSlot extends StatelessWidget {
   final Item item;
   final int index;
   dynamic useItem;
-  ItemSlot({this.item, this.index, this.useItem});
+  dynamic showDescription;
+  ItemSlot({this.item, this.index, this.useItem, this.showDescription});
 
   @override
   Widget build(BuildContext context) {
@@ -586,9 +612,7 @@ class ItemSlot extends StatelessWidget {
       padding: EdgeInsets.all(2.0),
       child: GestureDetector(
         onTap: () {
-          if (item != null) {
-            useItem(item, index);
-          }
+          showDescription(item, index);
         },
         child: Container(
             decoration: BoxDecoration(
