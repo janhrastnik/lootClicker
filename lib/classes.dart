@@ -60,7 +60,6 @@ class Player {
   int expCap;
   List skills;
   List inventory;
-  int numberOfItems;
   Map equipped;
 
   Player({this.gold = 0,
@@ -73,7 +72,6 @@ class Player {
     this.expCap = 100,
     this.skills,
     this.inventory,
-    this.numberOfItems = 0,
     this.equipped
   });
 
@@ -118,17 +116,24 @@ class Item {
     this.description
 });
 
-  void use(hpBloc, expBloc, clickBloc, goldBloc) {
-    if (equip != null) {
-      player.equipped[equip] = items[name];
+  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped) {
+    if (equipped != null) {
+      if (equipped == false) { // if item isn't equipped then equip it
+        player.equipped[equip] = items[name];
+        print("EQUIPPED IS " + player.equipped.toString());
+      } else { // if item is equipped then unequip it
+        player.equipped[equip] = null;
+        print("EQUIPPED IS " + player.equipped.toString());
+      }
     }
     behaviours.forEach((behaviour, args) {
+       // if item is equip, then reverse the value to 'unequip' it
       switch(behaviour) {
         case "changeHp":
-          changeHp(args["value"], args["percentage"], hpBloc);
+          changeHp(equipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
           break;
         case "changeAttack":
-          changeAttack(args["value"]);
+          changeAttack(equipped == true ? 0 - args["value"] : args["value"]);
       }
     });
   }

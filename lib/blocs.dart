@@ -107,7 +107,6 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         if (currEvent.progress >= currEvent.length) {
           if (currEvent.enemy.loot != null) {
             player.inventory.add(currEvent.enemy.loot);
-            player.numberOfItems++;
             print(player.inventory);
           }
           heroExpBloc.dispatch(currEvent.enemy.expValue);

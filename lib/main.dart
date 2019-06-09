@@ -510,32 +510,47 @@ class CharacterScreenState extends State<CharacterScreen> {
     super.initState();
   }
 
-  dynamic useItem(Item item, int index) {
+  dynamic useItem(Item item, int index, bool equipped) {
     setState(() {
         print("mate");
+        if (equipped == null || equipped == false) { // if the item is unequipped then we remove it
+          player.inventory.removeAt(index);
+          if (player.equipped[item.equip] != null) { // we 'unequip' the current item by using it
+            player.inventory.add(player.equipped[item.equip].name);
+            player.equipped[item.equip].use(
+              BlocProvider.of<HeroHpBloc>(context),
+              BlocProvider.of<HeroExpBloc>(context),
+              BlocProvider.of<GoldBloc>(context),
+              BlocProvider.of<ClickerBloc>(context),
+              true
+            );
+          }
+        } else {
+          player.inventory.add(item.name);
+        }
         item.use(
           BlocProvider.of<HeroHpBloc>(context),
           BlocProvider.of<HeroExpBloc>(context),
           BlocProvider.of<GoldBloc>(context),
-          BlocProvider.of<ClickerBloc>(context)
+          BlocProvider.of<ClickerBloc>(context),
+          equipped
         );
-        player.inventory.removeAt(index);
-        player.inventory.insert(index, null);
-        player.numberOfItems--;
     });
   }
 
-  void showDescription(Item item, int index) {
+  void showDescription(Item item, int index, bool equipped) {
     AlertDialog description = AlertDialog(
       title: Text(item.name),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(item.description),
-          FlatButton(
-            child: Text("Use Item"),
+          MaterialButton(
+            color: Colors.blueAccent,
+            child: ButtonDescriptionText(equipped: equipped),
             onPressed: () {
-              useItem(item, index);
+              useItem(item, index, equipped);
+              Navigator.pop(context);
             },
           )
         ],
@@ -565,10 +580,26 @@ class CharacterScreenState extends State<CharacterScreen> {
                   Column(
                     children: <Widget>[
                       Text("Equipment"),
-                      ItemSlot(item: player.equipped["weapon"],),
-                      ItemSlot(item: player.equipped["shield"]),
-                      ItemSlot(item: player.equipped["helmet"]),
-                      ItemSlot(item: player.equipped["body"])
+                      ItemSlot(
+                        item: player.equipped["weapon"],
+                        equipped: true,
+                        showDescription: showDescription,
+                      ),
+                      ItemSlot(
+                        item: player.equipped["shield"],
+                        equipped: true,
+                        showDescription: showDescription,
+                      ),
+                      ItemSlot(
+                        item: player.equipped["helmet"],
+                        equipped: true,
+                        showDescription: showDescription,
+                      ),
+                      ItemSlot(
+                        item: player.equipped["body"],
+                        equipped: true,
+                        showDescription: showDescription,
+                      )
                     ],
                   )
                 ],
@@ -588,7 +619,6 @@ class CharacterScreenState extends State<CharacterScreen> {
                       itemBuilder: (BuildContext context, int index) => ItemSlot(
                         index: index,
                         item: items[player.inventory[index]],
-                        useItem: useItem,
                         showDescription: showDescription,
                       )
                   ),
@@ -599,20 +629,45 @@ class CharacterScreenState extends State<CharacterScreen> {
       );
 }
 
-class ItemSlot extends StatelessWidget {
-  final Item item;
-  final int index;
-  dynamic useItem;
-  dynamic showDescription;
-  ItemSlot({this.item, this.index, this.useItem, this.showDescription});
+class ButtonDescriptionText extends StatelessWidget {
+  bool equipped;
+  String text;
+  ButtonDescriptionText({this.equipped});
 
   @override
   Widget build(BuildContext context) {
+    if (equipped == null) {
+      text = "Use Item";
+    } else if (equipped == false) {
+      text = "Equip Item";
+    } else {
+      text = "Unequip Item";
+    }
+    return Text(text);
+  }
+}
+
+class ItemSlot extends StatelessWidget {
+  final Item item;
+  final int index;
+  dynamic showDescription;
+  bool equipped;
+  ItemSlot({this.item, this.index, this.showDescription, this.equipped});
+
+  @override
+  Widget build(BuildContext context) {
+    if (item != null) {
+      if (item.equip != null && equipped == null) {
+        equipped = false;
+      }
+    }
     return Padding(
       padding: EdgeInsets.all(2.0),
       child: GestureDetector(
         onTap: () {
-          showDescription(item, index);
+          if (item != null) {
+            showDescription(item, index, equipped);
+          }
         },
         child: Container(
             decoration: BoxDecoration(
@@ -630,9 +685,27 @@ class ItemSlot extends StatelessWidget {
 }
 
 class ShopScreen extends StatelessWidget {
+  final List shopItems = [items["redPotion"]];
+
   @override
   Widget build(BuildContext context) =>
-      Container(color: Colors.lime, child: Center(child: Text('ShopScreen')));
+      Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("Shop")
+            ],
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: shopItems.length,
+            itemBuilder: (BuildContext context, int index) => ListTile(
+              title: Text(shopItems[index].name),
+            )
+          )
+        ],
+      );
 }
 
 class SkillsScreen extends StatelessWidget {
