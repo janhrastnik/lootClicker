@@ -44,7 +44,7 @@ class MyBlocDelegate extends BlocDelegate {
   @override
   void onTransition(Transition transition) {
     super.onTransition(transition);
-    // print(transition);
+    print(dungeonTiles[1].event.eventType);
   }
 }
 
@@ -64,6 +64,7 @@ class MyAppState extends State<MyApp> {
   TapAnimationBloc _tapAnimationBloc;
   HeroHpBloc _heroHpBloc;
   HeroExpBloc _heroExpBloc;
+  ActionBloc _actionBloc;
 
   Future readData(file) async {
     try {
@@ -78,8 +79,11 @@ class MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    _actionBloc = ActionBloc();
     _goldBloc = GoldBloc();
-    _dungeonBloc = DungeonBloc();
+    _dungeonBloc = DungeonBloc(
+      actionBloc: _actionBloc
+    );
     _heroHpBloc = HeroHpBloc(
       dungeonBloc: _dungeonBloc
     );
@@ -130,6 +134,7 @@ class MyAppState extends State<MyApp> {
       ),
       home: BlocProviderTree(
         blocProviders: <BlocProvider>[
+          BlocProvider<ActionBloc>(bloc: _actionBloc),
           BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
           BlocProvider<ClickerBloc>(bloc: _clickerBloc),
           BlocProvider<GoldBloc>(bloc: _goldBloc),
@@ -194,6 +199,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
+    final ActionBloc _actionBloc = BlocProvider.of<ActionBloc>(context);
     final DungeonBloc _dungeonBloc = BlocProvider.of<DungeonBloc>(context);
     final ClickerBloc _clickerBloc = BlocProvider.of<ClickerBloc>(context);
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
@@ -211,12 +217,12 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          if (!isScrolling) {
+          if (!isScrolling && dungeonTiles[1].event.eventType != "fight") {
             _clickerBloc.dispatch(dungeonTiles);
           }
         },
         onTapUp: (TapUpDetails details) {
-          if (!isScrolling) {
+          if (!isScrolling && dungeonTiles[1].event.eventType != "fight") {
             tapAnimationController.reset();
             List<dynamic> data = _onTapUp(details);
             dynamic event = dungeonTiles[1].event.eventType;
@@ -289,20 +295,56 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                       );
                     }),
                 Expanded(
-                  child: BlocBuilder(
-                    bloc: _dungeonBloc,
-                    builder: (BuildContext context, List<DungeonTile> l) {
-                      return ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        controller: scrollController,
-                        padding: EdgeInsets.all(0.0),
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemCount: l.length,
-                        itemBuilder: (BuildContext context, int index) =>
-                        l[index],
-                      );
-                    },
+                  child: Column(
+                    children: <Widget>[
+                      Flexible(
+                        flex: 2,
+                        child: BlocBuilder(
+                          bloc: _dungeonBloc,
+                          builder: (BuildContext context, List<DungeonTile> l) {
+                            return ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              controller: scrollController,
+                              padding: EdgeInsets.all(0.0),
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              itemCount: l.length,
+                              itemBuilder: (BuildContext context, int index) =>
+                              l[index],
+                            );
+                          },
+                        ),
+                      ),
+                      Flexible(
+                        flex: 1,
+                        child: BlocBuilder(
+                          bloc: _actionBloc,
+                          builder: (BuildContext context, int event) {
+                            if (event == 1) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: <Widget>[
+                                  GestureDetector(
+                                    child: Text("Attack"),
+                                    onTap: () {
+                                      _clickerBloc.dispatch(dungeonTiles);
+                                    },
+                                  ),
+                                  MaterialButton(
+                                    child: Text("Flee"),
+                                    onPressed: () {
+
+                                    },
+                                  )
+                                ],
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }
+                        ),
+                      )
+                    ],
                   ),
                 ),
                 BlocBuilder(
@@ -360,7 +402,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                   }
                 }
             ),
-            Positioned(
+            Positioned( // TODO: PASS THROUGH BLOC
               left: 0,
               top: 0,
               child: FadeTransition(

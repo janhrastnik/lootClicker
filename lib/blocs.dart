@@ -11,8 +11,10 @@ Future wait(n) async {
 class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   @override
   List<DungeonTile> get initialState => dungeonTiles;
-
+  final ActionBloc actionBloc;
   List eventTypes = ["loot", "fight", "puzzle"];
+
+  DungeonBloc({this.actionBloc});
 
   DungeonTile generateDungeon() {
     int randomRange(int min, int max) => min + Random().nextInt(max - min);
@@ -48,6 +50,9 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
       case 4:
         final List<DungeonTile> newList = List.from(event);
         newList.removeAt(0);
+        if (newList[1].event.eventType == "fight") {
+          actionBloc.dispatch("fight");
+        }
         dungeonTiles = newList;
         yield newList;
         break;
@@ -170,6 +175,20 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         break;
     }
   }
+}
+
+class ActionBloc extends Bloc<String, int> {
+  int get initialState => 0;
+
+  @override
+  Stream<int> mapEventToState(String event) async* {
+    if (event == "fight") {
+      yield 1;
+    } else {
+      yield 0;
+    }
+  }
+
 }
 
 class GoldBloc extends Bloc<int, int> {
