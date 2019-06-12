@@ -319,27 +319,27 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                         flex: 1,
                         child: BlocBuilder(
                           bloc: _actionBloc,
-                          builder: (BuildContext context, int event) {
-                            if (event == 1) {
+                          builder: (BuildContext context, String event) {
+                            if (event == "fight") {
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: <Widget>[
-                                  GestureDetector(
+                                  MaterialButton(
                                     child: Text("Attack"),
-                                    onTap: () {
+                                    onPressed: () {
                                       _clickerBloc.dispatch(dungeonTiles);
                                     },
                                   ),
                                   MaterialButton(
                                     child: Text("Flee"),
                                     onPressed: () {
-
+                                      scrollDungeon(_dungeonBloc);
                                     },
                                   )
                                 ],
                               );
                             } else {
-                              return Container();
+                              return Container(color: Colors.white,);
                             }
                           }
                         ),
@@ -402,17 +402,27 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                   }
                 }
             ),
-            Positioned( // TODO: PASS THROUGH BLOC
-              left: 0,
-              top: 0,
-              child: FadeTransition(
-                  opacity: deathAnimation,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height,
-                    color: Colors.black,
-                  )
-              ),
+            BlocBuilder(
+                bloc: _heroHpBloc,
+                builder: (BuildContext context, double health) {
+                  print(health);
+                  if (health != 0.0) {
+                    return Container();
+                  } else {
+                    return Positioned(
+                      left: 0,
+                      top: 0,
+                      child: FadeTransition(
+                          opacity: deathAnimation,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            color: Colors.black,
+                          )
+                      ),
+                    );
+                  }
+                }
             )
           ],
         ),

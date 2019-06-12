@@ -50,9 +50,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
       case 4:
         final List<DungeonTile> newList = List.from(event);
         newList.removeAt(0);
-        if (newList[1].event.eventType == "fight") {
-          actionBloc.dispatch("fight");
-        }
+        actionBloc.dispatch(newList[1].event.eventType);
         dungeonTiles = newList;
         yield newList;
         break;
@@ -68,6 +66,25 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   }
 }
 
+void scrollToMiddle() {
+  scrollController.jumpTo(TILE_LENGTH/2);
+}
+
+Future scrollDungeon(DungeonBloc bloc) async {
+  progressAnimationController.forward();
+  scrollToMiddle();
+  bloc.dispatch(dungeonTiles);
+  await scrollController.animateTo(
+      scrollController.offset + TILE_LENGTH,
+      duration: Duration(seconds: 1),
+      curve: Curves.ease
+  );
+  bloc.dispatch(dungeonTiles);
+  scrollToMiddle();
+  isScrolling = false;
+  progressAnimationController.reset();
+}
+
 class ClickerBloc extends Bloc<List<DungeonTile>, double> {
   double get initialState => 1.0;
   final GoldBloc goldBloc;
@@ -76,25 +93,6 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
   final DungeonBloc dungeonBloc;
 
   ClickerBloc({this.goldBloc, this.heroHpBloc, this.heroExpBloc, this.dungeonBloc});
-
-  void scrollToMiddle() {
-    scrollController.jumpTo(TILE_LENGTH/2);
-  }
-
-  Future scrollDungeon(DungeonBloc bloc) async {
-    progressAnimationController.forward();
-    scrollToMiddle();
-    bloc.dispatch(dungeonTiles);
-    await scrollController.animateTo(
-        scrollController.offset + TILE_LENGTH,
-        duration: Duration(seconds: 1),
-        curve: Curves.ease
-    );
-    bloc.dispatch(dungeonTiles);
-    scrollToMiddle();
-    isScrolling = false;
-    progressAnimationController.reset();
-  }
 
   @override
   Stream<double> mapEventToState(List<DungeonTile> event) async* {
@@ -177,16 +175,12 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
   }
 }
 
-class ActionBloc extends Bloc<String, int> {
-  int get initialState => 0;
+class ActionBloc extends Bloc<String, String> {
+  String get initialState => "shrine";
 
   @override
-  Stream<int> mapEventToState(String event) async* {
-    if (event == "fight") {
-      yield 1;
-    } else {
-      yield 0;
-    }
+  Stream<String> mapEventToState(String event) async* {
+    yield event;
   }
 
 }
@@ -217,7 +211,9 @@ class HeroHpBloc extends Bloc<int, double> {
     if (player.hp > player.hpCap) {
       player.hp = player.hpCap;
     }
+    yield player.hp / player.hpCap;
     if (player.hp <= 0) {
+      yield 0.0;
       isDead = true;
       print("hero hp dropped to zero.");
       player.gold = (player.gold / 2).round();
@@ -232,7 +228,6 @@ class HeroHpBloc extends Bloc<int, double> {
       isScrolling = true;
       deathAnimationController.forward();
     }
-    yield player.hp / player.hpCap;
   }
 }
 
