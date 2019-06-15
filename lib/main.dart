@@ -24,7 +24,7 @@ double TILE_LENGTH;
 List<DungeonTile> dungeonTiles = [
   DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
   DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
-  DungeonTile(event: DungeonEvent(eventType: "empty", length: null))
+  DungeonTile(event: DungeonEvent(eventType: "merchant", length: null))
 
 ];
 ScrollController scrollController = ScrollController();
@@ -131,6 +131,7 @@ class MyAppState extends State<MyApp> {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: "VT323"
       ),
       home: BlocProviderTree(
         blocProviders: <BlocProvider>[
@@ -216,6 +217,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
     final deathAnimation = Tween(begin: 0.0, end: 1.0).animate(deathAnimationController);
     return Scaffold(
       body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onTap: () {
           if (!isScrolling && dungeonTiles[1].event.eventType != "fight") {
             _clickerBloc.dispatch(dungeonTiles);
@@ -299,20 +301,70 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                     children: <Widget>[
                       Flexible(
                         flex: 2,
-                        child: BlocBuilder(
-                          bloc: _dungeonBloc,
-                          builder: (BuildContext context, List<DungeonTile> l) {
-                            return ListView.builder(
-                              physics: NeverScrollableScrollPhysics(),
-                              controller: scrollController,
-                              padding: EdgeInsets.all(0.0),
-                              scrollDirection: Axis.horizontal,
-                              shrinkWrap: true,
-                              itemCount: l.length,
-                              itemBuilder: (BuildContext context, int index) =>
-                              l[index],
-                            );
-                          },
+                        child: Column(
+                          children: <Widget>[
+                            Flexible(
+                              flex: 3,
+                              child: BlocBuilder(
+                                bloc: _dungeonBloc,
+                                builder: (BuildContext context, List<DungeonTile> l) {
+                                  return ListView.builder(
+                                    physics: NeverScrollableScrollPhysics(),
+                                    controller: scrollController,
+                                    padding: EdgeInsets.all(0.0),
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    itemCount: l.length,
+                                    itemBuilder: (BuildContext context, int index) =>
+                                    l[index],
+                                  );
+                                },
+                              ),
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: BlocBuilder(
+                                  bloc: _clickerBloc,
+                                  builder: (BuildContext context, double progress) {
+                                    String eventText;
+                                    if (dungeonTiles[1].event.eventType == "shrine") {
+                                      eventText = "Enter The Dungeon";
+                                    } if (dungeonTiles[1].event.eventType == "merchant") {
+                                      eventText = "placeholder";
+                                    } if (isDead) {
+                                      progress = 1.0;
+                                      eventText = "Enter The Dungeon";
+                                      isDead = false;
+                                    }
+                                    if (progress == 0.0) {
+                                      progress = 1.0;
+                                    }
+                                    return Container(
+                                      child: FadeTransition(
+                                        opacity: progressAnimation,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: <Widget>[
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(color: Colors.black54)
+                                              ),
+                                              width: 250.0,
+                                              height: 30.0,
+                                              child: LinearProgressIndicator(
+                                                value: progress,
+                                              ),
+                                            ),
+                                            dungeonTiles[1].event.eventType == "shrine" || dungeonTiles[1].event.eventType == "merchant" ?
+                                            Text(eventText) : Text("${dungeonTiles[1].event.length - dungeonTiles[1].event.progress} / ${dungeonTiles[1].event.length}"),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }
+                              ),
+                            )
+                          ],
                         ),
                       ),
                       Flexible(
@@ -324,22 +376,35 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: <Widget>[
-                                  MaterialButton(
-                                    child: Text("Attack"),
-                                    onPressed: () {
-                                      _clickerBloc.dispatch(dungeonTiles);
-                                    },
+                                  Container(
+                                    width: 80.0,
+                                    height: 80.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      color: Colors.white,
+                                      boxShadow: [BoxShadow(
+                                          color: Colors.redAccent,
+                                          blurRadius: 10.0,
+                                          spreadRadius: 1.0)
+                                      ]
+                                    ),
+                                    child: MaterialButton(
+                                      child: Text("Attack"),
+                                      onPressed: () {
+                                        _clickerBloc.dispatch(dungeonTiles);
+                                      },
+                                    ),
                                   ),
                                   MaterialButton(
                                     child: Text("Flee"),
                                     onPressed: () {
-                                      scrollDungeon(_dungeonBloc);
+                                      scrollDungeon(_dungeonBloc, _clickerBloc); // updates text
                                     },
                                   )
                                 ],
                               );
                             } else {
-                              return Container(color: Colors.white,);
+                              return Container();
                             }
                           }
                         ),
@@ -347,41 +412,6 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                     ],
                   ),
                 ),
-                BlocBuilder(
-                    bloc: _clickerBloc,
-                    builder: (BuildContext context, double progress) {
-                      // TODO: no need to yield -1 anymore
-                      String eventText;
-                       if (dungeonTiles[1].event.eventType == "shrine") {
-                        eventText = "Enter The Dungeon";
-                      } if (dungeonTiles[1].event.eventType == "empty") {
-                        eventText = "placeholder";
-                      } if (isDead) {
-                        progress = 1.0;
-                        eventText = "Enter The Dungeon";
-                        isDead = false;
-                      }
-                      if (progress == 0.0) {
-                         progress = 1.0;
-                      }
-                      return FadeTransition(
-                        opacity: progressAnimation,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: <Widget>[
-                            Container(
-                              height: 30.0,
-                              child: LinearProgressIndicator(
-                                value: progress,
-                              ),
-                            ),
-                            dungeonTiles[1].event.eventType == "shrine" || dungeonTiles[1].event.eventType == "empty" ?
-                            Text(eventText) : Text("${dungeonTiles[1].event.length - dungeonTiles[1].event.progress} / ${dungeonTiles[1].event.length}"),
-                          ],
-                        ),
-                      );
-                    }
-                )
               ],
             ),
             BlocBuilder(

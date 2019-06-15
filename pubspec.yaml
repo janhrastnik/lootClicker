@@ -53,7 +53,13 @@ flutter:
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.io/assets-and-images/#from-packages
-
+  fonts:
+    - family: PressStart
+      fonts:
+        - asset: fonts/PressStart2P-Regular.ttf
+    - family: VT323
+      fonts:
+        - asset: fonts/VT323-Regular.ttf
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

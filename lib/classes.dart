@@ -7,8 +7,15 @@ class DungeonTile extends StatelessWidget {
 
   final DungeonEvent event;
 
+  Image tileImage;
+
   @override
   Widget build(BuildContext context) {
+    try {
+      tileImage = Image(image: AssetImage("assets/${event.eventType}.gif"));
+    } catch(e) {
+      tileImage = Image(image: AssetImage("assets/${event.eventType}.png"));
+    }
     return Center(
         child: Container(
           width: MediaQuery.of(context).size.width/2,
@@ -18,7 +25,7 @@ class DungeonTile extends StatelessWidget {
               border: new Border.all(color: Colors.blueAccent)
           ),
           alignment: Alignment(0.7, 0.0),
-          child: event.enemy != null ? Text(event.enemy.name) : Text(event.eventType),
+          child: event.enemy != null ? Text(event.enemy.name) : tileImage,
         )
     );
   }

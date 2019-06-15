@@ -58,7 +58,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
         final List<DungeonTile> newList = [];
         newList.add(DungeonTile(event: DungeonEvent(eventType: "wall", length: null)));
         newList.add(DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)));
-        newList.add(DungeonTile(event: DungeonEvent(eventType: "empty", length: null)));
+        newList.add(DungeonTile(event: DungeonEvent(eventType: "merchant", length: null)));
         dungeonTiles = newList;
         yield newList;
         break;
@@ -70,19 +70,22 @@ void scrollToMiddle() {
   scrollController.jumpTo(TILE_LENGTH/2);
 }
 
-Future scrollDungeon(DungeonBloc bloc) async {
+Future scrollDungeon(DungeonBloc dbloc, [ClickerBloc cbloc]) async {
   progressAnimationController.forward();
   scrollToMiddle();
-  bloc.dispatch(dungeonTiles);
+  dbloc.dispatch(dungeonTiles);
   await scrollController.animateTo(
       scrollController.offset + TILE_LENGTH,
       duration: Duration(seconds: 1),
       curve: Curves.ease
   );
-  bloc.dispatch(dungeonTiles);
+  dbloc.dispatch(dungeonTiles);
   scrollToMiddle();
   isScrolling = false;
   progressAnimationController.reset();
+  if (cbloc != null) {
+    cbloc.dispatch(<DungeonTile>[]);
+  }
 }
 
 class ClickerBloc extends Bloc<List<DungeonTile>, double> {
@@ -96,6 +99,12 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
 
   @override
   Stream<double> mapEventToState(List<DungeonTile> event) async* {
+
+    if (event.length == 0) { // updates text
+      print("heyyyyy");
+      yield 0.0;
+    }
+
     final DungeonEvent currEvent = event[1].event;
 
     switch(currEvent.eventType) {
