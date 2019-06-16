@@ -33,6 +33,7 @@ AnimationController deathAnimationController;
 AnimationController goldAnimationController;
 Map monsters = {};
 Map items = {};
+List assetNames = [];
 
 class MyBlocDelegate extends BlocDelegate {
   @override
@@ -117,7 +118,8 @@ class MyAppState extends State<MyApp> {
           name: key,
           equip: args["equip"],
           behaviours: args,
-          description: args["description"]
+          description: args["description"],
+          cost: args["cost"]
         );
       });
     });
@@ -453,6 +455,13 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                     );
                   }
                 }
+            ),
+            Positioned(
+              top: 0.5,
+              left: 0.5,
+              child: Image(
+                image: AssetImage("assets/heroidle.gif"),
+              ),
             )
           ],
         ),
@@ -784,6 +793,14 @@ class ShopScreen extends StatelessWidget {
             itemCount: shopItems.length,
             itemBuilder: (BuildContext context, int index) => ListTile(
               title: Text(shopItems[index].name),
+              trailing: MaterialButton(
+                onPressed: () {
+                  if (player.gold >= shopItems[index].cost) {
+                    player.inventory.add(shopItems[index]);
+                  }
+                },
+                child: Text(shopItems[index].cost),
+              ),
             )
           )
         ],

@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'main.dart';
+import 'package:flutter/services.dart';
 
 class DungeonTile extends StatelessWidget {
   DungeonTile({Key key, @required this.event}) : super(key: key);
 
   final DungeonEvent event;
+  bool ye;
+  String img;
 
-  Image tileImage;
+  Future getImage(image) async {
+    try {
+      dynamic data;
+      data = await rootBundle.load("assets/$image.gif");
+      ye = true;
+      return 1;
+    } catch(e) {
+      ye = false;
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    try {
-      tileImage = Image(image: AssetImage("assets/${event.eventType}.gif"));
-    } catch(e) {
-      tileImage = Image(image: AssetImage("assets/${event.eventType}.png"));
+    if (event.eventType == "fight") {
+      img = event.enemy.name;
+    } else {
+      img = event.eventType;
     }
     return Center(
         child: Container(
@@ -25,7 +38,22 @@ class DungeonTile extends StatelessWidget {
               border: new Border.all(color: Colors.blueAccent)
           ),
           alignment: Alignment(0.7, 0.0),
-          child: event.enemy != null ? Text(event.enemy.name) : tileImage,
+          child: FutureBuilder(
+              future: getImage(event.eventType),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                    return Text('Press button to start.');
+                  case ConnectionState.active:
+                  case ConnectionState.waiting:
+                    return Text('Awaiting result...');
+                  case ConnectionState.done:
+                    if (snapshot.hasError)
+                      return Text('Error: ${snapshot.error}');
+                    return ye == true ? Image(image: AssetImage("assets/$img.gif"), width: 32.0, height: 32.0,) :
+                    Image(image: AssetImage("assets/$img.png"), width: 32.0, height: 32.0,);
+                }
+              }),
         )
     );
   }
@@ -115,12 +143,14 @@ class Item {
   Map behaviours;
   String equip;
   String description;
+  int cost;
 
   Item({
     this.name,
     this.behaviours,
     this.equip,
-    this.description
+    this.description,
+    this.cost
 });
 
   void use(hpBloc, expBloc, clickBloc, goldBloc, equipped) {
