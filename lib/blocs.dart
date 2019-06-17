@@ -173,7 +173,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         }
         yield 2; // needs to be different than 1 otherwise doesn't yield
         break;
-      case "empty":
+      case "merchant":
         if (isMenu == false) {
           isScrolling = true;
           await scrollDungeon(dungeonBloc);

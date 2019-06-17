@@ -50,8 +50,8 @@ class DungeonTile extends StatelessWidget {
                   case ConnectionState.done:
                     if (snapshot.hasError)
                       return Text('Error: ${snapshot.error}');
-                    return ye == true ? Image(image: AssetImage("assets/$img.gif"), width: 32.0, height: 32.0,) :
-                    Image(image: AssetImage("assets/$img.png"), width: 32.0, height: 32.0,);
+                    return ye == true ? Image(image: AssetImage("assets/$img.gif"), width: 64.0, height: 64.0,) :
+                    Image(image: AssetImage("assets/$img.png"), width: 64.0, height: 64.0,);
                 }
               }),
         )
@@ -179,7 +179,7 @@ class Item {
 
 void changeHp(n, percentage, hpBloc) {
   if (percentage) {
-    hpBloc.dispatch(player.hpCap * (n/100));
+    hpBloc.dispatch((player.hpCap * (n/100)).ceil());
   } else {
     hpBloc.dispatch(n);
   }

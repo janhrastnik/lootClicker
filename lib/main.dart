@@ -221,7 +221,9 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
+          print("bruh");
           if (!isScrolling && dungeonTiles[1].event.eventType != "fight") {
+            print("bruh2");
             _clickerBloc.dispatch(dungeonTiles);
           }
         },
@@ -457,8 +459,8 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                 }
             ),
             Positioned(
-              top: 0.5,
-              left: 0.5,
+              top: 100.5,
+              left: 100.5,
               child: Image(
                 image: AssetImage("assets/heroidle.gif"),
               ),
@@ -776,7 +778,7 @@ class ItemSlot extends StatelessWidget {
 }
 
 class ShopScreen extends StatelessWidget {
-  final List shopItems = [items["redPotion"]];
+  final List shopItems = [items["redPotion"], items["woodSword"]];
 
   @override
   Widget build(BuildContext context) =>
@@ -794,12 +796,14 @@ class ShopScreen extends StatelessWidget {
             itemBuilder: (BuildContext context, int index) => ListTile(
               title: Text(shopItems[index].name),
               trailing: MaterialButton(
+                color: Colors.yellowAccent,
                 onPressed: () {
                   if (player.gold >= shopItems[index].cost) {
-                    player.inventory.add(shopItems[index]);
+                    player.gold -= shopItems[index].cost;
+                    player.inventory.add(shopItems[index].name);
                   }
                 },
-                child: Text(shopItems[index].cost),
+                child: Text("${shopItems[index].cost} Gold"),
               ),
             )
           )
