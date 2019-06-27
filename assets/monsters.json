@@ -5,13 +5,13 @@
     "attack": 1,
     "loot": "woodSword"
   },
-  "crab": {
+  "skeleton": {
     "hp": 20,
     "expValue": 15,
     "attack": 1,
     "loot": "woodSword"
   },
-  "goblin": {
+  "wolf": {
     "hp": 15,
     "expValue": 15,
     "attack": 2,

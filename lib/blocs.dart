@@ -111,9 +111,10 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
       case "fight":
         currEvent.progress = currEvent.progress + player.attack;
         heroHpBloc.dispatch(-currEvent.enemy.attack);
+        // if the player dies
         if (currEvent.enemy.attack >= player.hp) {
-          // print("HELLO");
           await wait(3);
+          yield 0.0; // this should fix death bug
         }
         // if the player beats the monster
         if (currEvent.progress >= currEvent.length) {

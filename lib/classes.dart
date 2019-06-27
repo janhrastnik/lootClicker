@@ -7,20 +7,7 @@ class DungeonTile extends StatelessWidget {
   DungeonTile({Key key, @required this.event}) : super(key: key);
 
   final DungeonEvent event;
-  bool ye;
   String img;
-
-  Future getImage(image) async {
-    try {
-      dynamic data;
-      data = await rootBundle.load("assets/$image.gif");
-      ye = true;
-      return 1;
-    } catch(e) {
-      ye = false;
-      return null;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,26 +21,11 @@ class DungeonTile extends StatelessWidget {
           width: MediaQuery.of(context).size.width/2,
           height: 200.0,
           decoration: BoxDecoration(
-              image: DecorationImage(image: AssetImage("assets/mayclover_meadow_example.png"), fit: BoxFit.cover),
+              image: DecorationImage(image: AssetImage("assets/dungeon2.gif"), fit: BoxFit.cover),
               border: new Border.all(color: Colors.blueAccent)
           ),
-          alignment: Alignment(0.7, 0.0),
-          child: FutureBuilder(
-              future: getImage(event.eventType),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.none:
-                    return Text('Press button to start.');
-                  case ConnectionState.active:
-                  case ConnectionState.waiting:
-                    return Text('Awaiting result...');
-                  case ConnectionState.done:
-                    if (snapshot.hasError)
-                      return Text('Error: ${snapshot.error}');
-                    return ye == true ? Image(image: AssetImage("assets/$img.gif"), width: 64.0, height: 64.0,) :
-                    Image(image: AssetImage("assets/$img.png"), width: 64.0, height: 64.0,);
-                }
-              }),
+          alignment: Alignment(0.8, 0.3),
+          child:  Image(image: AssetImage("assets/$img.gif"), width: 96.0, height: 96.0)
         )
     );
   }
@@ -118,6 +90,7 @@ class Player {
     this.expCap = this.expCap * 2;
     this.exp = 0;
     this.hp = this.hpCap;
+    this.expCap = (this.expCap * 1.5).ceil();
     print(this.hpCap);
   }
 }
@@ -188,3 +161,5 @@ void changeHp(n, percentage, hpBloc) {
 void changeAttack(n) {
   player.attack += n;
 }
+
+// TODO: add temp status effects with future delayed probably

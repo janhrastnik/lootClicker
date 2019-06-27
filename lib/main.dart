@@ -245,7 +245,12 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                     builder: (BuildContext context, int newGold) {
                       return Column(
                         children: <Widget>[
-                          Text("Gold: " + player.gold.toString()),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Text("${player.gold}"),
+                                Image(image: AssetImage("assets/coin.gif"),)
+                              ]),
                           FadeTransition(
                             opacity: goldAnimation,
                             child: Text("+ " + newGold.toString(), style: TextStyle(color: Colors.amber),),
@@ -268,7 +273,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                                 child: LinearProgressIndicator(
                                   value: value,
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                                  backgroundColor: Colors.deepOrangeAccent,
+                                  backgroundColor: Color.fromRGBO(230, 230, 230, 1.0),
                                 ),
                               ),
                               Text("${player.hp} / ${player.hpCap} HP")
@@ -395,7 +400,9 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                                     child: MaterialButton(
                                       child: Text("Attack"),
                                       onPressed: () {
-                                        _clickerBloc.dispatch(dungeonTiles);
+                                        if (!isScrolling) {
+                                          _clickerBloc.dispatch(dungeonTiles);
+                                        }
                                       },
                                     ),
                                   ),
@@ -459,10 +466,12 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                 }
             ),
             Positioned(
-              top: 100.5,
-              left: 100.5,
+              top: MediaQuery.of(context).size.height/4.5,
+              left: MediaQuery.of(context).size.width/3.5,
               child: Image(
-                image: AssetImage("assets/heroidle.gif"),
+                image: AssetImage("assets/idle.gif"),
+                width: 128.0,
+                height: 128.0,
               ),
             )
           ],
@@ -814,5 +823,37 @@ class ShopScreen extends StatelessWidget {
 class SkillsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(color: Colors.cyan, child: Center(child: Text('SkillsScreen')));
+      ListView.separated(
+        itemCount: 10,
+        separatorBuilder: (BuildContext context, int index) => CustomPaint(
+          size: Size(MediaQuery.of(context).size.width/2, 20.0),
+          painter: Line(width: MediaQuery.of(context).size.width/2),
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            width: 20.0,
+            height: 60.0,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black)
+            ),
+          );
+        },
+      );
 }
+
+class Line extends CustomPainter {
+  double width;
+
+  Line({this.width});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawLine(Offset(width, 0.0), Offset(width, 20.0), Paint());
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
