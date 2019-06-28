@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'main.dart';
-import 'package:flutter/services.dart';
 
 class DungeonTile extends StatelessWidget {
   DungeonTile({Key key, @required this.event}) : super(key: key);
@@ -22,9 +21,8 @@ class DungeonTile extends StatelessWidget {
           height: 200.0,
           decoration: BoxDecoration(
               image: DecorationImage(image: AssetImage("assets/dungeon2.gif"), fit: BoxFit.cover),
-              border: new Border.all(color: Colors.blueAccent)
           ),
-          alignment: Alignment(0.8, 0.3),
+          alignment: Alignment(0.8, 0.4),
           child:  Image(image: AssetImage("assets/$img.gif"), width: 96.0, height: 96.0)
         )
     );
@@ -113,23 +111,27 @@ class Enemy {
 
 class Item {
   String name;
+  String id;
   Map behaviours;
   String equip;
   String description;
   int cost;
+  int time;
 
   Item({
+    this.id,
     this.name,
     this.behaviours,
     this.equip,
     this.description,
-    this.cost
+    this.cost,
+    this.time,
 });
 
   void use(hpBloc, expBloc, clickBloc, goldBloc, equipped) {
     if (equipped != null) {
       if (equipped == false) { // if item isn't equipped then equip it
-        player.equipped[equip] = items[name];
+        player.equipped[equip] = items[id];
         print("EQUIPPED IS " + player.equipped.toString());
       } else { // if item is equipped then unequip it
         player.equipped[equip] = null;

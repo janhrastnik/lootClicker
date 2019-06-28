@@ -1,30 +1,47 @@
 {
   "items" : {
     "redPotion" : {
+      "name": "Red Potion",
       "equip": null,
       "changeHp" : {
         "value" : 10,
         "percentage": true
       },
       "description": "Increases Hp by 10 %.",
-      "cost": 5
+      "cost": 5,
+      "time": 0
     },
     "ratMeat" : {
+      "name": "Rat Meat",
       "equip": null,
       "changeHp" : {
         "value": 5,
         "percentage": false
       },
       "description": "Increases Hp by 5 points.",
-      "cost": 0
+      "cost": 0,
+      "time": 0
     },
     "woodSword": {
+      "name": "Wooden Sword",
       "equip": "weapon",
       "changeAttack": {
         "value": 1
       },
       "description": "Increases Atk by 1.",
-      "cost": 0
+      "cost": 0,
+      "time": 0
+    },
+    "atkPotion" : {
+      "name": "Attack Potion",
+      "equip": null,
+      "changeAttack" : {
+        "value" : 1,
+        "percentage": true
+      },
+      "description": "Increases Atk by 1 for 30 seconds.",
+      "cost": 5,
+      "time": 30
     }
   }
 }

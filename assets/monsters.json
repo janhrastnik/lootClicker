@@ -3,13 +3,13 @@
     "hp": 10,
     "expValue": 10,
     "attack": 1,
-    "loot": "woodSword"
+    "loot": "atkPotion"
   },
   "skeleton": {
     "hp": 20,
     "expValue": 15,
     "attack": 1,
-    "loot": "woodSword"
+    "loot": "atkPotion"
   },
   "wolf": {
     "hp": 15,

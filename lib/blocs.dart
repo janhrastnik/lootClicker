@@ -120,7 +120,6 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         if (currEvent.progress >= currEvent.length) {
           if (currEvent.enemy.loot != null) {
             player.inventory.add(currEvent.enemy.loot);
-            print(player.inventory);
           }
           heroExpBloc.dispatch(currEvent.enemy.expValue);
           if (event[2].event.eventType == "fight") {
@@ -201,10 +200,12 @@ class GoldBloc extends Bloc<int, int> {
   @override
   Stream<int> mapEventToState(int gold) async* {
     int newGold = gold;
-    goldAnimationController.reset();
-    goldAnimationController.value = 1.0;
-    goldAnimationController.reverse();
-    player.gold += newGold;
+    if (newGold != 0) {
+      goldAnimationController.reset();
+      goldAnimationController.value = 1.0;
+      goldAnimationController.reverse();
+      player.gold += newGold;
+    }
     yield newGold;
   }
 }

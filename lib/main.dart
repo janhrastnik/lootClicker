@@ -115,11 +115,13 @@ class MyAppState extends State<MyApp> {
       Map _data = data["items"];
       _data.forEach((key, args) {
         items[key] = Item(
-          name: key,
+          id: key,
+          name: args["name"],
           equip: args["equip"],
           behaviours: args,
           description: args["description"],
-          cost: args["cost"]
+          cost: args["cost"],
+          time: args["time"]
         );
       });
     });
@@ -618,7 +620,7 @@ class CharacterScreenState extends State<CharacterScreen> {
         if (equipped == null || equipped == false) { // if the item is unequipped then we remove it
           player.inventory.removeAt(index);
           if (player.equipped[item.equip] != null) { // we 'unequip' the current item by using it
-            player.inventory.add(player.equipped[item.equip].name);
+            player.inventory.add(player.equipped[item.equip].id);
             player.equipped[item.equip].use(
               BlocProvider.of<HeroHpBloc>(context),
               BlocProvider.of<HeroExpBloc>(context),
@@ -628,7 +630,7 @@ class CharacterScreenState extends State<CharacterScreen> {
             );
           }
         } else {
-          player.inventory.add(item.name);
+          player.inventory.add(item.id);
         }
         item.use(
           BlocProvider.of<HeroHpBloc>(context),
@@ -642,10 +644,11 @@ class CharacterScreenState extends State<CharacterScreen> {
 
   void showDescription(Item item, int index, bool equipped) {
     AlertDialog description = AlertDialog(
-      title: Text(item.name),
+      title: Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text(item.name)],),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Image(image: AssetImage("assets/${item.id}.png"),)],),
           Text(item.description),
           MaterialButton(
             color: Colors.blueAccent,
@@ -779,7 +782,7 @@ class ItemSlot extends StatelessWidget {
             ),
             width: 60.0,
             height: 60.0,
-            child: item != null ? Center(child: Text(item.name),) : null
+            child: item != null ? Center(child: Image(image: AssetImage("assets/${item.id}.png"),),) : null
         ),
       ),
     );
@@ -790,8 +793,9 @@ class ShopScreen extends StatelessWidget {
   final List shopItems = [items["redPotion"], items["woodSword"]];
 
   @override
-  Widget build(BuildContext context) =>
-      Column(
+  Widget build(BuildContext context) {
+    final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
+    return Column(
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -809,7 +813,9 @@ class ShopScreen extends StatelessWidget {
                 onPressed: () {
                   if (player.gold >= shopItems[index].cost) {
                     player.gold -= shopItems[index].cost;
-                    player.inventory.add(shopItems[index].name);
+                    player.inventory.add(shopItems[index].id);
+                    print("PLAYER INVENTORY IS" + player.inventory.toString());
+                    _goldBloc.dispatch(0);
                   }
                 },
                 child: Text("${shopItems[index].cost} Gold"),
@@ -817,7 +823,8 @@ class ShopScreen extends StatelessWidget {
             )
           )
         ],
-      );
+    );
+    }
 }
 
 class SkillsScreen extends StatelessWidget {
@@ -830,11 +837,13 @@ class SkillsScreen extends StatelessWidget {
           painter: Line(width: MediaQuery.of(context).size.width/2),
         ),
         itemBuilder: (BuildContext context, int index) {
-          return Container(
-            width: 20.0,
-            height: 60.0,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black)
+          return Center(
+            child: Container(
+              width: 60.0,
+              height: 60.0,
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black)
+              ),
             ),
           );
         },
