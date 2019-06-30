@@ -32,6 +32,16 @@
       "cost": 0,
       "time": 0
     },
+    "woodShield": {
+      "name": "Wooden Shield",
+      "equip": "shield",
+      "changeAttack": {
+        "value": 1
+      },
+      "description": "Increases Hp Cap by 1.",
+      "cost": 0,
+      "time": 0
+    },
     "atkPotion" : {
       "name": "Attack Potion",
       "equip": null,
@@ -40,8 +50,8 @@
         "percentage": true
       },
       "description": "Increases Atk by 1 for 30 seconds.",
-      "cost": 5,
-      "time": 30
+      "cost": 0,
+      "time": 3
     }
   }
 }

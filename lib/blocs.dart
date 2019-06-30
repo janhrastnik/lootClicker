@@ -143,6 +143,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           currEvent.progress = 0;
           currEvent.length = event[2].event.length;
           goldBloc.dispatch(currEvent.loot);
+          goldBloc.dispatch(0); // fixes bug where gold counter doesn't update
           if (isMenu == false) {
             isScrolling = true;
             await scrollDungeon(dungeonBloc);
@@ -205,8 +206,10 @@ class GoldBloc extends Bloc<int, int> {
       goldAnimationController.value = 1.0;
       goldAnimationController.reverse();
       player.gold += newGold;
+      yield newGold;
+    } else {
+      yield player.gold;
     }
-    yield newGold;
   }
 }
 

@@ -7,6 +7,7 @@ import 'blocs.dart';
 import 'backdrop.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'classes.dart';
+import 'dart:async';
 
 enum FrontPanels {characterPage, shopPage, skillsPage}
 Player player = Player(
@@ -34,6 +35,7 @@ AnimationController goldAnimationController;
 Map monsters = {};
 Map items = {};
 List assetNames = [];
+List<Effect> effects = [];
 
 class MyBlocDelegate extends BlocDelegate {
   @override
@@ -306,7 +308,8 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                           )
                         ],
                       );
-                    }),
+                    }
+                ),
                 Expanded(
                   child: Column(
                     children: <Widget>[
@@ -619,14 +622,14 @@ class CharacterScreenState extends State<CharacterScreen> {
         print("mate");
         if (equipped == null || equipped == false) { // if the item is unequipped then we remove it
           player.inventory.removeAt(index);
-          if (player.equipped[item.equip] != null) { // we 'unequip' the current item by using it
+          if (player.equipped[item.equip] != null) { // we 'unequip' the current item by using it with an opposite value
             player.inventory.add(player.equipped[item.equip].id);
             player.equipped[item.equip].use(
               BlocProvider.of<HeroHpBloc>(context),
               BlocProvider.of<HeroExpBloc>(context),
               BlocProvider.of<GoldBloc>(context),
               BlocProvider.of<ClickerBloc>(context),
-              true
+              true,
             );
           }
         } else {
@@ -639,6 +642,20 @@ class CharacterScreenState extends State<CharacterScreen> {
           BlocProvider.of<ClickerBloc>(context),
           equipped
         );
+        if (item.time != 0) {
+          wait(item.time).then((data) { // we wait for the effect to run out
+            setState(() {
+              print("Item effect has ran out.");
+              item.use( // we use the item as if it were equipped, this reverts the item effects
+                BlocProvider.of<HeroHpBloc>(context),
+                BlocProvider.of<HeroExpBloc>(context),
+                BlocProvider.of<GoldBloc>(context),
+                BlocProvider.of<ClickerBloc>(context),
+                true,
+              );
+            });
+          });
+        }
     });
   }
 
@@ -790,7 +807,7 @@ class ItemSlot extends StatelessWidget {
 }
 
 class ShopScreen extends StatelessWidget {
-  final List shopItems = [items["redPotion"], items["woodSword"]];
+  final List shopItems = [items["redPotion"], items["woodSword"], items["atkPotion"]];
 
   @override
   Widget build(BuildContext context) {
@@ -863,6 +880,54 @@ class Line extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return false;
+  }
+}
+
+class Effect extends StatefulWidget {
+  int time;
+  int index;
+  String desc;
+
+  Effect({Key key, @required this.desc, @required this.time, @required this.index}) : super(key: key);
+
+  @override
+  EffectState createState() => EffectState();
+}
+
+class EffectState extends State<Effect> {
+
+  @override
+  Widget build(BuildContext context) {
+    wait(1).then((_) {
+      setState(() {
+        widget.time -= 1;
+        if (widget.time == 0) {
+          effects.removeAt(widget.index);
+          print("EFFECTS: " + effects.toString());
+        }
+      });
+    });
+    return Text("${widget.desc} : ${widget.time}");
+  }
+}
+
+class EffectsList extends StatefulWidget {
+  List<Widget> effectsList;
+
+  EffectsList({Key key, this.effectsList}) : super(key: key);
+
+  @override
+  EffectsListState createState() => EffectsListState();
+}
+
+class EffectsListState extends State<EffectsList> {
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      shrinkWrap: true,
+      children: widget.effectsList,
+    );
   }
 }
 
