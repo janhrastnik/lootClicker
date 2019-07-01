@@ -101,7 +101,6 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
   Stream<double> mapEventToState(List<DungeonTile> event) async* {
 
     if (event.length == 0) { // updates text
-      print("heyyyyy");
       yield 0.0;
     }
 

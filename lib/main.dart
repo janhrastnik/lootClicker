@@ -36,6 +36,7 @@ Map monsters = {};
 Map items = {};
 List assetNames = [];
 List<Effect> effects = [];
+final StreamController _effectsStream = StreamController<dynamic>();
 
 class MyBlocDelegate extends BlocDelegate {
   @override
@@ -225,9 +226,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          print("bruh");
           if (!isScrolling && dungeonTiles[1].event.eventType != "fight") {
-            print("bruh2");
             _clickerBloc.dispatch(dungeonTiles);
           }
         },
@@ -309,6 +308,18 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                         ],
                       );
                     }
+                ),
+                StreamBuilder(
+                  initialData: 0,
+                  stream: _effectsStream.stream,
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.data != 0) {
+                      effects.add(snapshot.data);
+                      return EffectsList(effectsList: effects);
+                    } else {
+                      return Container();
+                    }
+                  }
                 ),
                 Expanded(
                   child: Column(
@@ -451,7 +462,6 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
             BlocBuilder(
                 bloc: _heroHpBloc,
                 builder: (BuildContext context, double health) {
-                  print(health);
                   if (health != 0.0) {
                     return Container();
                   } else {
@@ -619,7 +629,6 @@ class CharacterScreenState extends State<CharacterScreen> {
 
   dynamic useItem(Item item, int index, bool equipped) {
     setState(() {
-        print("mate");
         if (equipped == null || equipped == false) { // if the item is unequipped then we remove it
           player.inventory.removeAt(index);
           if (player.equipped[item.equip] != null) { // we 'unequip' the current item by using it with an opposite value
@@ -643,6 +652,7 @@ class CharacterScreenState extends State<CharacterScreen> {
           equipped
         );
         if (item.time != 0) {
+          _effectsStream.sink.add(Effect(desc: item.name, time: item.time, index: effects.length,));
           wait(item.time).then((data) { // we wait for the effect to run out
             setState(() {
               print("Item effect has ran out.");
@@ -904,6 +914,7 @@ class EffectState extends State<Effect> {
         if (widget.time == 0) {
           effects.removeAt(widget.index);
           print("EFFECTS: " + effects.toString());
+          _effectsStream.sink.add(0);
         }
       });
     });
