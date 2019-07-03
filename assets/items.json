@@ -51,7 +51,7 @@
       },
       "description": "Increases Atk by 1 for 30 seconds.",
       "cost": 0,
-      "time": 3
+      "time": 10
     }
   }
 }

@@ -22,6 +22,7 @@ bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
 double TILE_LENGTH;
+int id = 0;
 List<DungeonTile> dungeonTiles = [
   DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
   DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
@@ -35,7 +36,7 @@ AnimationController goldAnimationController;
 Map monsters = {};
 Map items = {};
 List assetNames = [];
-List<Effect> effects = [];
+Map<int, Effect> effects = {};
 final StreamController _effectsStream = StreamController<dynamic>();
 
 class MyBlocDelegate extends BlocDelegate {
@@ -313,11 +314,13 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                   initialData: 0,
                   stream: _effectsStream.stream,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.data != 0) {
-                      effects.add(snapshot.data);
-                      return EffectsList(effectsList: effects);
-                    } else {
+                    print("EFFECTS: " + effects.toString());
+                    if (!snapshot.hasData) {
                       return Container();
+                    } else if (snapshot.data == 0) {
+                      return Container();
+                    }  else {
+                      return EffectsList(effectsList: effects.values.toList());
                     }
                   }
                 ),
@@ -652,7 +655,9 @@ class CharacterScreenState extends State<CharacterScreen> {
           equipped
         );
         if (item.time != 0) {
-          _effectsStream.sink.add(Effect(desc: item.name, time: item.time, index: effects.length,));
+          effects[id] = Effect(desc: item.name, time: item.time, id: id,);
+          id++;
+          _effectsStream.sink.add(1);
           wait(item.time).then((data) { // we wait for the effect to run out
             setState(() {
               print("Item effect has ran out.");
@@ -895,10 +900,10 @@ class Line extends CustomPainter {
 
 class Effect extends StatefulWidget {
   int time;
-  int index;
+  int id;
   String desc;
 
-  Effect({Key key, @required this.desc, @required this.time, @required this.index}) : super(key: key);
+  Effect({Key key, @required this.desc, @required this.time, @required this.id}) : super(key: key);
 
   @override
   EffectState createState() => EffectState();
@@ -912,9 +917,8 @@ class EffectState extends State<Effect> {
       setState(() {
         widget.time -= 1;
         if (widget.time == 0) {
-          effects.removeAt(widget.index);
-          print("EFFECTS: " + effects.toString());
-          _effectsStream.sink.add(0);
+          effects.remove(widget.id);
+          _effectsStream.sink.add(1);
         }
       });
     });
@@ -941,4 +945,3 @@ class EffectsListState extends State<EffectsList> {
     );
   }
 }
-
