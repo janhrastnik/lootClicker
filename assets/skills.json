@@ -1,0 +1,32 @@
+{
+  "strength" : {
+    "aggression" : {
+      "name" : "Heightened Aggression",
+      "description" : "Increases Attack by 1.",
+      "changeAtk" : {
+        "value" : 1,
+        "percentage": false
+      }
+    }
+  },
+  "endurance" : {
+    "thickSkin" : {
+      "name" : "Thick Skin",
+      "description" : "Increases Hp Cap by 10.",
+      "changeHpCap" : {
+        "value" : 10,
+        "percentage": false
+      }
+    }
+  },
+  "wisdom" : {
+    "puzzleMastery": {
+      "name" : "Puzzle Mastery",
+      "description" : "Increases puzzle solving (such as unlocking doors!) by 1.",
+      "changeIntelligence" : {
+        "value" : 1,
+        "percentage" : false
+      }
+    }
+  }
+}

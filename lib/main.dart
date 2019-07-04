@@ -9,15 +9,10 @@ import 'package:scoped_model/scoped_model.dart';
 import 'classes.dart';
 import 'dart:async';
 
-enum FrontPanels {characterPage, shopPage, skillsPage}
+enum FrontPanels { characterPage, shopPage, skillsPage }
 Player player = Player(
-  inventory: [], equipped: {
-    "weapon": null,
-    "shield": null,
-    "helmet": null,
-    "body": null
-    }
-  );
+    inventory: [],
+    equipped: {"weapon": null, "shield": null, "helmet": null, "body": null});
 bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
@@ -27,7 +22,6 @@ List<DungeonTile> dungeonTiles = [
   DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
   DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
   DungeonTile(event: DungeonEvent(eventType: "merchant", length: null))
-
 ];
 ScrollController scrollController = ScrollController();
 AnimationController progressAnimationController;
@@ -35,6 +29,7 @@ AnimationController deathAnimationController;
 AnimationController goldAnimationController;
 Map monsters = {};
 Map items = {};
+Map skills = {"strength" : [], "endurance": [], "wisdom": []};
 List assetNames = [];
 Map<int, Effect> effects = {};
 final StreamController _effectsStream = StreamController<dynamic>();
@@ -73,7 +68,7 @@ class MyAppState extends State<MyApp> {
 
   Future readData(file) async {
     try {
-      String data  = await rootBundle.loadString(file);
+      String data = await rootBundle.loadString(file);
       return jsonDecode(data);
     } catch (e) {
       print(e);
@@ -86,32 +81,24 @@ class MyAppState extends State<MyApp> {
   void initState() {
     _actionBloc = ActionBloc();
     _goldBloc = GoldBloc();
-    _dungeonBloc = DungeonBloc(
-      actionBloc: _actionBloc
-    );
-    _heroHpBloc = HeroHpBloc(
-      dungeonBloc: _dungeonBloc
-    );
-    _heroExpBloc = HeroExpBloc(
-      heroHpBloc: _heroHpBloc
-    );
+    _dungeonBloc = DungeonBloc(actionBloc: _actionBloc);
+    _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);
+    _heroExpBloc = HeroExpBloc(heroHpBloc: _heroHpBloc);
     _clickerBloc = ClickerBloc(
         goldBloc: _goldBloc,
         heroHpBloc: _heroHpBloc,
         heroExpBloc: _heroExpBloc,
-        dungeonBloc: _dungeonBloc
-    );
+        dungeonBloc: _dungeonBloc);
     _tapAnimationBloc = TapAnimationBloc();
     // get monsters, items from json files, add them to globals
     readData("assets/monsters.json").then((data) {
       data.forEach((key, value) {
         monsters[key] = Enemy(
-          name: key,
-          hp: value["hp"],
-          expValue: value["expValue"],
-          attack: value["attack"],
-          loot: value["loot"]
-        );
+            name: key,
+            hp: value["hp"],
+            expValue: value["expValue"],
+            attack: value["attack"],
+            loot: value["loot"]);
       });
       print(monsters.keys.toList().toString());
     });
@@ -119,14 +106,18 @@ class MyAppState extends State<MyApp> {
       Map _data = data["items"];
       _data.forEach((key, args) {
         items[key] = Item(
-          id: key,
-          name: args["name"],
-          equip: args["equip"],
-          behaviours: args,
-          description: args["description"],
-          cost: args["cost"],
-          time: args["time"]
-        );
+            id: key,
+            name: args["name"],
+            equip: args["equip"],
+            behaviours: args,
+            description: args["description"],
+            cost: args["cost"],
+            time: args["time"]);
+      });
+    });
+    readData("assets/skills.json").then((data) {
+      data.forEach((key, args) {
+
       });
     });
     super.initState();
@@ -137,10 +128,7 @@ class MyAppState extends State<MyApp> {
     SystemChrome.setEnabledSystemUIOverlays([]);
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: "VT323"
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: "VT323"),
       home: BlocProviderTree(
         blocProviders: <BlocProvider>[
           BlocProvider<ActionBloc>(bloc: _actionBloc),
@@ -171,15 +159,15 @@ class Panels extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<FrontPanelModel>(
       builder: (context, _, model) => Backdrop(
-        menuRow: MenuRow(
-          frontPanelOpen: frontPanelVisible,
-        ),
-        frontLayer: model.activePanel,
-        backLayer: DungeonList(),
-        panelVisible: frontPanelVisible,
-        frontPanelOpenHeight: 20.0,
-        frontHeaderHeight: 0.0,
-      ),
+            menuRow: MenuRow(
+              frontPanelOpen: frontPanelVisible,
+            ),
+            frontLayer: model.activePanel,
+            backLayer: DungeonList(),
+            panelVisible: frontPanelVisible,
+            frontPanelOpenHeight: 20.0,
+            frontHeaderHeight: 0.0,
+          ),
     );
   }
 }
@@ -189,8 +177,8 @@ class DungeonList extends StatefulWidget {
   DungeonListState createState() => DungeonListState();
 }
 
-class DungeonListState extends State<DungeonList> with TickerProviderStateMixin {
-
+class DungeonListState extends State<DungeonList>
+    with TickerProviderStateMixin {
   _onTapUp(TapUpDetails details) {
     var x = details.globalPosition.dx;
     var y = details.globalPosition.dy;
@@ -201,8 +189,8 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-        TILE_LENGTH = MediaQuery.of(context).size.width/2;
-        return scrollController.jumpTo(MediaQuery.of(context).size.width/4);
+      TILE_LENGTH = MediaQuery.of(context).size.width / 2;
+      return scrollController.jumpTo(MediaQuery.of(context).size.width / 4);
     });
   }
 
@@ -214,15 +202,24 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
     final HeroHpBloc _heroHpBloc = BlocProvider.of<HeroHpBloc>(context);
     final HeroExpBloc _heroExpBloc = BlocProvider.of<HeroExpBloc>(context);
-    final TapAnimationBloc _tapAnimationBloc = BlocProvider.of<TapAnimationBloc>(context);
-    final tapAnimationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    final tapAnimation = Tween(begin: 1.0, end: 0.0).animate(tapAnimationController);
-    goldAnimationController = AnimationController(vsync: this, duration: Duration(seconds: 2));
-    final goldAnimation = Tween(begin: 0.0, end: 1.0).animate(goldAnimationController);
-    progressAnimationController = AnimationController(vsync: this, duration: Duration(milliseconds: 1));
-    final progressAnimation = Tween(begin: 1.0, end: 0.0).animate(progressAnimationController);
-    deathAnimationController = AnimationController(vsync: this, duration: Duration(seconds: 3));
-    final deathAnimation = Tween(begin: 0.0, end: 1.0).animate(deathAnimationController);
+    final TapAnimationBloc _tapAnimationBloc =
+        BlocProvider.of<TapAnimationBloc>(context);
+    final tapAnimationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    final tapAnimation =
+        Tween(begin: 1.0, end: 0.0).animate(tapAnimationController);
+    goldAnimationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 2));
+    final goldAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(goldAnimationController);
+    progressAnimationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 1));
+    final progressAnimation =
+        Tween(begin: 1.0, end: 0.0).animate(progressAnimationController);
+    deathAnimationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 3));
+    final deathAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(deathAnimationController);
     return Scaffold(
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -253,16 +250,20 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 Text("${player.gold}"),
-                                Image(image: AssetImage("assets/coin.gif"),)
+                                Image(
+                                  image: AssetImage("assets/coin.gif"),
+                                )
                               ]),
                           FadeTransition(
                             opacity: goldAnimation,
-                            child: Text("+ " + newGold.toString(), style: TextStyle(color: Colors.amber),),
+                            child: Text(
+                              "+ " + newGold.toString(),
+                              style: TextStyle(color: Colors.amber),
+                            ),
                           )
                         ],
                       );
-                    }
-                ),
+                    }),
                 BlocBuilder(
                     bloc: _heroHpBloc,
                     builder: (BuildContext context, double value) {
@@ -276,8 +277,10 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                                 height: 16.0,
                                 child: LinearProgressIndicator(
                                   value: value,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                                  backgroundColor: Color.fromRGBO(230, 230, 230, 1.0),
+                                  valueColor:
+                                      AlwaysStoppedAnimation<Color>(Colors.red),
+                                  backgroundColor:
+                                      Color.fromRGBO(230, 230, 230, 1.0),
                                 ),
                               ),
                               Text("${player.hp} / ${player.hpCap} HP")
@@ -285,7 +288,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                           )
                         ],
                       );
-                }),
+                    }),
                 BlocBuilder(
                     bloc: _heroExpBloc,
                     builder: (BuildContext context, double value) {
@@ -299,7 +302,8 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                                 height: 16.0,
                                 child: LinearProgressIndicator(
                                   value: value,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.green),
                                   backgroundColor: Colors.lightGreenAccent,
                                 ),
                               ),
@@ -308,22 +312,7 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                           )
                         ],
                       );
-                    }
-                ),
-                StreamBuilder(
-                  initialData: 0,
-                  stream: _effectsStream.stream,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    print("EFFECTS: " + effects.toString());
-                    if (!snapshot.hasData) {
-                      return Container();
-                    } else if (snapshot.data == 0) {
-                      return Container();
-                    }  else {
-                      return EffectsList(effectsList: effects.values.toList());
-                    }
-                  }
-                ),
+                    }),
                 Expanded(
                   child: Column(
                     children: <Widget>[
@@ -335,7 +324,8 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                               flex: 3,
                               child: BlocBuilder(
                                 bloc: _dungeonBloc,
-                                builder: (BuildContext context, List<DungeonTile> l) {
+                                builder: (BuildContext context,
+                                    List<DungeonTile> l) {
                                   return ListView.builder(
                                     physics: NeverScrollableScrollPhysics(),
                                     controller: scrollController,
@@ -343,8 +333,9 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                                     scrollDirection: Axis.horizontal,
                                     shrinkWrap: true,
                                     itemCount: l.length,
-                                    itemBuilder: (BuildContext context, int index) =>
-                                    l[index],
+                                    itemBuilder:
+                                        (BuildContext context, int index) =>
+                                            l[index],
                                   );
                                 },
                               ),
@@ -353,13 +344,18 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                               flex: 1,
                               child: BlocBuilder(
                                   bloc: _clickerBloc,
-                                  builder: (BuildContext context, double progress) {
+                                  builder:
+                                      (BuildContext context, double progress) {
                                     String eventText;
-                                    if (dungeonTiles[1].event.eventType == "shrine") {
+                                    if (dungeonTiles[1].event.eventType ==
+                                        "shrine") {
                                       eventText = "Enter The Dungeon";
-                                    } if (dungeonTiles[1].event.eventType == "merchant") {
+                                    }
+                                    if (dungeonTiles[1].event.eventType ==
+                                        "merchant") {
                                       eventText = "placeholder";
-                                    } if (isDead) {
+                                    }
+                                    if (isDead) {
                                       progress = 1.0;
                                       eventText = "Enter The Dungeon";
                                       isDead = false;
@@ -375,69 +371,97 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                                           children: <Widget>[
                                             Container(
                                               decoration: BoxDecoration(
-                                                border: Border.all(color: Colors.black54)
-                                              ),
+                                                  border: Border.all(
+                                                      color: Colors.black54)),
                                               width: 250.0,
                                               height: 30.0,
                                               child: LinearProgressIndicator(
                                                 value: progress,
                                               ),
                                             ),
-                                            dungeonTiles[1].event.eventType == "shrine" || dungeonTiles[1].event.eventType == "merchant" ?
-                                            Text(eventText) : Text("${dungeonTiles[1].event.length - dungeonTiles[1].event.progress} / ${dungeonTiles[1].event.length}"),
+                                            dungeonTiles[1].event.eventType ==
+                                                        "shrine" ||
+                                                    dungeonTiles[1]
+                                                            .event
+                                                            .eventType ==
+                                                        "merchant"
+                                                ? Text(eventText)
+                                                : Text(
+                                                    "${dungeonTiles[1].event.length - dungeonTiles[1].event.progress} / ${dungeonTiles[1].event.length}"),
                                           ],
                                         ),
                                       ),
                                     );
-                                  }
-                              ),
+                                  }),
                             )
                           ],
                         ),
                       ),
+                      StreamBuilder(
+                          initialData: 0,
+                          stream: _effectsStream.stream,
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            print("EFFECTS: " + effects.toString());
+                            if (!snapshot.hasData) {
+                              return Container();
+                            } else if (snapshot.data == 0) {
+                              return Container();
+                            } else {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  EffectsList(
+                                      effectsList: effects.values.toList())
+                                ],
+                              );
+                            }
+                          }),
                       Flexible(
                         flex: 1,
                         child: BlocBuilder(
-                          bloc: _actionBloc,
-                          builder: (BuildContext context, String event) {
-                            if (event == "fight") {
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: <Widget>[
-                                  Container(
-                                    width: 80.0,
-                                    height: 80.0,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      color: Colors.white,
-                                      boxShadow: [BoxShadow(
-                                          color: Colors.redAccent,
-                                          blurRadius: 10.0,
-                                          spreadRadius: 1.0)
-                                      ]
+                            bloc: _actionBloc,
+                            builder: (BuildContext context, String event) {
+                              if (event == "fight") {
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    Container(
+                                      width: 80.0,
+                                      height: 80.0,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          color: Colors.white,
+                                          boxShadow: [
+                                            BoxShadow(
+                                                color: Colors.redAccent,
+                                                blurRadius: 10.0,
+                                                spreadRadius: 1.0)
+                                          ]),
+                                      child: MaterialButton(
+                                        child: Text("Attack"),
+                                        onPressed: () {
+                                          if (!isScrolling) {
+                                            _clickerBloc.dispatch(dungeonTiles);
+                                          }
+                                        },
+                                      ),
                                     ),
-                                    child: MaterialButton(
-                                      child: Text("Attack"),
+                                    MaterialButton(
+                                      child: Text("Flee"),
                                       onPressed: () {
-                                        if (!isScrolling) {
-                                          _clickerBloc.dispatch(dungeonTiles);
-                                        }
+                                        scrollDungeon(_dungeonBloc,
+                                            _clickerBloc); // updates text
                                       },
-                                    ),
-                                  ),
-                                  MaterialButton(
-                                    child: Text("Flee"),
-                                    onPressed: () {
-                                      scrollDungeon(_dungeonBloc, _clickerBloc); // updates text
-                                    },
-                                  )
-                                ],
-                              );
-                            } else {
-                              return Container();
-                            }
-                          }
-                        ),
+                                    )
+                                  ],
+                                );
+                              } else {
+                                return Container();
+                              }
+                            }),
                       )
                     ],
                   ),
@@ -450,18 +474,17 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                   if (tapData.length == 3) {
                     tapAnimationController.forward();
                     return Positioned(
-                        left: tapData[0],
-                        top: tapData[1],
-                        child: FadeTransition(
-                          opacity: tapAnimation,
-                          child: Text("+ " + tapData[2].toString()),
-                        ),
+                      left: tapData[0],
+                      top: tapData[1],
+                      child: FadeTransition(
+                        opacity: tapAnimation,
+                        child: Text("+ " + tapData[2].toString()),
+                      ),
                     );
                   } else {
                     return Container(child: null);
                   }
-                }
-            ),
+                }),
             BlocBuilder(
                 bloc: _heroHpBloc,
                 builder: (BuildContext context, double health) {
@@ -477,15 +500,13 @@ class DungeonListState extends State<DungeonList> with TickerProviderStateMixin 
                             width: MediaQuery.of(context).size.width,
                             height: MediaQuery.of(context).size.height,
                             color: Colors.black,
-                          )
-                      ),
+                          )),
                     );
                   }
-                }
-            ),
+                }),
             Positioned(
-              top: MediaQuery.of(context).size.height/4.5,
-              left: MediaQuery.of(context).size.width/3.5,
+              top: MediaQuery.of(context).size.height / 4.5,
+              left: MediaQuery.of(context).size.width / 3.5,
               child: Image(
                 image: AssetImage("assets/idle.gif"),
                 width: 128.0,
@@ -555,65 +576,68 @@ class MenuRowState extends State<MenuRow> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         ScopedModelDescendant<FrontPanelModel>(
-        rebuildOnChange: false,
-          builder: (context, _, model) => MaterialButton(
-            color: model._activePanel == FrontPanels.characterPage &&
-                widget.frontPanelOpen.value ?
-            Colors.lightGreenAccent :
-            Colors.white,
-            child: Text("Character"),
-            onPressed: () {
-              if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.characterPage) {
-                toggleBackdropPanelVisibility(widget.frontPanelOpen.value);
-                isMenu = false;
-              } else {
-                isMenu = true;
-                model.activate(FrontPanels.characterPage);
-                widget.frontPanelOpen.value = true;
-              }
-            },
-          )
-        ),
-        ScopedModelDescendant<FrontPanelModel>(
-          rebuildOnChange: false,
-          builder: (context, _, model) => MaterialButton(
-            color: model._activePanel == FrontPanels.shopPage &&
-                widget.frontPanelOpen.value ?
-            Colors.lightGreenAccent :
-            Colors.white,
-            child: Text("Shop"),
-            onPressed: () {
-              if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.shopPage) {
-                toggleBackdropPanelVisibility(widget.frontPanelOpen.value);
-                isMenu = false;
-              }  else {
-                isMenu = true;
-                model.activate(FrontPanels.shopPage);
-                widget.frontPanelOpen.value = true;
-              }
-            },
-            )
-        ),
+            rebuildOnChange: false,
+            builder: (context, _, model) => MaterialButton(
+                  color: model._activePanel == FrontPanels.characterPage &&
+                          widget.frontPanelOpen.value
+                      ? Colors.lightGreenAccent
+                      : Colors.white,
+                  child: Text("Character"),
+                  onPressed: () {
+                    if (widget.frontPanelOpen.value == true &&
+                        model._activePanel == FrontPanels.characterPage) {
+                      toggleBackdropPanelVisibility(
+                          widget.frontPanelOpen.value);
+                      isMenu = false;
+                    } else {
+                      isMenu = true;
+                      model.activate(FrontPanels.characterPage);
+                      widget.frontPanelOpen.value = true;
+                    }
+                  },
+                )),
         ScopedModelDescendant<FrontPanelModel>(
             rebuildOnChange: false,
             builder: (context, _, model) => MaterialButton(
-              color: model._activePanel == FrontPanels.skillsPage &&
-                  widget.frontPanelOpen.value ?
-              Colors.lightGreenAccent :
-              Colors.white,
-              child: Text("Skills"),
-              onPressed: () {
-                if (widget.frontPanelOpen.value == true && model._activePanel == FrontPanels.skillsPage) {
-                  toggleBackdropPanelVisibility(widget.frontPanelOpen.value);
-                  isMenu = false;
-                }  else {
-                  isMenu = true;
-                  model.activate(FrontPanels.skillsPage);
-                  widget.frontPanelOpen.value = true;
-                }
-              },
-            )
-        )
+                  color: model._activePanel == FrontPanels.shopPage &&
+                          widget.frontPanelOpen.value
+                      ? Colors.lightGreenAccent
+                      : Colors.white,
+                  child: Text("Shop"),
+                  onPressed: () {
+                    if (widget.frontPanelOpen.value == true &&
+                        model._activePanel == FrontPanels.shopPage) {
+                      toggleBackdropPanelVisibility(
+                          widget.frontPanelOpen.value);
+                      isMenu = false;
+                    } else {
+                      isMenu = true;
+                      model.activate(FrontPanels.shopPage);
+                      widget.frontPanelOpen.value = true;
+                    }
+                  },
+                )),
+        ScopedModelDescendant<FrontPanelModel>(
+            rebuildOnChange: false,
+            builder: (context, _, model) => MaterialButton(
+                  color: model._activePanel == FrontPanels.skillsPage &&
+                          widget.frontPanelOpen.value
+                      ? Colors.lightGreenAccent
+                      : Colors.white,
+                  child: Text("Skills"),
+                  onPressed: () {
+                    if (widget.frontPanelOpen.value == true &&
+                        model._activePanel == FrontPanels.skillsPage) {
+                      toggleBackdropPanelVisibility(
+                          widget.frontPanelOpen.value);
+                      isMenu = false;
+                    } else {
+                      isMenu = true;
+                      model.activate(FrontPanels.skillsPage);
+                      widget.frontPanelOpen.value = true;
+                    }
+                  },
+                ))
       ],
     );
   }
@@ -624,7 +648,6 @@ class CharacterScreen extends StatefulWidget {
 }
 
 class CharacterScreenState extends State<CharacterScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -632,138 +655,153 @@ class CharacterScreenState extends State<CharacterScreen> {
 
   dynamic useItem(Item item, int index, bool equipped) {
     setState(() {
-        if (equipped == null || equipped == false) { // if the item is unequipped then we remove it
-          player.inventory.removeAt(index);
-          if (player.equipped[item.equip] != null) { // we 'unequip' the current item by using it with an opposite value
-            player.inventory.add(player.equipped[item.equip].id);
-            player.equipped[item.equip].use(
+      if (equipped == null || equipped == false) {
+        // if the item is unequipped then we remove it
+        player.inventory.removeAt(index);
+        if (player.equipped[item.equip] != null) {
+          // we 'unequip' the current item by using it with an opposite value
+          player.inventory.add(player.equipped[item.equip].id);
+          player.equipped[item.equip].use(
+            BlocProvider.of<HeroHpBloc>(context),
+            BlocProvider.of<HeroExpBloc>(context),
+            BlocProvider.of<GoldBloc>(context),
+            BlocProvider.of<ClickerBloc>(context),
+            true,
+          );
+        }
+      } else {
+        player.inventory.add(item.id);
+      }
+      item.use(
+          BlocProvider.of<HeroHpBloc>(context),
+          BlocProvider.of<HeroExpBloc>(context),
+          BlocProvider.of<GoldBloc>(context),
+          BlocProvider.of<ClickerBloc>(context),
+          equipped);
+      if (item.time != 0) {
+        effects[id] = Effect(
+          desc: item.name,
+          time: item.time,
+          id: id,
+        );
+        id++;
+        _effectsStream.sink.add(1);
+        wait(item.time).then((data) {
+          // we wait for the effect to run out
+          setState(() {
+            print("Item effect has ran out.");
+            item.use(
+              // we use the item as if it were equipped, this reverts the item effects
               BlocProvider.of<HeroHpBloc>(context),
               BlocProvider.of<HeroExpBloc>(context),
               BlocProvider.of<GoldBloc>(context),
               BlocProvider.of<ClickerBloc>(context),
               true,
             );
-          }
-        } else {
-          player.inventory.add(item.id);
-        }
-        item.use(
-          BlocProvider.of<HeroHpBloc>(context),
-          BlocProvider.of<HeroExpBloc>(context),
-          BlocProvider.of<GoldBloc>(context),
-          BlocProvider.of<ClickerBloc>(context),
-          equipped
-        );
-        if (item.time != 0) {
-          effects[id] = Effect(desc: item.name, time: item.time, id: id,);
-          id++;
-          _effectsStream.sink.add(1);
-          wait(item.time).then((data) { // we wait for the effect to run out
-            setState(() {
-              print("Item effect has ran out.");
-              item.use( // we use the item as if it were equipped, this reverts the item effects
-                BlocProvider.of<HeroHpBloc>(context),
-                BlocProvider.of<HeroExpBloc>(context),
-                BlocProvider.of<GoldBloc>(context),
-                BlocProvider.of<ClickerBloc>(context),
-                true,
-              );
-            });
           });
-        }
+        });
+      }
     });
   }
 
   void showDescription(Item item, int index, bool equipped) {
     AlertDialog description = AlertDialog(
-      title: Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text(item.name)],),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Image(image: AssetImage("assets/${item.id}.png"),)],),
-          Text(item.description),
-          MaterialButton(
-            color: Colors.blueAccent,
-            child: ButtonDescriptionText(equipped: equipped),
-            onPressed: () {
-              useItem(item, index, equipped);
-              Navigator.pop(context);
-            },
-          )
-        ],
-      )
-    );
-    showDialog(context: context, builder: (BuildContext context) => description);
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[Text(item.name)],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image(
+                  image: AssetImage("assets/${item.id}.png"),
+                )
+              ],
+            ),
+            Text(item.description),
+            MaterialButton(
+              color: Colors.blueAccent,
+              child: ButtonDescriptionText(equipped: equipped),
+              onPressed: () {
+                useItem(item, index, equipped);
+                Navigator.pop(context);
+              },
+            )
+          ],
+        ));
+    showDialog(
+        context: context, builder: (BuildContext context) => description);
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Container(
-          color: Colors.teal,
-          child: Column(
+  Widget build(BuildContext context) => Container(
+      color: Colors.teal,
+      child: Column(
+        children: <Widget>[
+          Row(
             children: <Widget>[
-              Row(
+              Column(
                 children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      Text("Stats"),
-                      Text("HP: ${player.hp}/${player.hpCap}"),
-                      Text("EXP: ${player.exp}/${player.expCap}"),
-                      Text("Attack: ${player.attack}"),
-                      Text("Intelligence: ${player.intelligence}"),
-                      Text("Looting: ${player.looting}")
-                    ],
-                  ),
-                  Column(
-                    children: <Widget>[
-                      Text("Equipment"),
-                      ItemSlot(
-                        item: player.equipped["weapon"],
-                        equipped: true,
-                        showDescription: showDescription,
-                      ),
-                      ItemSlot(
-                        item: player.equipped["shield"],
-                        equipped: true,
-                        showDescription: showDescription,
-                      ),
-                      ItemSlot(
-                        item: player.equipped["helmet"],
-                        equipped: true,
-                        showDescription: showDescription,
-                      ),
-                      ItemSlot(
-                        item: player.equipped["body"],
-                        equipped: true,
-                        showDescription: showDescription,
-                      )
-                    ],
-                  )
+                  Text("Stats"),
+                  Text("HP: ${player.hp}/${player.hpCap}"),
+                  Text("EXP: ${player.exp}/${player.expCap}"),
+                  Text("Attack: ${player.attack}"),
+                  Text("Intelligence: ${player.intelligence}"),
+                  Text("Looting: ${player.looting}")
                 ],
               ),
-              Text("Inventory"),
-              Stack(
+              Column(
                 children: <Widget>[
-                  GridView.count(
-                    shrinkWrap: true,
-                    crossAxisCount: 6,
-                    children: List.generate(30, (int index) => ItemSlot()),
+                  Text("Equipment"),
+                  ItemSlot(
+                    item: player.equipped["weapon"],
+                    equipped: true,
+                    showDescription: showDescription,
                   ),
-                  GridView.builder(
-                      shrinkWrap: true,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6),
-                      itemCount: player.inventory.length,
-                      itemBuilder: (BuildContext context, int index) => ItemSlot(
-                        index: index,
-                        item: items[player.inventory[index]],
-                        showDescription: showDescription,
-                      )
+                  ItemSlot(
+                    item: player.equipped["shield"],
+                    equipped: true,
+                    showDescription: showDescription,
                   ),
+                  ItemSlot(
+                    item: player.equipped["helmet"],
+                    equipped: true,
+                    showDescription: showDescription,
+                  ),
+                  ItemSlot(
+                    item: player.equipped["body"],
+                    equipped: true,
+                    showDescription: showDescription,
+                  )
                 ],
               )
             ],
+          ),
+          Text("Inventory"),
+          Stack(
+            children: <Widget>[
+              GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 6,
+                children: List.generate(30, (int index) => ItemSlot()),
+              ),
+              GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 6),
+                  itemCount: player.inventory.length,
+                  itemBuilder: (BuildContext context, int index) => ItemSlot(
+                        index: index,
+                        item: items[player.inventory[index]],
+                        showDescription: showDescription,
+                      )),
+            ],
           )
-      );
+        ],
+      ));
 }
 
 class ButtonDescriptionText extends StatelessWidget {
@@ -808,78 +846,153 @@ class ItemSlot extends StatelessWidget {
         },
         child: Container(
             decoration: BoxDecoration(
-              border: Border.all(
-                  color: Colors.black54
-              ),
+              border: Border.all(color: Colors.black54),
             ),
             width: 60.0,
             height: 60.0,
-            child: item != null ? Center(child: Image(image: AssetImage("assets/${item.id}.png"),),) : null
-        ),
+            child: item != null
+                ? Center(
+                    child: Image(
+                      image: AssetImage("assets/${item.id}.png"),
+                    ),
+                  )
+                : null),
       ),
     );
   }
 }
 
 class ShopScreen extends StatelessWidget {
-  final List shopItems = [items["redPotion"], items["woodSword"], items["atkPotion"]];
+  final List shopItems = [
+    items["redPotion"],
+    items["woodSword"],
+    items["atkPotion"],
+    items["woodShield"],
+    items["luckyCharm"],
+    items["atkGem"]
+  ];
 
   @override
   Widget build(BuildContext context) {
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
     return Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("Shop")
-            ],
-          ),
-          ListView.builder(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[Text("Shop")],
+        ),
+        ListView.builder(
             shrinkWrap: true,
             itemCount: shopItems.length,
             itemBuilder: (BuildContext context, int index) => ListTile(
-              title: Text(shopItems[index].name),
-              trailing: MaterialButton(
-                color: Colors.yellowAccent,
-                onPressed: () {
-                  if (player.gold >= shopItems[index].cost) {
-                    player.gold -= shopItems[index].cost;
-                    player.inventory.add(shopItems[index].id);
-                    print("PLAYER INVENTORY IS" + player.inventory.toString());
-                    _goldBloc.dispatch(0);
-                  }
-                },
-                child: Text("${shopItems[index].cost} Gold"),
-              ),
-            )
-          )
-        ],
+                  title: Text(shopItems[index].name),
+                  trailing: MaterialButton(
+                    color: Colors.yellowAccent,
+                    onPressed: () {
+                      if (player.gold >= shopItems[index].cost) {
+                        player.gold -= shopItems[index].cost;
+                        player.inventory.add(shopItems[index].id);
+                        print("PLAYER INVENTORY IS" +
+                            player.inventory.toString());
+                        _goldBloc.dispatch(0);
+                      }
+                    },
+                    child: Text("${shopItems[index].cost} Gold"),
+                  ),
+                ))
+      ],
     );
-    }
+  }
 }
 
 class SkillsScreen extends StatelessWidget {
   @override
-  Widget build(BuildContext context) =>
-      ListView.separated(
-        itemCount: 10,
-        separatorBuilder: (BuildContext context, int index) => CustomPaint(
-          size: Size(MediaQuery.of(context).size.width/2, 20.0),
-          painter: Line(width: MediaQuery.of(context).size.width/2),
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          return Center(
-            child: Container(
-              width: 60.0,
-              height: 60.0,
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black)
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Text("Strength"),
+              Expanded(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: 10,
+                  separatorBuilder: (BuildContext context, int index) =>
+                      CustomPaint(
+                        size: Size(MediaQuery.of(context).size.width / 2, 20.0),
+                        painter: Line(width: MediaQuery.of(context).size.width / 2),
+                      ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return Center(
+                        child: Container(
+                            width: 60.0,
+                            height: 60.0,
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black))));
+                  },
+                ),
               ),
-            ),
-          );
-        },
-      );
+            ],
+          ),
+        ),
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Text("Endurance"),
+              Expanded(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: 10,
+                  separatorBuilder: (BuildContext context, int index) =>
+                      CustomPaint(
+                        size: Size(MediaQuery.of(context).size.width / 2, 20.0),
+                        painter: Line(width: MediaQuery.of(context).size.width / 2),
+                      ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return Center(
+                        child: Container(
+                            width: 60.0,
+                            height: 60.0,
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black))));
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Text("Wisdom"),
+              Expanded(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: 10,
+                  separatorBuilder: (BuildContext context, int index) =>
+                      CustomPaint(
+                        size: Size(MediaQuery.of(context).size.width / 2, 20.0),
+                        painter: Line(width: MediaQuery.of(context).size.width / 2),
+                      ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return Center(
+                        child: Container(
+                            width: 60.0,
+                            height: 60.0,
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black))));
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class Line extends CustomPainter {
@@ -903,14 +1016,14 @@ class Effect extends StatefulWidget {
   int id;
   String desc;
 
-  Effect({Key key, @required this.desc, @required this.time, @required this.id}) : super(key: key);
+  Effect({Key key, @required this.desc, @required this.time, @required this.id})
+      : super(key: key);
 
   @override
   EffectState createState() => EffectState();
 }
 
 class EffectState extends State<Effect> {
-
   @override
   Widget build(BuildContext context) {
     wait(1).then((_) {
@@ -936,7 +1049,6 @@ class EffectsList extends StatefulWidget {
 }
 
 class EffectsListState extends State<EffectsList> {
-
   @override
   Widget build(BuildContext context) {
     return ListView(

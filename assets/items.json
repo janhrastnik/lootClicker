@@ -26,7 +26,8 @@
       "name": "Wooden Sword",
       "equip": "weapon",
       "changeAttack": {
-        "value": 1
+        "value": 1,
+        "percentage": false
       },
       "description": "Increases Atk by 1.",
       "cost": 0,
@@ -35,8 +36,9 @@
     "woodShield": {
       "name": "Wooden Shield",
       "equip": "shield",
-      "changeAttack": {
-        "value": 1
+      "changeHpCap": {
+        "value": 1,
+        "percentage": false
       },
       "description": "Increases Hp Cap by 1.",
       "cost": 0,
@@ -47,11 +49,33 @@
       "equip": null,
       "changeAttack" : {
         "value" : 1,
+        "percentage": false
+      },
+      "description": "Increases Atk by 1 for 2 minutes.",
+      "cost": 0,
+      "time": 120
+    },
+    "atkGem" : {
+      "name": "Attack Gem",
+      "equip": null,
+      "changeAttack" : {
+        "value" : 100,
         "percentage": true
       },
-      "description": "Increases Atk by 1 for 30 seconds.",
+      "description": "Increases Atk by 100 % for 2 minutes.",
       "cost": 0,
-      "time": 10
+      "time": 120
+    },
+    "luckyCharm" : {
+      "name": "Lucky Charm",
+      "equip": null,
+      "changeLoot" : {
+        "value" : 100,
+        "percentage": true
+      },
+      "description": "Increases Loot by 100 % for 1 minute.",
+      "cost": 0,
+      "time": 60
     }
   }
 }

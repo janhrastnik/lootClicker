@@ -63,6 +63,8 @@ class Player {
   int intelligence;
   int exp;
   int expCap;
+  int lootModifierRaw;
+  double lootModifierPercentage;
   List skills;
   List inventory;
   Map equipped;
@@ -75,6 +77,8 @@ class Player {
     this.looting = 1,
     this.exp = 0,
     this.expCap = 100,
+    this.lootModifierRaw = 0,
+    this.lootModifierPercentage = 1.00,
     this.skills,
     this.inventory,
     this.equipped
@@ -145,7 +149,17 @@ class Item {
           changeHp(equipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
           break;
         case "changeAttack":
-          changeAttack(equipped == true ? 0 - args["value"] : args["value"]);
+          changeAttack(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          break;
+        case "changeHpCap":
+          changeHpCap(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          break;
+        case "changeLoot":
+          changeLoot(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          break;
+        case "changeIntelligence":
+          changeIntelligence(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          break;
       }
     });
   }
@@ -160,8 +174,34 @@ void changeHp(n, percentage, hpBloc) {
   }
 }
 
-void changeAttack(n) {
-  player.attack += n;
+void changeHpCap(n, percentage) {
+  if (percentage) {
+    player.hpCap = (player.hpCap * (1 + n/100)).floor();
+  } else {
+    player.hpCap += n;
+  }
 }
 
-// TODO: add temp status effects with future delayed probably
+void changeAttack(n, percentage) {
+  if (percentage) {
+    player.attack = (player.attack * (1 + n/100)).floor();
+  } else {
+    player.attack += n;
+  }
+}
+
+void changeIntelligence(n, percentage) {
+  if (percentage) {
+    player.intelligence = (player.intelligence * (1 + n/100)).floor();
+  } else {
+    player.intelligence += n;
+  }
+}
+
+void changeLoot(n, percentage) {
+  if (percentage) {
+    player.lootModifierPercentage += (n/100);
+  } else {
+    player.lootModifierRaw += n;
+  }
+}
