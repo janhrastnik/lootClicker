@@ -113,26 +113,9 @@ class Enemy {
   });
 }
 
-class Item {
-  String name;
-  String id;
-  Map behaviours;
-  String equip;
-  String description;
-  int cost;
-  int time;
+class Usable {
 
-  Item({
-    this.id,
-    this.name,
-    this.behaviours,
-    this.equip,
-    this.description,
-    this.cost,
-    this.time,
-});
-
-  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped) {
+  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped, behaviours, equip) {
     if (equipped != null) {
       if (equipped == false) { // if item isn't equipped then equip it
         player.equipped[equip] = items[id];
@@ -143,7 +126,7 @@ class Item {
       }
     }
     behaviours.forEach((behaviour, args) {
-       // if item is equip, then reverse the value to 'unequip' it
+      // if item is equip, then reverse the value to 'unequip' it
       switch(behaviour) {
         case "changeHp":
           changeHp(equipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
@@ -164,44 +147,77 @@ class Item {
     });
   }
 
-}
+  void changeHp(n, percentage, hpBloc) {
+    if (percentage) {
+      hpBloc.dispatch((player.hpCap * (n/100)).ceil());
+    } else {
+      hpBloc.dispatch(n);
+    }
+  }
 
-void changeHp(n, percentage, hpBloc) {
-  if (percentage) {
-    hpBloc.dispatch((player.hpCap * (n/100)).ceil());
-  } else {
-    hpBloc.dispatch(n);
+  void changeHpCap(n, percentage) {
+    if (percentage) {
+      player.hpCap = (player.hpCap * (1 + n/100)).floor();
+    } else {
+      player.hpCap += n;
+    }
+  }
+
+  void changeAttack(n, percentage) {
+    if (percentage) {
+      player.attack = (player.attack * (1 + n/100)).floor();
+    } else {
+      player.attack += n;
+    }
+  }
+
+  void changeIntelligence(n, percentage) {
+    if (percentage) {
+      player.intelligence = (player.intelligence * (1 + n/100)).floor();
+    } else {
+      player.intelligence += n;
+    }
+  }
+
+  void changeLoot(n, percentage) {
+    if (percentage) {
+      player.lootModifierPercentage += (n/100);
+    } else {
+      player.lootModifierRaw += n;
+    }
   }
 }
 
-void changeHpCap(n, percentage) {
-  if (percentage) {
-    player.hpCap = (player.hpCap * (1 + n/100)).floor();
-  } else {
-    player.hpCap += n;
-  }
+class Item extends Usable {
+  String name;
+  String id;
+  Map behaviours;
+  String equip;
+  String description;
+  int cost;
+  int time;
+
+  Item({
+    this.name,
+    this.id,
+    this.behaviours,
+    this.equip,
+    this.description,
+    this.cost,
+    this.time,
+  });
 }
 
-void changeAttack(n, percentage) {
-  if (percentage) {
-    player.attack = (player.attack * (1 + n/100)).floor();
-  } else {
-    player.attack += n;
-  }
-}
+class Skill extends Usable {
+  String name;
+  String id;
+  String description;
+  Map behaviours;
 
-void changeIntelligence(n, percentage) {
-  if (percentage) {
-    player.intelligence = (player.intelligence * (1 + n/100)).floor();
-  } else {
-    player.intelligence += n;
-  }
-}
-
-void changeLoot(n, percentage) {
-  if (percentage) {
-    player.lootModifierPercentage += (n/100);
-  } else {
-    player.lootModifierRaw += n;
-  }
+  Skill({
+    this.name,
+    this.id,
+    this.description,
+    this.behaviours
+  });
 }

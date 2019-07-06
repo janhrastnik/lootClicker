@@ -106,8 +106,8 @@ class MyAppState extends State<MyApp> {
       Map _data = data["items"];
       _data.forEach((key, args) {
         items[key] = Item(
-            id: key,
             name: args["name"],
+            id: key,
             equip: args["equip"],
             behaviours: args,
             description: args["description"],
@@ -116,9 +116,22 @@ class MyAppState extends State<MyApp> {
       });
     });
     readData("assets/skills.json").then((data) {
-      data.forEach((key, args) {
-
+      data.forEach((tree, _skills) {
+        print(tree);
+        _skills.forEach((skillName, skillDetail) {
+          print(skillName);
+          print(skillDetail);
+          List temp = skills[tree];
+          temp.add(Skill(
+              name: skillDetail["name"],
+              id: skillName,
+              description: skillDetail["description"],
+              behaviours: skillDetail
+          ));
+          skills[tree] = temp;
+        });
       });
+      print(skills);
     });
     super.initState();
   }
@@ -408,15 +421,10 @@ class DungeonListState extends State<DungeonList>
                             } else if (snapshot.data == 0) {
                               return Container();
                             } else {
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  EffectsList(
-                                      effectsList: effects.values.toList())
-                                ],
-                              );
+                              return EffectsList(
+                                  effectsList: effects.values.toList());
                             }
-                          }),
+                      }),
                       Flexible(
                         flex: 1,
                         child: BlocBuilder(
@@ -673,11 +681,14 @@ class CharacterScreenState extends State<CharacterScreen> {
         player.inventory.add(item.id);
       }
       item.use(
-          BlocProvider.of<HeroHpBloc>(context),
-          BlocProvider.of<HeroExpBloc>(context),
-          BlocProvider.of<GoldBloc>(context),
-          BlocProvider.of<ClickerBloc>(context),
-          equipped);
+        BlocProvider.of<HeroHpBloc>(context),
+        BlocProvider.of<HeroExpBloc>(context),
+        BlocProvider.of<GoldBloc>(context),
+        BlocProvider.of<ClickerBloc>(context),
+        equipped,
+        item.equip,
+        item.behaviours
+      );
       if (item.time != 0) {
         effects[id] = Effect(
           desc: item.name,
@@ -697,6 +708,8 @@ class CharacterScreenState extends State<CharacterScreen> {
               BlocProvider.of<GoldBloc>(context),
               BlocProvider.of<ClickerBloc>(context),
               true,
+              item.equip,
+              item.behaviours
             );
           });
         });
@@ -869,7 +882,9 @@ class ShopScreen extends StatelessWidget {
     items["atkPotion"],
     items["woodShield"],
     items["luckyCharm"],
-    items["atkGem"]
+    items["atkGem"],
+    items["leatherHelmet"],
+    items["commonShirt"]
   ];
 
   @override
@@ -885,21 +900,22 @@ class ShopScreen extends StatelessWidget {
             shrinkWrap: true,
             itemCount: shopItems.length,
             itemBuilder: (BuildContext context, int index) => ListTile(
-                  title: Text(shopItems[index].name),
-                  trailing: MaterialButton(
-                    color: Colors.yellowAccent,
-                    onPressed: () {
-                      if (player.gold >= shopItems[index].cost) {
-                        player.gold -= shopItems[index].cost;
-                        player.inventory.add(shopItems[index].id);
-                        print("PLAYER INVENTORY IS" +
-                            player.inventory.toString());
-                        _goldBloc.dispatch(0);
-                      }
-                    },
-                    child: Text("${shopItems[index].cost} Gold"),
-                  ),
-                ))
+              leading: Image(image: AssetImage("assets/${shopItems[index].id}.png"),),
+              title: Text(shopItems[index].name),
+              trailing: MaterialButton(
+                color: Colors.yellowAccent,
+                onPressed: () {
+                  if (player.gold >= shopItems[index].cost) {
+                    player.gold -= shopItems[index].cost;
+                    player.inventory.add(shopItems[index].id);
+                    print("PLAYER INVENTORY IS" +
+                        player.inventory.toString());
+                    _goldBloc.dispatch(0);
+                  }
+                },
+                child: Text("${shopItems[index].cost} Gold"),
+              ),
+            ))
       ],
     );
   }
@@ -919,7 +935,7 @@ class SkillsScreen extends StatelessWidget {
               Expanded(
                 child: ListView.separated(
                   shrinkWrap: true,
-                  itemCount: 10,
+                  itemCount: skills["strength"].length,
                   separatorBuilder: (BuildContext context, int index) =>
                       CustomPaint(
                         size: Size(MediaQuery.of(context).size.width / 2, 20.0),
@@ -927,11 +943,18 @@ class SkillsScreen extends StatelessWidget {
                       ),
                   itemBuilder: (BuildContext context, int index) {
                     return Center(
-                        child: Container(
-                            width: 60.0,
-                            height: 60.0,
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black))));
+                      child: Container(
+                        width: 60.0,
+                        height: 60.0,
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black)
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.fill,
+                          child: Image(image: AssetImage("assets/skills/${skills["strength"][index].id}.png")),
+                        ),
+                      )
+                    );
                   },
                 ),
               ),
@@ -945,7 +968,7 @@ class SkillsScreen extends StatelessWidget {
               Expanded(
                 child: ListView.separated(
                   shrinkWrap: true,
-                  itemCount: 10,
+                  itemCount: skills["endurance"].length,
                   separatorBuilder: (BuildContext context, int index) =>
                       CustomPaint(
                         size: Size(MediaQuery.of(context).size.width / 2, 20.0),
@@ -954,10 +977,17 @@ class SkillsScreen extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     return Center(
                         child: Container(
-                            width: 60.0,
-                            height: 60.0,
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black))));
+                          width: 60.0,
+                          height: 60.0,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black)
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Image(image: AssetImage("assets/skills/${skills["endurance"][index].id}.png")),
+                          ),
+                        )
+                    );
                   },
                 ),
               ),
@@ -971,7 +1001,7 @@ class SkillsScreen extends StatelessWidget {
               Expanded(
                 child: ListView.separated(
                   shrinkWrap: true,
-                  itemCount: 10,
+                  itemCount: skills["wisdom"].length,
                   separatorBuilder: (BuildContext context, int index) =>
                       CustomPaint(
                         size: Size(MediaQuery.of(context).size.width / 2, 20.0),
@@ -980,10 +1010,17 @@ class SkillsScreen extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     return Center(
                         child: Container(
-                            width: 60.0,
-                            height: 60.0,
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black))));
+                          width: 60.0,
+                          height: 60.0,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black)
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Image(image: AssetImage("assets/skills/${skills["wisdom"][index].id}.png")),
+                          ),
+                        )
+                    );
                   },
                 ),
               ),

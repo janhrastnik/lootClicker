@@ -44,6 +44,28 @@
       "cost": 0,
       "time": 0
     },
+    "leatherHelmet": {
+      "name": "Leather Helmet",
+      "equip": "helmet",
+      "changeHpCap": {
+        "value": 10,
+        "percentage": false
+      },
+      "description": "Increases Hp Cap by 10.",
+      "cost": 0,
+      "time": 0
+    },
+    "commonShirt": {
+      "name": "Common Shirt",
+      "equip": "body",
+      "changeHpCap": {
+        "value": 10,
+        "percentage": false
+      },
+      "description": "Increases Hp Cap by 10.",
+      "cost": 0,
+      "time": 0
+    },
     "atkPotion" : {
       "name": "Attack Potion",
       "equip": null,
