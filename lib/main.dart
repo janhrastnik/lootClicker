@@ -675,6 +675,8 @@ class CharacterScreenState extends State<CharacterScreen> {
             BlocProvider.of<GoldBloc>(context),
             BlocProvider.of<ClickerBloc>(context),
             true,
+            player.equipped[item.equip].equip,
+            player.equipped[item.equip].behaviours
           );
         }
       } else {
@@ -921,28 +923,92 @@ class ShopScreen extends StatelessWidget {
   }
 }
 
-class SkillsScreen extends StatelessWidget {
+class SkillsScreen extends StatefulWidget {
+  @override
+  SkillsScreenState createState() => SkillsScreenState();
+}
+
+class SkillsScreenState extends State<SkillsScreen> {
+
+  void useSkill(Skill skill) {
+    setState(() {
+      skill.use(
+          BlocProvider.of<HeroHpBloc>(context),
+          BlocProvider.of<HeroExpBloc>(context),
+          BlocProvider.of<GoldBloc>(context),
+          BlocProvider.of<ClickerBloc>(context),
+          false,
+          null,
+          skill.behaviours
+      );
+    });
+  }
+
+  void showDescription(Skill skill) {
+    AlertDialog description = AlertDialog(
+      title: Text(skill.name),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Image(image: AssetImage("assets/skills/${skill.id}.png"),),
+          Text(skill.description),
+          MaterialButton(
+            color: Colors.redAccent,
+            child: Text("Unlock Skill"),
+            onPressed: () {
+              useSkill(skill);
+            },
+          )
+        ],
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => description
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        Expanded(
-          child: Column(
-            children: <Widget>[
-              Text("Strength"),
-              Expanded(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: skills["strength"].length,
-                  separatorBuilder: (BuildContext context, int index) =>
-                      CustomPaint(
-                        size: Size(MediaQuery.of(context).size.width / 2, 20.0),
-                        painter: Line(width: MediaQuery.of(context).size.width / 2),
-                      ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Center(
+        SkillTree(treeName: "strength", showDescription: showDescription),
+        SkillTree(treeName: "endurance", showDescription: showDescription),
+        SkillTree(treeName: "wisdom", showDescription: showDescription)
+      ],
+    );
+  }
+}
+
+class SkillTree extends StatelessWidget {
+  String treeName;
+  dynamic showDescription;
+
+  SkillTree({this.treeName, this.showDescription});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: <Widget>[
+          Text(treeName),
+          Expanded(
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: skills[treeName].length,
+              separatorBuilder: (BuildContext context, int index) =>
+                  CustomPaint(
+                    size: Size(MediaQuery.of(context).size.width / 2, 20.0),
+                    painter: Line(width: MediaQuery.of(context).size.width / 2),
+                  ),
+              itemBuilder: (BuildContext context, int index) {
+                Skill currSkill = skills[treeName][index];
+                return Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        showDescription(currSkill);
+                      },
                       child: Container(
                         width: 60.0,
                         height: 60.0,
@@ -951,83 +1017,16 @@ class SkillsScreen extends StatelessWidget {
                         ),
                         child: FittedBox(
                           fit: BoxFit.fill,
-                          child: Image(image: AssetImage("assets/skills/${skills["strength"][index].id}.png")),
+                          child: Image(image: AssetImage("assets/skills/${currSkill.id}.png")),
                         ),
-                      )
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Column(
-            children: <Widget>[
-              Text("Endurance"),
-              Expanded(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: skills["endurance"].length,
-                  separatorBuilder: (BuildContext context, int index) =>
-                      CustomPaint(
-                        size: Size(MediaQuery.of(context).size.width / 2, 20.0),
-                        painter: Line(width: MediaQuery.of(context).size.width / 2),
                       ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Center(
-                        child: Container(
-                          width: 60.0,
-                          height: 60.0,
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black)
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Image(image: AssetImage("assets/skills/${skills["endurance"][index].id}.png")),
-                          ),
-                        )
-                    );
-                  },
-                ),
-              ),
-            ],
+                    )
+                );
+              },
+            ),
           ),
-        ),
-        Expanded(
-          child: Column(
-            children: <Widget>[
-              Text("Wisdom"),
-              Expanded(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: skills["wisdom"].length,
-                  separatorBuilder: (BuildContext context, int index) =>
-                      CustomPaint(
-                        size: Size(MediaQuery.of(context).size.width / 2, 20.0),
-                        painter: Line(width: MediaQuery.of(context).size.width / 2),
-                      ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Center(
-                        child: Container(
-                          width: 60.0,
-                          height: 60.0,
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black)
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Image(image: AssetImage("assets/skills/${skills["wisdom"][index].id}.png")),
-                          ),
-                        )
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

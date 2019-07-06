@@ -3,7 +3,7 @@
     "aggression" : {
       "name" : "Heightened Aggression",
       "description" : "Increases Attack by 1.",
-      "changeAtk" : {
+      "changeAttack" : {
         "value" : 1,
         "percentage": false
       }

@@ -64,6 +64,7 @@ class Player {
   int exp;
   int expCap;
   int lootModifierRaw;
+  int skillPoints;
   double lootModifierPercentage;
   List skills;
   List inventory;
@@ -81,19 +82,19 @@ class Player {
     this.lootModifierPercentage = 1.00,
     this.skills,
     this.inventory,
-    this.equipped
+    this.equipped,
+    this.skillPoints = 0,
   });
 
   void levelUp() {
-    this.hpCap = this.hpCap + 20;
+    this.hpCap = (this.hpCap * 1.2).floor();
     this.attack = this.attack + Random().nextInt(2);
     this.looting = this.looting + Random().nextInt(2);
     this.intelligence = this.intelligence + Random().nextInt(2);
-    this.expCap = this.expCap * 2;
     this.exp = 0;
     this.hp = this.hpCap;
-    this.expCap = (this.expCap * 1.5).ceil();
-    print(this.hpCap);
+    this.expCap = (this.expCap * 2).ceil();
+    this.skillPoints++;
   }
 }
 
@@ -115,7 +116,7 @@ class Enemy {
 
 class Usable {
 
-  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped, behaviours, equip) {
+  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped, equip, behaviours) {
     if (equipped != null) {
       if (equipped == false) { // if item isn't equipped then equip it
         player.equipped[equip] = items[id];
