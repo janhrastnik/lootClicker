@@ -22,5 +22,6 @@
     "expValue": 20,
     "attack": 2,
     "loot": "woodSword"
-  }
+  },
+  "slime": {}
 }

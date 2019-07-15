@@ -7,6 +7,13 @@
         "value" : 1,
         "percentage": false
       }
+    },
+    "accuracy" : {
+      "name" : "Increased Accuracy",
+      "description" : "Increases Critical Hit Chance by 2%",
+      "changeCriticalHitChance" : {
+        "value": 0.02
+      }
     }
   },
   "endurance" : {
@@ -17,15 +24,30 @@
         "value" : 10,
         "percentage": false
       }
+    },
+    "agility" : {
+      "name" : "Agility",
+      "description" : "Increases Dodge Chance by 2%",
+      "changeDodgeChance" : {
+        "value" : 0.02
+      }
     }
   },
   "wisdom" : {
-    "puzzleMastery": {
+    "puzzleMastery" : {
       "name" : "Puzzle Mastery",
       "description" : "Increases puzzle solving (such as unlocking doors!) by 1.",
       "changeIntelligence" : {
         "value" : 1,
         "percentage" : false
+      }
+    },
+    "bookworm" : {
+      "name" : "Bookworm",
+      "description" : "Increases all xp gain by 5 %",
+      "changeExpGain" : {
+        "value" : 5,
+        "percentage" : true
       }
     }
   }

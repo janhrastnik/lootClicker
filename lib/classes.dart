@@ -63,10 +63,15 @@ class Player {
   int intelligence;
   int exp;
   int expCap;
+  int expModifierRaw;
   int lootModifierRaw;
   int skillPoints;
+  int criticalHitDamage;
+  Map skillProgress;
+  double expModifierPercentage;
   double lootModifierPercentage;
-  List skills;
+  double criticalHitChance;
+  double dodgeChance;
   List inventory;
   Map equipped;
 
@@ -78,12 +83,17 @@ class Player {
     this.looting = 1,
     this.exp = 0,
     this.expCap = 100,
+    this.expModifierRaw = 0,
     this.lootModifierRaw = 0,
+    this.expModifierPercentage = 1.00,
     this.lootModifierPercentage = 1.00,
-    this.skills,
+    this.criticalHitDamage = 2,
+    this.criticalHitChance = 0.01,
+    this.dodgeChance = 0.01,
     this.inventory,
     this.equipped,
-    this.skillPoints = 0,
+    this.skillPoints = 2,
+    this.skillProgress
   });
 
   void levelUp() {
@@ -116,14 +126,16 @@ class Enemy {
 
 class Usable {
 
-  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped, equip, behaviours) {
+  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped, equip, behaviours, id) {
+    print(equip);
+    print(equipped);
+    print(behaviours);
     if (equipped != null) {
-      if (equipped == false) { // if item isn't equipped then equip it
+      if (equipped == false) {// if item isn't equipped then equip it
+        print("yes");
         player.equipped[equip] = items[id];
-        print("EQUIPPED IS " + player.equipped.toString());
       } else { // if item is equipped then unequip it
         player.equipped[equip] = null;
-        print("EQUIPPED IS " + player.equipped.toString());
       }
     }
     behaviours.forEach((behaviour, args) {
@@ -143,6 +155,15 @@ class Usable {
           break;
         case "changeIntelligence":
           changeIntelligence(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          break;
+        case "changeExpGain":
+          changeExpGain(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          break;
+        case "changeCriticalHitChance":
+          changeCriticalHitChance(equipped == true ? 0 - args["value"] : args["value"]);
+          break;
+        case "changeDodgeChance":
+          changeDodgeChance(equipped == true ? 0 - args["value"] : args["value"]);
           break;
       }
     });
@@ -185,6 +206,22 @@ class Usable {
       player.lootModifierPercentage += (n/100);
     } else {
       player.lootModifierRaw += n;
+    }
+  }
+
+  void changeDodgeChance(n) {
+    player.dodgeChance += n;
+  }
+
+  void changeCriticalHitChance(n) {
+    player.criticalHitChance += n;
+  }
+
+  void changeExpGain(n, percentage) {
+    if (percentage) {
+      player.expModifierPercentage += (n/100);
+    } else {
+      player.expModifierRaw += n;
     }
   }
 }

@@ -12,7 +12,9 @@ import 'dart:async';
 enum FrontPanels { characterPage, shopPage, skillsPage }
 Player player = Player(
     inventory: [],
-    equipped: {"weapon": null, "shield": null, "helmet": null, "body": null});
+    equipped: {"weapon": null, "shield": null, "helmet": null, "body": null},
+    skillProgress: {"strength": 0, "endurance": 0, "wisdom": 0}
+);
 bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
@@ -117,10 +119,7 @@ class MyAppState extends State<MyApp> {
     });
     readData("assets/skills.json").then((data) {
       data.forEach((tree, _skills) {
-        print(tree);
         _skills.forEach((skillName, skillDetail) {
-          print(skillName);
-          print(skillDetail);
           List temp = skills[tree];
           temp.add(Skill(
               name: skillDetail["name"],
@@ -353,6 +352,21 @@ class DungeonListState extends State<DungeonList>
                                 },
                               ),
                             ),
+                            StreamBuilder(
+                                initialData: 0,
+                                stream: _effectsStream.stream,
+                                builder:
+                                    (BuildContext context, AsyncSnapshot snapshot) {
+                                  print("EFFECTS: " + effects.toString());
+                                  if (!snapshot.hasData) {
+                                    return Container();
+                                  } else if (snapshot.data == 0) {
+                                    return Container();
+                                  } else {
+                                    return EffectsList(
+                                        effectsList: effects.values.toList());
+                                  }
+                                }),
                             Flexible(
                               flex: 1,
                               child: BlocBuilder(
@@ -410,21 +424,6 @@ class DungeonListState extends State<DungeonList>
                           ],
                         ),
                       ),
-                      StreamBuilder(
-                          initialData: 0,
-                          stream: _effectsStream.stream,
-                          builder:
-                              (BuildContext context, AsyncSnapshot snapshot) {
-                            print("EFFECTS: " + effects.toString());
-                            if (!snapshot.hasData) {
-                              return Container();
-                            } else if (snapshot.data == 0) {
-                              return Container();
-                            } else {
-                              return EffectsList(
-                                  effectsList: effects.values.toList());
-                            }
-                      }),
                       Flexible(
                         flex: 1,
                         child: BlocBuilder(
@@ -676,7 +675,8 @@ class CharacterScreenState extends State<CharacterScreen> {
             BlocProvider.of<ClickerBloc>(context),
             true,
             player.equipped[item.equip].equip,
-            player.equipped[item.equip].behaviours
+            player.equipped[item.equip].behaviours,
+            item.id
           );
         }
       } else {
@@ -689,7 +689,8 @@ class CharacterScreenState extends State<CharacterScreen> {
         BlocProvider.of<ClickerBloc>(context),
         equipped,
         item.equip,
-        item.behaviours
+        item.behaviours,
+        item.id
       );
       if (item.time != 0) {
         effects[id] = Effect(
@@ -711,7 +712,8 @@ class CharacterScreenState extends State<CharacterScreen> {
               BlocProvider.of<ClickerBloc>(context),
               true,
               item.equip,
-              item.behaviours
+              item.behaviours,
+              item.id
             );
           });
         });
@@ -762,10 +764,14 @@ class CharacterScreenState extends State<CharacterScreen> {
                 children: <Widget>[
                   Text("Stats"),
                   Text("HP: ${player.hp}/${player.hpCap}"),
-                  Text("EXP: ${player.exp}/${player.expCap}"),
                   Text("Attack: ${player.attack}"),
+                  Text("Critical Hit Chance: ${player.criticalHitChance}"),
+                  Text("Dodge Chance: ${player.dodgeChance}"),
                   Text("Intelligence: ${player.intelligence}"),
-                  Text("Looting: ${player.looting}")
+                  Text("Looting: ${player.looting}"),
+                  Text("Loot Amount: ${player.lootModifierPercentage}"),
+                  Text("EXP: ${player.exp}/${player.expCap}"),
+                  Text("EXP Amount: ${player.expModifierPercentage}"),
                 ],
               ),
               Column(
@@ -792,7 +798,7 @@ class CharacterScreenState extends State<CharacterScreen> {
                     showDescription: showDescription,
                   )
                 ],
-              )
+              ),
             ],
           ),
           Text("Inventory"),
@@ -930,8 +936,9 @@ class SkillsScreen extends StatefulWidget {
 
 class SkillsScreenState extends State<SkillsScreen> {
 
-  void useSkill(Skill skill) {
+  void useSkill(Skill skill, String treeName) {
     setState(() {
+      player.skillProgress[treeName]++;
       skill.use(
           BlocProvider.of<HeroHpBloc>(context),
           BlocProvider.of<HeroExpBloc>(context),
@@ -939,12 +946,13 @@ class SkillsScreenState extends State<SkillsScreen> {
           BlocProvider.of<ClickerBloc>(context),
           false,
           null,
-          skill.behaviours
+          skill.behaviours,
+          null
       );
     });
   }
 
-  void showDescription(Skill skill) {
+  void showDescription(Skill skill, String treeName, int index) {
     AlertDialog description = AlertDialog(
       title: Text(skill.name),
       content: Column(
@@ -952,13 +960,17 @@ class SkillsScreenState extends State<SkillsScreen> {
         children: <Widget>[
           Image(image: AssetImage("assets/skills/${skill.id}.png"),),
           Text(skill.description),
-          MaterialButton(
-            color: Colors.redAccent,
+          player.skillProgress[treeName] == index ? MaterialButton(
+            color: Colors.blueAccent,
             child: Text("Unlock Skill"),
             onPressed: () {
-              useSkill(skill);
+              if (player.skillPoints > 0) {
+                useSkill(skill, treeName);
+                player.skillPoints--;
+                Navigator.pop(context);
+              }
             },
-          )
+          ) : Container()
         ],
       ),
     );
@@ -969,13 +981,20 @@ class SkillsScreenState extends State<SkillsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
       children: <Widget>[
-        SkillTree(treeName: "strength", showDescription: showDescription),
-        SkillTree(treeName: "endurance", showDescription: showDescription),
-        SkillTree(treeName: "wisdom", showDescription: showDescription)
+        Text("Skill Points: ${player.skillPoints}"),
+        Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              SkillTree(treeName: "strength", showDescription: showDescription),
+              SkillTree(treeName: "endurance", showDescription: showDescription),
+              SkillTree(treeName: "wisdom", showDescription: showDescription)
+            ],
+          ),
+        )
       ],
     );
   }
@@ -1007,11 +1026,15 @@ class SkillTree extends StatelessWidget {
                 return Center(
                     child: GestureDetector(
                       onTap: () {
-                        showDescription(currSkill);
+                        showDescription(currSkill, treeName, index);
                       },
                       child: Container(
                         width: 60.0,
                         height: 60.0,
+                        foregroundDecoration: player.skillProgress[treeName] <= index ? BoxDecoration(
+                          color: Colors.grey,
+                          backgroundBlendMode: BlendMode.saturation
+                        ) : null,
                         decoration: BoxDecoration(
                             border: Border.all(color: Colors.black)
                         ),

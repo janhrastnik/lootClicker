@@ -108,12 +108,20 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
 
     switch(currEvent.eventType) {
       case "fight":
-        currEvent.progress = currEvent.progress + player.attack;
-        heroHpBloc.dispatch(-currEvent.enemy.attack);
+        double r = Random().nextDouble();
+        if (player.dodgeChance < r) { // if the player doesn't dodge
+          heroHpBloc.dispatch(-currEvent.enemy.attack);
+        }
         // if the player dies
         if (currEvent.enemy.attack >= player.hp) {
           await wait(3);
           yield 0.0; // this should fix death bug
+        }
+        r = Random().nextDouble();
+        if (player.criticalHitChance >= r) { // if the player lands a critical hit
+          currEvent.progress = currEvent.progress + (player.attack * player.criticalHitDamage);
+        } else {
+          currEvent.progress = currEvent.progress + player.attack;
         }
         // if the player beats the monster
         if (currEvent.progress >= currEvent.length) {
@@ -252,7 +260,7 @@ class HeroExpBloc extends Bloc<int, double> {
 
   @override
   Stream<double> mapEventToState(int event) async* {
-    player.exp = player.exp + event;
+    player.exp = player.exp + (event * player.expModifierPercentage).round() + player.expModifierRaw;
     if (player.exp >= player.expCap) { // player levels up
       player.exp = 0;
       // increase stats
