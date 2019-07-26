@@ -71,14 +71,12 @@ class Player {
   int lootModifierRaw;
   int skillPoints;
   int criticalHitDamage;
-  @JsonKey(name: 'skill-progress')
   Map skillProgress;
   double expModifierPercentage;
   double lootModifierPercentage;
   double criticalHitChance;
   double dodgeChance;
   List inventory;
-  @JsonKey(name: 'equipped')
   Map equipped;
   bool bloodSteal;
 
@@ -253,6 +251,7 @@ class Usable {
   }
 }
 
+@JsonSerializable()
 class Item extends Usable {
   String name;
   String id;
@@ -271,6 +270,10 @@ class Item extends Usable {
     this.cost,
     this.time,
   });
+
+  factory Item.fromJson(Map<String, dynamic> json)  => _$ItemFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ItemToJson(this);
 }
 
 class Skill extends Usable {

@@ -62,13 +62,28 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  DungeonBloc _dungeonBloc;
-  ClickerBloc _clickerBloc;
-  GoldBloc _goldBloc;
-  TapAnimationBloc _tapAnimationBloc;
-  HeroHpBloc _heroHpBloc;
-  HeroExpBloc _heroExpBloc;
-  ActionBloc _actionBloc;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: "VT323"),
+      home: SplashPage(),
+    );
+  }
+}
+
+class SplashPage extends StatefulWidget {
+  SplashPageState createState() => SplashPageState();
+}
+
+class SplashPageState extends State<SplashPage> {
 
   Future readData(file) async {
     try {
@@ -104,33 +119,20 @@ class MyAppState extends State<MyApp> {
       final file = await _localFile;
       // Read the file
       String contents = await file.readAsString();
+      print(contents);
       if (jsonDecode(contents) != null) {
-        player = Player.fromJson(jsonDecode(contents));
+        return Player.fromJson(jsonDecode(contents));
       }
     } catch (e) {
       print(e);
-      // If encountering an error, return 0
       return 0;
+      // If encountering an error, return 0
     }
   }
 
-  @override
-  void initState() {
-    _actionBloc = ActionBloc();
-    _goldBloc = GoldBloc();
-    _dungeonBloc = DungeonBloc(actionBloc: _actionBloc);
-    _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);
-    _heroExpBloc = HeroExpBloc(heroHpBloc: _heroHpBloc);
-    _clickerBloc = ClickerBloc(
-        goldBloc: _goldBloc,
-        heroHpBloc: _heroHpBloc,
-        heroExpBloc: _heroExpBloc,
-        dungeonBloc: _dungeonBloc);
-    _tapAnimationBloc = TapAnimationBloc();
-    // get monsters, items from json files, add them to globals
-    readProgress();
+  void wrap() async {
     Timer.periodic(Duration(seconds: 5), (Timer t) => saveProgress()); // save game every 15 seconds
-    readData("assets/monsters.json").then((data) {
+    await readData("assets/monsters.json").then((data) {
       data.forEach((key, value) {
         monsters[key] = Enemy(
             name: key,
@@ -141,7 +143,7 @@ class MyAppState extends State<MyApp> {
       });
       print(monsters.keys.toList().toString());
     });
-    readData("assets/items.json").then((data) {
+    await readData("assets/items.json").then((data) {
       Map _data = data["items"];
       _data.forEach((key, args) {
         items[key] = Item(
@@ -154,7 +156,7 @@ class MyAppState extends State<MyApp> {
             time: args["time"]);
       });
     });
-    readData("assets/skills.json").then((data) {
+    await readData("assets/skills.json").then((data) {
       data.forEach((tree, _skills) {
         _skills.forEach((skillName, skillDetail) {
           List temp = skills[tree];
@@ -169,27 +171,74 @@ class MyAppState extends State<MyApp> {
       });
       print(skills);
     });
+    readProgress().then((data) {
+      if (data != 0) {
+        player = data;
+      } else {
+        player = Player(
+            inventory: [],
+            equipped: {"weapon": null, "shield": null, "helmet": null, "body": null},
+            skillProgress: {"strength": 0, "endurance": 0, "wisdom": 0}
+        );
+      }
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => BlocPage()));
+    });
+  }
+
+  @override
+  void initState() {
+    wrap();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays([]);
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: "VT323"),
-      home: BlocProviderTree(
-        blocProviders: <BlocProvider>[
-          BlocProvider<ActionBloc>(bloc: _actionBloc),
-          BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
-          BlocProvider<ClickerBloc>(bloc: _clickerBloc),
-          BlocProvider<GoldBloc>(bloc: _goldBloc),
-          BlocProvider<TapAnimationBloc>(bloc: _tapAnimationBloc),
-          BlocProvider<HeroHpBloc>(bloc: _heroHpBloc),
-          BlocProvider<HeroExpBloc>(bloc: _heroExpBloc),
-        ],
-        child: ClickerApp(),
-      ),
+    return Text("Splash Page");
+  }
+}
+
+class BlocPage extends StatefulWidget {
+  BlocPageState createState() => BlocPageState();
+}
+
+class BlocPageState extends State<BlocPage> {
+  DungeonBloc _dungeonBloc;
+  ClickerBloc _clickerBloc;
+  GoldBloc _goldBloc;
+  TapAnimationBloc _tapAnimationBloc;
+  HeroHpBloc _heroHpBloc;
+  HeroExpBloc _heroExpBloc;
+  ActionBloc _actionBloc;
+
+  @override
+  void initState() {
+    _actionBloc = ActionBloc();
+    _goldBloc = GoldBloc();
+    _dungeonBloc = DungeonBloc(actionBloc: _actionBloc);
+    _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);
+    _heroExpBloc = HeroExpBloc(heroHpBloc: _heroHpBloc);
+    _clickerBloc = ClickerBloc(
+        goldBloc: _goldBloc,
+        heroHpBloc: _heroHpBloc,
+        heroExpBloc: _heroExpBloc,
+        dungeonBloc: _dungeonBloc);
+    _tapAnimationBloc = TapAnimationBloc();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProviderTree(
+      blocProviders: <BlocProvider>[
+        BlocProvider<ActionBloc>(bloc: _actionBloc),
+        BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
+        BlocProvider<ClickerBloc>(bloc: _clickerBloc),
+        BlocProvider<GoldBloc>(bloc: _goldBloc),
+        BlocProvider<TapAnimationBloc>(bloc: _tapAnimationBloc),
+        BlocProvider<HeroHpBloc>(bloc: _heroHpBloc),
+        BlocProvider<HeroExpBloc>(bloc: _heroExpBloc),
+      ],
+      child: ClickerApp(),
     );
   }
 }
@@ -316,6 +365,7 @@ class DungeonListState extends State<DungeonList>
                 BlocBuilder(
                     bloc: _heroHpBloc,
                     builder: (BuildContext context, double value) {
+                      print("VALUE IS " + value.toString());
                       return Column(
                         children: <Widget>[
                           Stack(

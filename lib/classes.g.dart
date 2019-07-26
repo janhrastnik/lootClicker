@@ -27,7 +27,7 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
     equipped: json['equipped'] as Map<String, dynamic>,
     bloodSteal: json['bloodSteal'] as bool,
     skillPoints: json['skillPoints'] as int,
-    skillProgress: json['skill-progress'] as Map<String, dynamic>,
+    skillProgress: json['skillProgress'] as Map<String, dynamic>,
   );
 }
 
@@ -44,7 +44,7 @@ Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'lootModifierRaw': instance.lootModifierRaw,
       'skillPoints': instance.skillPoints,
       'criticalHitDamage': instance.criticalHitDamage,
-      'skill-progress': instance.skillProgress,
+      'skillProgress': instance.skillProgress,
       'expModifierPercentage': instance.expModifierPercentage,
       'lootModifierPercentage': instance.lootModifierPercentage,
       'criticalHitChance': instance.criticalHitChance,
@@ -52,4 +52,26 @@ Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'inventory': instance.inventory,
       'equipped': instance.equipped,
       'bloodSteal': instance.bloodSteal,
+    };
+
+Item _$ItemFromJson(Map<String, dynamic> json) {
+  return Item(
+    name: json['name'] as String,
+    id: json['id'] as String,
+    behaviours: json['behaviours'] as Map<String, dynamic>,
+    equip: json['equip'] as String,
+    description: json['description'] as String,
+    cost: json['cost'] as int,
+    time: json['time'] as int,
+  );
+}
+
+Map<String, dynamic> _$ItemToJson(Item instance) => <String, dynamic>{
+      'name': instance.name,
+      'id': instance.id,
+      'behaviours': instance.behaviours,
+      'equip': instance.equip,
+      'description': instance.description,
+      'cost': instance.cost,
+      'time': instance.time,
     };
