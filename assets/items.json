@@ -37,10 +37,10 @@
       "name": "Wooden Shield",
       "equip": "shield",
       "changeHpCap": {
-        "value": 1,
+        "value": 10,
         "percentage": false
       },
-      "description": "Increases Hp Cap by 1.",
+      "description": "Increases Hp Cap by 10.",
       "cost": 0,
       "time": 0
     },
@@ -59,10 +59,10 @@
       "name": "Common Shirt",
       "equip": "body",
       "changeHpCap": {
-        "value": 10,
+        "value": 5,
         "percentage": false
       },
-      "description": "Increases Hp Cap by 10.",
+      "description": "Increases Hp Cap by 5.",
       "cost": 0,
       "time": 0
     },
@@ -91,11 +91,11 @@
     "luckyCharm": {
       "name": "Lucky Charm",
       "equip": null,
-      "changeLoot" : {
-        "value" : 100,
+      "changeLoot": {
+        "value": 100,
         "percentage": true
       },
-      "description": "Increases Loot by 100 % for 1 minute.",
+      "description": "Increases Gold from looting by 100 % for 1 minute.",
       "cost": 0,
       "time": 60
     },

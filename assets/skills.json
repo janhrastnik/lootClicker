@@ -1,53 +1,77 @@
 {
-  "strength" : {
-    "aggression" : {
-      "name" : "Heightened Aggression",
-      "description" : "Increases Attack by 1.",
-      "changeAttack" : {
-        "value" : 1,
+  "strength": {
+    "aggression": {
+      "name": "Heightened Aggression",
+      "description": "Increases Attack by 1.",
+      "changeAttack": {
+        "value": 1,
         "percentage": false
       }
     },
-    "accuracy" : {
-      "name" : "Increased Accuracy",
-      "description" : "Increases Critical Hit Chance by 2%",
-      "changeCriticalHitChance" : {
+    "accuracy": {
+      "name": "Increased Accuracy",
+      "description": "Increases Critical Hit Chance by 2%.",
+      "changeCriticalHitChance": {
         "value": 0.02
       }
+    },
+    "critDamage": {
+      "name": "Deadly Strikes",
+      "description": "Double the power of Critical Hits.",
+      "changeCriticalHitDamage": {
+        "value": 100,
+        "percentage": true
+      }
     }
   },
-  "endurance" : {
-    "thickSkin" : {
-      "name" : "Thick Skin",
-      "description" : "Increases Hp Cap by 10.",
-      "changeHpCap" : {
-        "value" : 10,
+  "endurance": {
+    "thickSkin": {
+      "name": "Thick Skin",
+      "description": "Increases Hp Cap by 30.",
+      "changeHpCap": {
+        "value": 30,
         "percentage": false
       }
     },
-    "agility" : {
-      "name" : "Agility",
-      "description" : "Increases Dodge Chance by 2%",
-      "changeDodgeChance" : {
-        "value" : 0.02
-      }
-    }
-  },
-  "wisdom" : {
-    "puzzleMastery" : {
-      "name" : "Puzzle Mastery",
-      "description" : "Increases puzzle solving (such as unlocking doors!) by 1.",
-      "changeIntelligence" : {
-        "value" : 1,
-        "percentage" : false
+    "agility": {
+      "name": "Agility",
+      "description": "Increases Dodge Chance by 2%",
+      "changeDodgeChance": {
+        "value": 0.02
       }
     },
-    "bookworm" : {
-      "name" : "Bookworm",
-      "description" : "Increases all xp gain by 5 %",
-      "changeExpGain" : {
-        "value" : 5,
-        "percentage" : true
+    "bloodSteal": {
+      "name": "Blood Steal",
+      "description": "Gain 5% Hp every time you defeat an enemy.",
+      "bloodSteal": {}
+    }
+  },
+  "wisdom": {
+    "puzzleMastery": {
+      "name": "Puzzle Mastery",
+      "description": "Increases puzzle solving (such as unlocking doors!) by 1.",
+      "changeIntelligence": {
+        "value": 1,
+        "percentage": false
+      }
+    },
+    "bookworm": {
+      "name": "Bookworm",
+      "description": "Increases all Xp gain by 5 %.",
+      "changeExpGain": {
+        "value": 5,
+        "percentage": true
+      }
+    },
+    "moneybag": {
+      "name": "Improved Looting",
+      "description": "Increases looting by 1 and gain 5% more gold from looting.",
+      "changeLooting": {
+        "value": 1
+      },
+      "changeLoot": {
+        "value": 5,
+        "percentage": true
       }
     }
   }

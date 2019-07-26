@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'main.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'classes.g.dart';
 
 class DungeonTile extends StatelessWidget {
   DungeonTile({Key key, @required this.event}) : super(key: key);
@@ -54,6 +57,7 @@ class DungeonEvent {
       'DungeonEvent { evenType: $eventType, length: $length, progress: $progress }';
 }
 
+@JsonSerializable()
 class Player {
   int gold;
   int hp;
@@ -67,13 +71,16 @@ class Player {
   int lootModifierRaw;
   int skillPoints;
   int criticalHitDamage;
+  @JsonKey(name: 'skill-progress')
   Map skillProgress;
   double expModifierPercentage;
   double lootModifierPercentage;
   double criticalHitChance;
   double dodgeChance;
   List inventory;
+  @JsonKey(name: 'equipped')
   Map equipped;
+  bool bloodSteal;
 
   Player({this.gold = 0,
     this.hp = 100,
@@ -92,9 +99,14 @@ class Player {
     this.dodgeChance = 0.01,
     this.inventory,
     this.equipped,
+    this.bloodSteal = false,
     this.skillPoints = 2,
     this.skillProgress
   });
+
+  factory Player.fromJson(Map<String, dynamic> json)  => _$PlayerFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PlayerToJson(this);
 
   void levelUp() {
     this.hpCap = (this.hpCap * 1.2).floor();
@@ -162,6 +174,9 @@ class Usable {
         case "changeCriticalHitChance":
           changeCriticalHitChance(equipped == true ? 0 - args["value"] : args["value"]);
           break;
+        case "changeCriticalHitDamage":
+          changeCriticalHitDamage(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          break;
         case "changeDodgeChance":
           changeDodgeChance(equipped == true ? 0 - args["value"] : args["value"]);
           break;
@@ -201,6 +216,10 @@ class Usable {
     }
   }
 
+  void changeLooting() {
+
+  }
+
   void changeLoot(n, percentage) {
     if (percentage) {
       player.lootModifierPercentage += (n/100);
@@ -215,6 +234,14 @@ class Usable {
 
   void changeCriticalHitChance(n) {
     player.criticalHitChance += n;
+  }
+
+  void changeCriticalHitDamage(n, percentage) {
+    if (percentage) {
+      player.criticalHitDamage = (player.criticalHitDamage * (1 + n/100)).floor();
+    } else {
+      player.criticalHitDamage += n;
+    }
   }
 
   void changeExpGain(n, percentage) {

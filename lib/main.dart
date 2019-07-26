@@ -8,6 +8,8 @@ import 'backdrop.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'classes.dart';
 import 'dart:async';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 enum FrontPanels { characterPage, shopPage, skillsPage }
 Player player = Player(
@@ -79,6 +81,39 @@ class MyAppState extends State<MyApp> {
     }
   }
 
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    String path = await _localPath;
+    return File('$path/player.json');
+  }
+
+  Future<File> saveProgress() async {
+    final file = await _localFile;
+    var jsonData = jsonEncode(player.toJson());
+    // Write the file
+    return file.writeAsString(jsonData);
+  }
+
+  Future readProgress() async {
+    try {
+      final file = await _localFile;
+      // Read the file
+      String contents = await file.readAsString();
+      if (jsonDecode(contents) != null) {
+        player = Player.fromJson(jsonDecode(contents));
+      }
+    } catch (e) {
+      print(e);
+      // If encountering an error, return 0
+      return 0;
+    }
+  }
+
   @override
   void initState() {
     _actionBloc = ActionBloc();
@@ -93,6 +128,8 @@ class MyAppState extends State<MyApp> {
         dungeonBloc: _dungeonBloc);
     _tapAnimationBloc = TapAnimationBloc();
     // get monsters, items from json files, add them to globals
+    readProgress();
+    Timer.periodic(Duration(seconds: 5), (Timer t) => saveProgress()); // save game every 15 seconds
     readData("assets/monsters.json").then((data) {
       data.forEach((key, value) {
         monsters[key] = Enemy(
@@ -987,7 +1024,7 @@ class SkillsScreenState extends State<SkillsScreen> {
         Expanded(
           child: Row(
             mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               SkillTree(treeName: "strength", showDescription: showDescription),
               SkillTree(treeName: "endurance", showDescription: showDescription),

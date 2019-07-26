@@ -26,10 +26,13 @@ dependencies:
   flutter_bloc: ^0.9.1
   scoped_model: ^1.0.1
   path_provider: ^1.1.0
+  json_annotation: ^2.4.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^1.0.0
+  json_serializable: ^3.0.0
 
 
 # For information on the generic Dart part of this file, see the

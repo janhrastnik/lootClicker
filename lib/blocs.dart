@@ -203,7 +203,7 @@ class ActionBloc extends Bloc<String, String> {
 }
 
 class GoldBloc extends Bloc<int, int> {
-  int get initialState => 0;
+  int get initialState => player.gold;
 
   @override
   Stream<int> mapEventToState(int gold) async* {
@@ -214,14 +214,12 @@ class GoldBloc extends Bloc<int, int> {
       goldAnimationController.reverse();
       player.gold += newGold;
       yield newGold;
-    } else {
-      yield player.gold;
     }
   }
 }
 
 class HeroHpBloc extends Bloc<int, double> {
-  double get initialState => 1.0;
+  double get initialState => player.hp / player.hpCap;
   final DungeonBloc dungeonBloc;
 
   HeroHpBloc({this.dungeonBloc});
@@ -253,7 +251,7 @@ class HeroHpBloc extends Bloc<int, double> {
 }
 
 class HeroExpBloc extends Bloc<int, double> {
-  double get initialState => 0.0;
+  double get initialState => player.exp / player.expCap;
   final HeroHpBloc heroHpBloc;
 
   HeroExpBloc({this.heroHpBloc});
