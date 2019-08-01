@@ -27,7 +27,7 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
     equipped: json['equipped'] as Map<String, dynamic>,
     bloodSteal: json['bloodSteal'] as bool,
     skillPoints: json['skillPoints'] as int,
-    skillProgress: json['skillProgress'] as Map<String, dynamic>,
+    skillProgress: json['skillProgress'] as List,
   );
 }
 

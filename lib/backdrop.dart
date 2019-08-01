@@ -215,10 +215,7 @@ class _BackdropState extends State<Backdrop>
                 ],
               ),
             ),
-            Container(
-              color: Colors.white,
-              child: widget.menuRow,
-            )
+            widget.menuRow
           ],
         ),
       );

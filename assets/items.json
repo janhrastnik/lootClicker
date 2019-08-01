@@ -99,8 +99,44 @@
       "cost": 0,
       "time": 60
     },
-    "ironAxe": {},
-    "ironDagger": {},
-    "ironSword": {}
+    "ironAxe": {
+      "name": "Iron Axe",
+      "equip": "weapon",
+      "changeAttack": {
+        "value": 4,
+        "percentage": false
+      },
+      "changeDodgeChance": {
+        "value": -0.05
+      },
+      "description": "Increases Atk by 4, but decreases Dodge Chance by 5 %.",
+      "cost": 400,
+      "time": 0
+    },
+    "ironDagger": {
+      "name": "Iron Dagger",
+      "equip": "weapon",
+      "changeAttack": {
+        "value": 2,
+        "percentage": false
+      },
+      "changeDodgeChance": {
+        "value": 0.05
+      },
+      "description": "Increases Atk by 2 and Dodge Chance by 5 %.",
+      "cost": 150,
+      "time": 0
+    },
+    "ironSword": {
+      "name": "Iron Sword",
+      "equip": "weapon",
+      "changeAttack": {
+        "value": 3,
+        "percentage": false
+      },
+      "description": "Increases Atk by 3.",
+      "cost": 300,
+      "time": 0
+    }
   }
 }

@@ -12,11 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 enum FrontPanels { characterPage, shopPage, skillsPage }
-Player player = Player(
-    inventory: [],
-    equipped: {"weapon": null, "shield": null, "helmet": null, "body": null},
-    skillProgress: {"strength": 0, "endurance": 0, "wisdom": 0}
-);
+Player player;
 bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
@@ -73,7 +69,55 @@ class MyAppState extends State<MyApp> {
     SystemChrome.setEnabledSystemUIOverlays([]);
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: "VT323"),
+      theme: ThemeData(
+          primarySwatch: Colors.blue,
+          fontFamily: "Boxy",
+          textTheme: TextTheme(
+            body1: TextStyle(
+              fontSize: 10.0,
+              color: Colors.black,
+              shadows: [
+                Shadow( // bottomLeft
+                    offset: Offset(-1.5, -1.5),
+                    color: Colors.white
+                ),
+                Shadow( // bottomRight
+                    offset: Offset(1.5, -1.5),
+                    color: Colors.white
+                ),
+                Shadow( // topRight
+                    offset: Offset(1.5, 1.5),
+                    color: Colors.white
+                ),
+                Shadow( // topLeft
+                    offset: Offset(-1.5, 1.5),
+                    color: Colors.white
+                ),
+            ]),
+            button: TextStyle(
+                fontSize: 11.0,
+                color: Colors.black,
+                shadows: [
+                  Shadow( // bottomLeft
+                      offset: Offset(-1.5, -1.5),
+                      color: Colors.white
+                  ),
+                  Shadow( // bottomRight
+                      offset: Offset(1.5, -1.5),
+                      color: Colors.white
+                  ),
+                  Shadow( // topRight
+                      offset: Offset(1.5, 1.5),
+                      color: Colors.white
+                  ),
+                  Shadow( // topLeft
+                      offset: Offset(-1.5, 1.5),
+                      color: Colors.white
+                  ),
+                ]
+            )
+          )
+      ),
       home: SplashPage(),
     );
   }
@@ -118,10 +162,18 @@ class SplashPageState extends State<SplashPage> {
     try {
       final file = await _localFile;
       // Read the file
-      String contents = await file.readAsString();
-      print(contents);
-      if (jsonDecode(contents) != null) {
-        return Player.fromJson(jsonDecode(contents));
+      String jsonString = await file.readAsString();
+      print(jsonString);
+      Map contents = jsonDecode(jsonString);
+      if (contents != null) {
+        Player tempPlayer = Player.fromJson(contents);
+        tempPlayer.equipped = {
+          "weapon": contents["equipped"]["weapon"] != null ? Item.fromJson(contents["equipped"]["weapon"]): null,
+          "shield": contents["equipped"]["shield"] != null ? Item.fromJson(contents["equipped"]["shield"]) : null,
+          "helmet": contents["equipped"]["helmet"] != null ? Item.fromJson(contents["equipped"]["helmet"]) : null,
+          "body": contents["equipped"]["body"] != null ? Item.fromJson(contents["equipped"]["body"]): null
+        };
+        return tempPlayer;
       }
     } catch (e) {
       print(e);
@@ -178,7 +230,7 @@ class SplashPageState extends State<SplashPage> {
         player = Player(
             inventory: [],
             equipped: {"weapon": null, "shield": null, "helmet": null, "body": null},
-            skillProgress: {"strength": 0, "endurance": 0, "wisdom": 0}
+            skillProgress: [0, 0, 0]
         );
       }
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => BlocPage()));
@@ -256,16 +308,18 @@ class Panels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<FrontPanelModel>(
-      builder: (context, _, model) => Backdrop(
-            menuRow: MenuRow(
-              frontPanelOpen: frontPanelVisible,
-            ),
-            frontLayer: model.activePanel,
-            backLayer: DungeonList(),
-            panelVisible: frontPanelVisible,
-            frontPanelOpenHeight: 20.0,
-            frontHeaderHeight: 0.0,
+      builder: (context, _, model) => Scaffold(
+        body: Backdrop(
+          menuRow: MenuRow(
+            frontPanelOpen: frontPanelVisible,
           ),
+          frontLayer: model.activePanel,
+          backLayer: DungeonList(),
+          panelVisible: frontPanelVisible,
+          frontPanelOpenHeight: 20.0,
+          frontHeaderHeight: 0.0,
+        ),
+      ),
     );
   }
 }
@@ -318,16 +372,19 @@ class DungeonListState extends State<DungeonList>
         AnimationController(vsync: this, duration: Duration(seconds: 3));
     final deathAnimation =
         Tween(begin: 0.0, end: 1.0).animate(deathAnimationController);
-    return Scaffold(
-      body: GestureDetector(
+    return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          if (!isScrolling && dungeonTiles[1].event.eventType != "fight") {
+          if (!isScrolling &&
+              dungeonTiles[1].event.eventType != "fight" &&
+              dungeonTiles[1].event.eventType != "merchant") {
             _clickerBloc.dispatch(dungeonTiles);
           }
         },
         onTapUp: (TapUpDetails details) {
-          if (!isScrolling && dungeonTiles[1].event.eventType != "fight") {
+          if (!isScrolling &&
+              dungeonTiles[1].event.eventType != "fight"&&
+              dungeonTiles[1].event.eventType != "merchant") {
             tapAnimationController.reset();
             List<dynamic> data = _onTapUp(details);
             dynamic event = dungeonTiles[1].event.eventType;
@@ -338,80 +395,107 @@ class DungeonListState extends State<DungeonList>
         child: Stack(
           children: <Widget>[
             Column(
+              mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                BlocBuilder(
-                    bloc: _goldBloc,
-                    builder: (BuildContext context, int newGold) {
-                      return Column(
-                        children: <Widget>[
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                Flexible(
+                  flex: 1,
+                    child: Image(
+                      width: double.infinity,
+                      height: double.infinity,
+                      repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundbrick.png"),
+                    )
+                ),
+                Flexible(
+                    flex: 2,
+                    child: Image(
+                      width: double.infinity,
+                      height: double.infinity,
+                      repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundbrick.png"),
+                    )
+                )
+              ],
+            ),
+            Column(
+              children: <Widget>[
+                Stack(
+                  children: <Widget>[
+                    Column(children: <Widget>[
+                      BlocBuilder(
+                          bloc: _goldBloc,
+                          builder: (BuildContext context, int newGold) {
+                            return Column(
                               children: <Widget>[
-                                Text("${player.gold}"),
-                                Image(
-                                  image: AssetImage("assets/coin.gif"),
+                                Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text("${player.gold}"),
+                                      Image(
+                                        image: AssetImage("assets/coin.gif"),
+                                      )
+                                    ]),
+                                FadeTransition(
+                                  opacity: goldAnimation,
+                                  child: Text(
+                                    "+ " + newGold.toString(),
+                                    style: TextStyle(color: Colors.amber),
+                                  ),
                                 )
-                              ]),
-                          FadeTransition(
-                            opacity: goldAnimation,
-                            child: Text(
-                              "+ " + newGold.toString(),
-                              style: TextStyle(color: Colors.amber),
-                            ),
-                          )
-                        ],
-                      );
-                    }),
-                BlocBuilder(
-                    bloc: _heroHpBloc,
-                    builder: (BuildContext context, double value) {
-                      print("VALUE IS " + value.toString());
-                      return Column(
-                        children: <Widget>[
-                          Stack(
-                            alignment: Alignment.center,
-                            children: <Widget>[
-                              Container(
-                                width: 300.0,
-                                height: 16.0,
-                                child: LinearProgressIndicator(
-                                  value: value,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.red),
-                                  backgroundColor:
-                                      Color.fromRGBO(230, 230, 230, 1.0),
-                                ),
-                              ),
-                              Text("${player.hp} / ${player.hpCap} HP")
-                            ],
-                          )
-                        ],
-                      );
-                    }),
-                BlocBuilder(
-                    bloc: _heroExpBloc,
-                    builder: (BuildContext context, double value) {
-                      return Column(
-                        children: <Widget>[
-                          Stack(
-                            alignment: Alignment.center,
-                            children: <Widget>[
-                              Container(
-                                width: 300.0,
-                                height: 16.0,
-                                child: LinearProgressIndicator(
-                                  value: value,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.green),
-                                  backgroundColor: Colors.lightGreenAccent,
-                                ),
-                              ),
-                              Text("${player.exp} / ${player.expCap} EXP")
-                            ],
-                          )
-                        ],
-                      );
-                    }),
+                              ],
+                            );
+                          }),
+                      BlocBuilder(
+                          bloc: _heroHpBloc,
+                          builder: (BuildContext context, double value) {
+                            print("VALUE IS " + value.toString());
+                            return Column(
+                              children: <Widget>[
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: <Widget>[
+                                    Container(
+                                      width: 300.0,
+                                      height: 16.0,
+                                      child: LinearProgressIndicator(
+                                        value: value,
+                                        valueColor:
+                                        AlwaysStoppedAnimation<Color>(Colors.red),
+                                        backgroundColor:
+                                        Color.fromRGBO(230, 230, 230, 1.0),
+                                      ),
+                                    ),
+                                    Text("${player.hp} / ${player.hpCap} HP")
+                                  ],
+                                )
+                              ],
+                            );
+                          }),
+                      BlocBuilder(
+                          bloc: _heroExpBloc,
+                          builder: (BuildContext context, double value) {
+                            return Column(
+                              children: <Widget>[
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: <Widget>[
+                                    Container(
+                                      width: 300.0,
+                                      height: 16.0,
+                                      child: LinearProgressIndicator(
+                                        value: value,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                            Colors.green),
+                                        backgroundColor: Colors.lightGreenAccent,
+                                      ),
+                                    ),
+                                    Text("${player.exp} / ${player.expCap} EXP")
+                                  ],
+                                )
+                              ],
+                            );
+                          }),
+                    ],)
+                  ],
+                ),
                 Expanded(
                   child: Column(
                     children: <Widget>[
@@ -419,7 +503,7 @@ class DungeonListState extends State<DungeonList>
                         flex: 2,
                         child: Column(
                           children: <Widget>[
-                            Flexible(
+                            Flexible( // dungeon tile listview
                               flex: 3,
                               child: BlocBuilder(
                                 bloc: _dungeonBloc,
@@ -522,20 +606,22 @@ class DungeonListState extends State<DungeonList>
                                       MainAxisAlignment.spaceEvenly,
                                   children: <Widget>[
                                     Container(
-                                      width: 80.0,
-                                      height: 80.0,
+                                      width: 95.0,
+                                      height: 95.0,
                                       decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                          color: Colors.white,
-                                          boxShadow: [
-                                            BoxShadow(
-                                                color: Colors.redAccent,
-                                                blurRadius: 10.0,
-                                                spreadRadius: 1.0)
-                                          ]),
+                                        color: Colors.lightGreenAccent
+                                      ),
                                       child: MaterialButton(
-                                        child: Text("Attack"),
+                                        child: Center(child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Image(image: AssetImage("assets/attack.png"),),
+                                            Padding(
+                                              padding: const EdgeInsets.all(4.0),
+                                              child: Text("Attack"),
+                                            )
+                                          ],
+                                        )),
                                         onPressed: () {
                                           if (!isScrolling) {
                                             _clickerBloc.dispatch(dungeonTiles);
@@ -543,14 +629,52 @@ class DungeonListState extends State<DungeonList>
                                         },
                                       ),
                                     ),
-                                    MaterialButton(
-                                      child: Text("Flee"),
-                                      onPressed: () {
-                                        scrollDungeon(_dungeonBloc,
-                                            _clickerBloc); // updates text
-                                      },
-                                    )
+                                    Container(
+                                      width: 95.0,
+                                      height: 95.0,
+                                      decoration: BoxDecoration(
+                                          color: Colors.lightGreenAccent
+                                      ),
+                                      child: MaterialButton(
+                                        child: Center(child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Image(image: AssetImage("assets/flee.png"),),
+                                            Padding(
+                                              padding: const EdgeInsets.all(4.0),
+                                              child: Text("Flee"),
+                                            )
+                                          ],
+                                        )),
+                                        onPressed: () {
+                                          scrollDungeon(_dungeonBloc,
+                                              _clickerBloc); // updates text
+                                        },
+                                      ),
+                                    ),
                                   ],
+                                );
+                              } else if (event == "merchant") {
+                                return Card(
+                                  child: Column(
+                                    children: <Widget>[
+                                      Text("The merchant offers you a trade."),
+                                      Text("trade_info"),
+                                      Row(
+                                        children: <Widget>[
+                                          FlatButton(
+                                            child: Text("Buy"),
+                                          ),
+                                          FlatButton(
+                                            child: Text("Leave"),
+                                            onPressed: () {
+                                              _clickerBloc.dispatch(dungeonTiles);
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 );
                               } else {
                                 return Container();
@@ -609,8 +733,7 @@ class DungeonListState extends State<DungeonList>
             )
           ],
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -666,74 +789,88 @@ class MenuRowState extends State<MenuRow> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        ScopedModelDescendant<FrontPanelModel>(
-            rebuildOnChange: false,
-            builder: (context, _, model) => MaterialButton(
-                  color: model._activePanel == FrontPanels.characterPage &&
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: ScopedModelDescendant<FrontPanelModel>(
+                    rebuildOnChange: false,
+                    builder: (context, _, model) => MaterialButton(
+                      height: 50.0,
+                      color: model._activePanel == FrontPanels.characterPage &&
                           widget.frontPanelOpen.value
-                      ? Colors.lightGreenAccent
-                      : Colors.white,
-                  child: Text("Character"),
-                  onPressed: () {
-                    if (widget.frontPanelOpen.value == true &&
-                        model._activePanel == FrontPanels.characterPage) {
-                      toggleBackdropPanelVisibility(
-                          widget.frontPanelOpen.value);
-                      isMenu = false;
-                    } else {
-                      isMenu = true;
-                      model.activate(FrontPanels.characterPage);
-                      widget.frontPanelOpen.value = true;
-                    }
-                  },
-                )),
-        ScopedModelDescendant<FrontPanelModel>(
-            rebuildOnChange: false,
-            builder: (context, _, model) => MaterialButton(
-                  color: model._activePanel == FrontPanels.shopPage &&
+                          ? Colors.blueGrey
+                          : Colors.white,
+                      child: Text("Character"),
+                      onPressed: () {
+                        if (widget.frontPanelOpen.value == true &&
+                            model._activePanel == FrontPanels.characterPage) {
+                          toggleBackdropPanelVisibility(
+                              widget.frontPanelOpen.value);
+                          isMenu = false;
+                        } else {
+                          isMenu = true;
+                          model.activate(FrontPanels.characterPage);
+                          widget.frontPanelOpen.value = true;
+                        }
+                      },
+                    )),
+              ),
+              Expanded(
+                child: ScopedModelDescendant<FrontPanelModel>(
+                  rebuildOnChange: false,
+                  builder: (context, _, model) => MaterialButton(
+                    height: 50.0,
+                    color: model._activePanel == FrontPanels.shopPage &&
+                        widget.frontPanelOpen.value
+                        ? Colors.blueGrey
+                        : Colors.white,
+                    child: Text("Shop"),
+                    onPressed: () {
+                      if (widget.frontPanelOpen.value == true &&
+                          model._activePanel == FrontPanels.shopPage) {
+                        toggleBackdropPanelVisibility(
+                            widget.frontPanelOpen.value);
+                        isMenu = false;
+                      } else {
+                        isMenu = true;
+                        model.activate(FrontPanels.shopPage);
+                        widget.frontPanelOpen.value = true;
+                      }
+                    },
+                  )),
+              ),
+              Expanded(
+                child: ScopedModelDescendant<FrontPanelModel>(
+                    rebuildOnChange: false,
+                    builder: (context, _, model) => MaterialButton(
+                      height: 50.0,
+                      color: model._activePanel == FrontPanels.skillsPage &&
                           widget.frontPanelOpen.value
-                      ? Colors.lightGreenAccent
-                      : Colors.white,
-                  child: Text("Shop"),
-                  onPressed: () {
-                    if (widget.frontPanelOpen.value == true &&
-                        model._activePanel == FrontPanels.shopPage) {
-                      toggleBackdropPanelVisibility(
-                          widget.frontPanelOpen.value);
-                      isMenu = false;
-                    } else {
-                      isMenu = true;
-                      model.activate(FrontPanels.shopPage);
-                      widget.frontPanelOpen.value = true;
-                    }
-                  },
-                )),
-        ScopedModelDescendant<FrontPanelModel>(
-            rebuildOnChange: false,
-            builder: (context, _, model) => MaterialButton(
-                  color: model._activePanel == FrontPanels.skillsPage &&
-                          widget.frontPanelOpen.value
-                      ? Colors.lightGreenAccent
-                      : Colors.white,
-                  child: Text("Skills"),
-                  onPressed: () {
-                    if (widget.frontPanelOpen.value == true &&
-                        model._activePanel == FrontPanels.skillsPage) {
-                      toggleBackdropPanelVisibility(
-                          widget.frontPanelOpen.value);
-                      isMenu = false;
-                    } else {
-                      isMenu = true;
-                      model.activate(FrontPanels.skillsPage);
-                      widget.frontPanelOpen.value = true;
-                    }
-                  },
-                ))
-      ],
-    );
+                          ? Colors.blueGrey
+                          : Colors.white,
+                      child: Text("Skills"),
+                      onPressed: () {
+                        if (widget.frontPanelOpen.value == true &&
+                            model._activePanel == FrontPanels.skillsPage) {
+                          toggleBackdropPanelVisibility(
+                              widget.frontPanelOpen.value);
+                          isMenu = false;
+                        } else {
+                          isMenu = true;
+                          model.activate(FrontPanels.skillsPage);
+                          widget.frontPanelOpen.value = true;
+                        }
+                      },
+                    )),
+              )
+            ],
+          ),
+        ],
+      )
+    ;
   }
 }
 
@@ -1023,15 +1160,15 @@ class SkillsScreen extends StatefulWidget {
 
 class SkillsScreenState extends State<SkillsScreen> {
 
-  void useSkill(Skill skill, String treeName) {
+  void useSkill(Skill skill, int treeIndex) {
     setState(() {
-      player.skillProgress[treeName]++;
+      player.skillProgress[treeIndex]++;
       skill.use(
           BlocProvider.of<HeroHpBloc>(context),
           BlocProvider.of<HeroExpBloc>(context),
           BlocProvider.of<GoldBloc>(context),
           BlocProvider.of<ClickerBloc>(context),
-          false,
+          null,
           null,
           skill.behaviours,
           null
@@ -1039,7 +1176,7 @@ class SkillsScreenState extends State<SkillsScreen> {
     });
   }
 
-  void showDescription(Skill skill, String treeName, int index) {
+  void showDescription(Skill skill, int treeIndex, int index) {
     AlertDialog description = AlertDialog(
       title: Text(skill.name),
       content: Column(
@@ -1047,12 +1184,12 @@ class SkillsScreenState extends State<SkillsScreen> {
         children: <Widget>[
           Image(image: AssetImage("assets/skills/${skill.id}.png"),),
           Text(skill.description),
-          player.skillProgress[treeName] == index ? MaterialButton(
+          player.skillProgress[treeIndex] == index ? MaterialButton(
             color: Colors.blueAccent,
             child: Text("Unlock Skill"),
             onPressed: () {
               if (player.skillPoints > 0) {
-                useSkill(skill, treeName);
+                useSkill(skill, treeIndex);
                 player.skillPoints--;
                 Navigator.pop(context);
               }
@@ -1076,9 +1213,9 @@ class SkillsScreenState extends State<SkillsScreen> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              SkillTree(treeName: "strength", showDescription: showDescription),
-              SkillTree(treeName: "endurance", showDescription: showDescription),
-              SkillTree(treeName: "wisdom", showDescription: showDescription)
+              SkillTree(treeIndex: 0, treeName: "strength", showDescription: showDescription),
+              SkillTree(treeIndex: 1, treeName: "endurance", showDescription: showDescription),
+              SkillTree(treeIndex: 2, treeName: "wisdom", showDescription: showDescription)
             ],
           ),
         )
@@ -1088,10 +1225,11 @@ class SkillsScreenState extends State<SkillsScreen> {
 }
 
 class SkillTree extends StatelessWidget {
+  int treeIndex;
   String treeName;
   dynamic showDescription;
 
-  SkillTree({this.treeName, this.showDescription});
+  SkillTree({this.treeIndex, this.treeName, this.showDescription});
 
   @override
   Widget build(BuildContext context) {
@@ -1113,12 +1251,12 @@ class SkillTree extends StatelessWidget {
                 return Center(
                     child: GestureDetector(
                       onTap: () {
-                        showDescription(currSkill, treeName, index);
+                        showDescription(currSkill, treeIndex, index);
                       },
                       child: Container(
                         width: 60.0,
                         height: 60.0,
-                        foregroundDecoration: player.skillProgress[treeName] <= index ? BoxDecoration(
+                        foregroundDecoration: player.skillProgress[treeIndex] <= index ? BoxDecoration(
                           color: Colors.grey,
                           backgroundBlendMode: BlendMode.saturation
                         ) : null,

@@ -3,25 +3,30 @@
     "hp": 10,
     "expValue": 10,
     "attack": 1,
-    "loot": "atkPotion"
+    "loot": null
   },
   "skeleton": {
     "hp": 20,
     "expValue": 15,
     "attack": 1,
-    "loot": "atkPotion"
+    "loot": null
   },
   "wolf": {
     "hp": 15,
     "expValue": 15,
     "attack": 2,
-    "loot": "woodSword"
+    "loot": null
   },
   "ghost": {
     "hp": 25,
     "expValue": 20,
     "attack": 2,
-    "loot": "woodSword"
+    "loot": null
   },
-  "slime": {}
+  "slime": {
+    "hp": 5,
+    "expValue": 5,
+    "attack": 1,
+    "loot": null
+  }
 }

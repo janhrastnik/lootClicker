@@ -71,13 +71,13 @@ class Player {
   int lootModifierRaw;
   int skillPoints;
   int criticalHitDamage;
-  Map skillProgress;
+  List skillProgress;
   double expModifierPercentage;
   double lootModifierPercentage;
   double criticalHitChance;
   double dodgeChance;
   List inventory;
-  Map equipped;
+  Map<dynamic, dynamic> equipped;
   bool bloodSteal;
 
   Player({this.gold = 0,
@@ -142,8 +142,9 @@ class Usable {
     print(behaviours);
     if (equipped != null) {
       if (equipped == false) {// if item isn't equipped then equip it
-        print("yes");
         player.equipped[equip] = items[id];
+        print("player.equipped is " + player.equipped.toString());
+        print("ITEMS ID IS " + items[id].toString());
       } else { // if item is equipped then unequip it
         player.equipped[equip] = null;
       }
@@ -158,7 +159,7 @@ class Usable {
           changeAttack(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
           break;
         case "changeHpCap":
-          changeHpCap(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          changeHpCap(equipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
           break;
         case "changeLoot":
           changeLoot(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
@@ -190,11 +191,13 @@ class Usable {
     }
   }
 
-  void changeHpCap(n, percentage) {
+  void changeHpCap(n, percentage, hpBloc) {
     if (percentage) {
       player.hpCap = (player.hpCap * (1 + n/100)).floor();
+      hpBloc.dispatch(0); // refreshes hp bar
     } else {
       player.hpCap += n;
+      hpBloc.dispatch(0);
     }
   }
 
