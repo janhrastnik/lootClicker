@@ -410,7 +410,7 @@ class DungeonListState extends State<DungeonList>
                     child: Image(
                       width: double.infinity,
                       height: double.infinity,
-                      repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundbrick.png"),
+                      repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundground.png"),
                     )
                 )
               ],
@@ -655,27 +655,7 @@ class DungeonListState extends State<DungeonList>
                                   ],
                                 );
                               } else if (event == "merchant") {
-                                return Card(
-                                  child: Column(
-                                    children: <Widget>[
-                                      Text("The merchant offers you a trade."),
-                                      Text("trade_info"),
-                                      Row(
-                                        children: <Widget>[
-                                          FlatButton(
-                                            child: Text("Buy"),
-                                          ),
-                                          FlatButton(
-                                            child: Text("Leave"),
-                                            onPressed: () {
-                                              _clickerBloc.dispatch(dungeonTiles);
-                                            },
-                                          )
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                );
+                                return Merchant(clickerBloc: BlocProvider.of<ClickerBloc>(context),);
                               } else {
                                 return Container();
                               }
@@ -979,7 +959,13 @@ class CharacterScreenState extends State<CharacterScreen> {
 
   @override
   Widget build(BuildContext context) => Container(
-      color: Colors.teal,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          topRight: Radius.circular(16.0),
+        ),
+        image: DecorationImage(image: AssetImage("assets/uibackground.png"), repeat: ImageRepeat.repeat)
+      ),
       child: Column(
         children: <Widget>[
           Row(
@@ -1122,33 +1108,42 @@ class ShopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[Text("Shop")],
-        ),
-        ListView.builder(
-            shrinkWrap: true,
-            itemCount: shopItems.length,
-            itemBuilder: (BuildContext context, int index) => ListTile(
-              leading: Image(image: AssetImage("assets/${shopItems[index].id}.png"),),
-              title: Text(shopItems[index].name),
-              trailing: MaterialButton(
-                color: Colors.yellowAccent,
-                onPressed: () {
-                  if (player.gold >= shopItems[index].cost) {
-                    player.gold -= shopItems[index].cost;
-                    player.inventory.add(shopItems[index].id);
-                    print("PLAYER INVENTORY IS" +
-                        player.inventory.toString());
-                    _goldBloc.dispatch(0);
-                  }
-                },
-                child: Text("${shopItems[index].cost} Gold"),
-              ),
-            ))
-      ],
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16.0),
+            topRight: Radius.circular(16.0),
+          ),
+          image: DecorationImage(image: AssetImage("assets/uibackground.png"), repeat: ImageRepeat.repeat)
+      ),
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[Text("Shop")],
+          ),
+          ListView.builder(
+              shrinkWrap: true,
+              itemCount: shopItems.length,
+              itemBuilder: (BuildContext context, int index) => ListTile(
+                leading: Image(image: AssetImage("assets/${shopItems[index].id}.png"),),
+                title: Text(shopItems[index].name),
+                trailing: MaterialButton(
+                  color: Colors.yellowAccent,
+                  onPressed: () {
+                    if (player.gold >= shopItems[index].cost) {
+                      player.gold -= shopItems[index].cost;
+                      player.inventory.add(shopItems[index].id);
+                      print("PLAYER INVENTORY IS" +
+                          player.inventory.toString());
+                      _goldBloc.dispatch(0);
+                    }
+                  },
+                  child: Text("${shopItems[index].cost} Gold"),
+                ),
+              ))
+        ],
+      ),
     );
   }
 }
@@ -1205,21 +1200,30 @@ class SkillsScreenState extends State<SkillsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Text("Skill Points: ${player.skillPoints}"),
-        Expanded(
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              SkillTree(treeIndex: 0, treeName: "strength", showDescription: showDescription),
-              SkillTree(treeIndex: 1, treeName: "endurance", showDescription: showDescription),
-              SkillTree(treeIndex: 2, treeName: "wisdom", showDescription: showDescription)
-            ],
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16.0),
+            topRight: Radius.circular(16.0),
           ),
-        )
-      ],
+          image: DecorationImage(image: AssetImage("assets/uibackground.png"), repeat: ImageRepeat.repeat)
+      ),
+      child: Column(
+        children: <Widget>[
+          Text("Skill Points: ${player.skillPoints}"),
+          Expanded(
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                SkillTree(treeIndex: 0, treeName: "strength", showDescription: showDescription),
+                SkillTree(treeIndex: 1, treeName: "endurance", showDescription: showDescription),
+                SkillTree(treeIndex: 2, treeName: "wisdom", showDescription: showDescription)
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
@@ -1241,11 +1245,17 @@ class SkillTree extends StatelessWidget {
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: skills[treeName].length,
-              separatorBuilder: (BuildContext context, int index) =>
-                  CustomPaint(
-                    size: Size(MediaQuery.of(context).size.width / 2, 20.0),
-                    painter: Line(width: MediaQuery.of(context).size.width / 2),
-                  ),
+              separatorBuilder: (BuildContext context, int index) {
+                print("YO");
+                return Column(
+                  children: <Widget>[
+                    CustomPaint(
+                      size: Size(MediaQuery.of(context).size.width / 2, 20.0),
+                      painter: Line(width: MediaQuery.of(context).size.width / 6),
+                    ),
+                  ],
+                );
+              },
               itemBuilder: (BuildContext context, int index) {
                 Skill currSkill = skills[treeName][index];
                 return Center(
@@ -1338,6 +1348,38 @@ class EffectsListState extends State<EffectsList> {
     return ListView(
       shrinkWrap: true,
       children: widget.effectsList,
+    );
+  }
+}
+
+class Merchant extends StatelessWidget {
+  ClickerBloc clickerBloc;
+  List merchantItems = [];
+
+  Merchant({Key key, ClickerBloc clickerBloc}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        children: <Widget>[
+          Text("The merchant offers you a trade."),
+          Text("trade_info"),
+          Row(
+            children: <Widget>[
+              FlatButton(
+                child: Text("Buy"),
+              ),
+              FlatButton(
+                child: Text("Leave"),
+                onPressed: () {
+                  clickerBloc.dispatch(dungeonTiles);
+                },
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
