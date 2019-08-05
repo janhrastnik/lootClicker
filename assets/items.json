@@ -22,6 +22,39 @@
       "cost": 0,
       "time": 0
     },
+    "apple": {
+      "name": "Apple",
+      "equip": null,
+      "changeHp" : {
+        "value": 5,
+        "percentage": false
+      },
+      "description": "Increases Hp by 40 points.",
+      "cost": 30,
+      "time": 0
+    },
+    "tomato": {
+      "name": "Tomato",
+      "equip": null,
+      "changeHpCap" : {
+        "value": 40,
+        "percentage": false
+      },
+      "description": "Increases Hp Cap by 40 points for 5 minutes.",
+      "cost": 30,
+      "time": 300
+    },
+    "meat": {
+      "name": "Tender Meat",
+      "equip": null,
+      "changeHp" : {
+        "value": 5,
+        "percentage": false
+      },
+      "description": "Increases Hp and Hp Cap by 40 points for 5 minutes.",
+      "cost": 50,
+      "time": 0
+    },
     "woodSword": {
       "name": "Wooden Sword",
       "equip": "weapon",

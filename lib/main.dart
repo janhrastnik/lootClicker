@@ -10,6 +10,7 @@ import 'classes.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'dart:math';
 
 enum FrontPanels { characterPage, shopPage, skillsPage }
 Player player;
@@ -64,6 +65,36 @@ class MyAppState extends State<MyApp> {
     super.initState();
   }
 
+  TextStyle textStyle(fontSize) => TextStyle(
+  fontSize: fontSize,
+  color: Colors.black,
+  shadows: [
+  Shadow( // bottomLeft
+    offset: Offset(-1.5, -1.5),
+    color: Colors.white
+  ),
+  Shadow( // bottomRight
+    offset: Offset(0.0, -1.5),
+    color: Colors.white
+  ),
+  Shadow( // topRight
+    offset: Offset(1.5, 1.5),
+    color: Colors.white
+  ),
+  Shadow(// topLeft
+    offset: Offset(-1.5, 0.0),
+    color: Colors.white
+  ),
+  Shadow(// topLeft
+      offset: Offset(0.0, 1.5),
+      color: Colors.white
+  ),
+  Shadow(// topLeft
+      offset: Offset(1.5, 0.0),
+      color: Colors.white
+  ),
+  ]);
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -73,49 +104,9 @@ class MyAppState extends State<MyApp> {
           primarySwatch: Colors.blue,
           fontFamily: "Boxy",
           textTheme: TextTheme(
-            body1: TextStyle(
-              fontSize: 10.0,
-              color: Colors.black,
-              shadows: [
-                Shadow( // bottomLeft
-                    offset: Offset(-1.5, -1.5),
-                    color: Colors.white
-                ),
-                Shadow( // bottomRight
-                    offset: Offset(1.5, -1.5),
-                    color: Colors.white
-                ),
-                Shadow( // topRight
-                    offset: Offset(1.5, 1.5),
-                    color: Colors.white
-                ),
-                Shadow( // topLeft
-                    offset: Offset(-1.5, 1.5),
-                    color: Colors.white
-                ),
-            ]),
-            button: TextStyle(
-                fontSize: 11.0,
-                color: Colors.black,
-                shadows: [
-                  Shadow( // bottomLeft
-                      offset: Offset(-1.5, -1.5),
-                      color: Colors.white
-                  ),
-                  Shadow( // bottomRight
-                      offset: Offset(1.5, -1.5),
-                      color: Colors.white
-                  ),
-                  Shadow( // topRight
-                      offset: Offset(1.5, 1.5),
-                      color: Colors.white
-                  ),
-                  Shadow( // topLeft
-                      offset: Offset(-1.5, 1.5),
-                      color: Colors.white
-                  ),
-                ]
-            )
+            body1: textStyle(12.0),
+            button: textStyle(11.0),
+            subhead: textStyle(11.0),
           )
       ),
       home: SplashPage(),
@@ -410,7 +401,7 @@ class DungeonListState extends State<DungeonList>
                     child: Image(
                       width: double.infinity,
                       height: double.infinity,
-                      repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundground.png"),
+                      repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundbrick.png"),
                     )
                 )
               ],
@@ -436,7 +427,7 @@ class DungeonListState extends State<DungeonList>
                                 FadeTransition(
                                   opacity: goldAnimation,
                                   child: Text(
-                                    "+ " + newGold.toString(),
+                                    "${newGold > -1 ? "+" : ""} " + newGold.toString(),
                                     style: TextStyle(color: Colors.amber),
                                   ),
                                 )
@@ -447,50 +438,54 @@ class DungeonListState extends State<DungeonList>
                           bloc: _heroHpBloc,
                           builder: (BuildContext context, double value) {
                             print("VALUE IS " + value.toString());
-                            return Column(
-                              children: <Widget>[
-                                Stack(
-                                  alignment: Alignment.center,
-                                  children: <Widget>[
-                                    Container(
-                                      width: 300.0,
-                                      height: 16.0,
-                                      child: LinearProgressIndicator(
-                                        value: value,
-                                        valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.red),
-                                        backgroundColor:
-                                        Color.fromRGBO(230, 230, 230, 1.0),
-                                      ),
+                            return Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    width: MediaQuery.of(context).size.width / 1.10,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black)
                                     ),
-                                    Text("${player.hp} / ${player.hpCap} HP")
-                                  ],
-                                )
-                              ],
+                                    height: 20.0,
+                                    child: LinearProgressIndicator(
+                                      value: value,
+                                      valueColor:
+                                      AlwaysStoppedAnimation<Color>(Colors.red),
+                                      backgroundColor:
+                                      Color.fromRGBO(230, 230, 230, 1.0),
+                                    ),
+                                  ),
+                                  Text("${player.hp} / ${player.hpCap} HP")
+                                ],
+                              ),
                             );
                           }),
                       BlocBuilder(
                           bloc: _heroExpBloc,
                           builder: (BuildContext context, double value) {
-                            return Column(
-                              children: <Widget>[
-                                Stack(
-                                  alignment: Alignment.center,
-                                  children: <Widget>[
-                                    Container(
-                                      width: 300.0,
-                                      height: 16.0,
-                                      child: LinearProgressIndicator(
-                                        value: value,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                            Colors.green),
-                                        backgroundColor: Colors.lightGreenAccent,
-                                      ),
+                            return Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    width: MediaQuery.of(context).size.width / 1.10,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.black)
                                     ),
-                                    Text("${player.exp} / ${player.expCap} EXP")
-                                  ],
-                                )
-                              ],
+                                    height: 20.0,
+                                    child: LinearProgressIndicator(
+                                      value: value,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.green),
+                                      backgroundColor: Colors.lightGreenAccent,
+                                    ),
+                                  ),
+                                  Text("${player.exp} / ${player.expCap} EXP")
+                                ],
+                              ),
                             );
                           }),
                     ],)
@@ -551,7 +546,7 @@ class DungeonListState extends State<DungeonList>
                                     }
                                     if (dungeonTiles[1].event.eventType ==
                                         "merchant") {
-                                      eventText = "placeholder";
+                                      eventText = "The merchant offers you a trade.";
                                     }
                                     if (isDead) {
                                       progress = 1.0;
@@ -571,7 +566,7 @@ class DungeonListState extends State<DungeonList>
                                               decoration: BoxDecoration(
                                                   border: Border.all(
                                                       color: Colors.black54)),
-                                              width: 250.0,
+                                              width: MediaQuery.of(context).size.width / 1.10,
                                               height: 30.0,
                                               child: LinearProgressIndicator(
                                                 value: progress,
@@ -609,13 +604,21 @@ class DungeonListState extends State<DungeonList>
                                       width: 95.0,
                                       height: 95.0,
                                       decoration: BoxDecoration(
-                                        color: Colors.lightGreenAccent
+                                        borderRadius: BorderRadius.circular(12.0),
+                                        color: Colors.white
                                       ),
                                       child: MaterialButton(
                                         child: Center(child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
-                                            Image(image: AssetImage("assets/attack.png"),),
+                                            Container(
+                                              width: 64.0,
+                                              height: 64.0,
+                                              child: FittedBox(
+                                                fit: BoxFit.fill,
+                                                child: Image(image: AssetImage("assets/attack.png")),
+                                              ),
+                                            ),
                                             Padding(
                                               padding: const EdgeInsets.all(4.0),
                                               child: Text("Attack"),
@@ -633,13 +636,21 @@ class DungeonListState extends State<DungeonList>
                                       width: 95.0,
                                       height: 95.0,
                                       decoration: BoxDecoration(
-                                          color: Colors.lightGreenAccent
+                                          borderRadius: BorderRadius.circular(12.0),
+                                          color: Colors.white
                                       ),
                                       child: MaterialButton(
                                         child: Center(child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
-                                            Image(image: AssetImage("assets/flee.png"),),
+                                            Container(
+                                              width: 64.0,
+                                              height: 64.0,
+                                              child: FittedBox(
+                                                fit: BoxFit.fill,
+                                                child: Image(image: AssetImage("assets/flee.png")),
+                                              ),
+                                            ),
                                             Padding(
                                               padding: const EdgeInsets.all(4.0),
                                               child: Text("Flee"),
@@ -655,7 +666,7 @@ class DungeonListState extends State<DungeonList>
                                   ],
                                 );
                               } else if (event == "merchant") {
-                                return Merchant(clickerBloc: BlocProvider.of<ClickerBloc>(context),);
+                                return Merchant();
                               } else {
                                 return Container();
                               }
@@ -703,8 +714,8 @@ class DungeonListState extends State<DungeonList>
                   }
                 }),
             Positioned(
-              top: MediaQuery.of(context).size.height / 4.5,
-              left: MediaQuery.of(context).size.width / 3.5,
+              top: MediaQuery.of(context).size.height / 4.0,
+              left: MediaQuery.of(context).size.width / 3.4,
               child: Image(
                 image: AssetImage("assets/idle.gif"),
                 width: 128.0,
@@ -942,7 +953,9 @@ class CharacterScreenState extends State<CharacterScreen> {
                 )
               ],
             ),
-            Text(item.description),
+            Text(item.description, style: TextStyle(
+              fontFamily: "Centurion"
+            ),),
             MaterialButton(
               color: Colors.blueAccent,
               child: ButtonDescriptionText(equipped: equipped),
@@ -968,68 +981,82 @@ class CharacterScreenState extends State<CharacterScreen> {
       ),
       child: Column(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Text("Stats"),
-                  Text("HP: ${player.hp}/${player.hpCap}"),
-                  Text("Attack: ${player.attack}"),
-                  Text("Critical Hit Chance: ${player.criticalHitChance}"),
-                  Text("Dodge Chance: ${player.dodgeChance}"),
-                  Text("Intelligence: ${player.intelligence}"),
-                  Text("Looting: ${player.looting}"),
-                  Text("Loot Amount: ${player.lootModifierPercentage}"),
-                  Text("EXP: ${player.exp}/${player.expCap}"),
-                  Text("EXP Amount: ${player.expModifierPercentage}"),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  Text("Equipment"),
-                  ItemSlot(
-                    item: player.equipped["weapon"],
-                    equipped: true,
-                    showDescription: showDescription,
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  height: double.infinity,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Text("Stats"),
+                      Text("HP: ${player.hp}/${player.hpCap}"),
+                      Text("Attack: ${player.attack}"),
+                      Text("Critical Hit Chance: ${player.criticalHitChance}"),
+                      Text("Dodge Chance: ${player.dodgeChance}"),
+                      Text("Intelligence: ${player.intelligence}"),
+                      Text("Looting: ${player.looting}"),
+                      Text("Loot Amount: ${player.lootModifierPercentage}"),
+                      Text("EXP: ${player.exp}/${player.expCap}"),
+                      Text("EXP Amount: ${player.expModifierPercentage}"),
+                    ],
                   ),
-                  ItemSlot(
-                    item: player.equipped["shield"],
-                    equipped: true,
-                    showDescription: showDescription,
-                  ),
-                  ItemSlot(
-                    item: player.equipped["helmet"],
-                    equipped: true,
-                    showDescription: showDescription,
-                  ),
-                  ItemSlot(
-                    item: player.equipped["body"],
-                    equipped: true,
-                    showDescription: showDescription,
-                  )
-                ],
-              ),
-            ],
+                ),
+                Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 10.0),
+                      child: Text("Equipment"),
+                    ),
+                    ItemSlot(
+                      item: player.equipped["weapon"],
+                      equipped: true,
+                      showDescription: showDescription,
+                    ),
+                    ItemSlot(
+                      item: player.equipped["shield"],
+                      equipped: true,
+                      showDescription: showDescription,
+                    ),
+                    ItemSlot(
+                      item: player.equipped["helmet"],
+                      equipped: true,
+                      showDescription: showDescription,
+                    ),
+                    ItemSlot(
+                      item: player.equipped["body"],
+                      equipped: true,
+                      showDescription: showDescription,
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
           Text("Inventory"),
-          Stack(
-            children: <Widget>[
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 6,
-                children: List.generate(30, (int index) => ItemSlot()),
-              ),
-              GridView.builder(
+          Padding(
+            padding: EdgeInsets.only(bottom: 10.0),
+            child: Stack(
+              children: <Widget>[
+                GridView.count(
                   shrinkWrap: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 6),
-                  itemCount: player.inventory.length,
-                  itemBuilder: (BuildContext context, int index) => ItemSlot(
-                        index: index,
-                        item: items[player.inventory[index]],
-                        showDescription: showDescription,
-                      )),
-            ],
+                  crossAxisCount: 6,
+                  children: List.generate(30, (int index) => ItemSlot()),
+                ),
+                GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 6),
+                    itemCount: player.inventory.length,
+                    itemBuilder: (BuildContext context, int index) => ItemSlot(
+                          index: index,
+                          item: items[player.inventory[index]],
+                          showDescription: showDescription,
+                        )),
+              ],
+            ),
           )
         ],
       ));
@@ -1079,8 +1106,8 @@ class ItemSlot extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black54),
             ),
-            width: 60.0,
-            height: 60.0,
+            width: 55.0,
+            height: 55.0,
             child: item != null
                 ? Center(
                     child: Image(
@@ -1353,31 +1380,59 @@ class EffectsListState extends State<EffectsList> {
 }
 
 class Merchant extends StatelessWidget {
-  ClickerBloc clickerBloc;
-  List merchantItems = [];
+  List<Item> merchantItems = [items["apple"], items["tomato"], items["meat"]];
 
   Merchant({Key key, ClickerBloc clickerBloc}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Item randomItem = merchantItems[Random().nextInt(merchantItems.length)];
+    ClickerBloc _clickerBloc = BlocProvider.of<ClickerBloc>(context);
+    final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
     return Card(
-      child: Column(
+      child: Stack(
         children: <Widget>[
-          Text("The merchant offers you a trade."),
-          Text("trade_info"),
-          Row(
+          Image(
+            width: double.infinity,
+            height: double.infinity,
+            image: AssetImage("assets/uibackground.png"), repeat: ImageRepeat.repeat,),
+          Column(
             children: <Widget>[
-              FlatButton(
-                child: Text("Buy"),
+              ListTile(
+                leading: Image(image: AssetImage("assets/${randomItem.id}.png"), width: 64.0, height: 64.0,),
+                title: Text(randomItem.name),
+                trailing: FlatButton(
+                  color: Colors.white,
+                  child: Text("Buy (${randomItem.cost} Gold)"),
+                  onPressed: () {
+                    if (player.gold >= randomItem.cost) {
+                      player.inventory.add(randomItem.id);
+                      print("PLAYER INVENTORY IS" + player.inventory.toString());
+                      _goldBloc.dispatch(-randomItem.cost);
+                      _clickerBloc.dispatch(dungeonTiles);
+                    }
+                  },
+                ),
               ),
-              FlatButton(
-                child: Text("Leave"),
-                onPressed: () {
-                  clickerBloc.dispatch(dungeonTiles);
-                },
-              )
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  randomItem.description,
+                  style: TextStyle(fontFamily: "Centurion", fontSize: 12.0),
+                )
+              ),
+              Row(
+                children: <Widget>[
+                  FlatButton(
+                    child: Text("Leave"),
+                    onPressed: () {
+                      _clickerBloc.dispatch(dungeonTiles);
+                    },
+                  )
+                ],
+              ),
             ],
-          ),
+          )
         ],
       ),
     );
