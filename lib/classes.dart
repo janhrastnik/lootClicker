@@ -71,6 +71,7 @@ class Player {
   int lootModifierRaw;
   int skillPoints;
   int criticalHitDamage;
+  int dungeonLevel;
   List skillProgress;
   double expModifierPercentage;
   double lootModifierPercentage;
@@ -99,7 +100,8 @@ class Player {
     this.equipped,
     this.bloodSteal = false,
     this.skillPoints = 2,
-    this.skillProgress
+    this.skillProgress,
+    this.dungeonLevel = 1
   });
 
   factory Player.fromJson(Map<String, dynamic> json)  => _$PlayerFromJson(json);

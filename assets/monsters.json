@@ -2,31 +2,31 @@
   "rat": {
     "hp": 10,
     "expValue": 10,
-    "attack": 1,
+    "attack": 50,
     "loot": null
   },
   "skeleton": {
     "hp": 20,
     "expValue": 15,
-    "attack": 1,
+    "attack": 50,
     "loot": null
   },
   "wolf": {
     "hp": 15,
     "expValue": 15,
-    "attack": 2,
+    "attack": 50,
     "loot": null
   },
   "ghost": {
     "hp": 25,
     "expValue": 20,
-    "attack": 2,
+    "attack": 50,
     "loot": null
   },
   "slime": {
     "hp": 5,
     "expValue": 5,
-    "attack": 1,
+    "attack": 50,
     "loot": null
   }
 }

@@ -261,10 +261,12 @@ class BlocPageState extends State<BlocPage> {
     _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);
     _heroExpBloc = HeroExpBloc(heroHpBloc: _heroHpBloc);
     _clickerBloc = ClickerBloc(
-        goldBloc: _goldBloc,
-        heroHpBloc: _heroHpBloc,
-        heroExpBloc: _heroExpBloc,
-        dungeonBloc: _dungeonBloc);
+      goldBloc: _goldBloc,
+      heroHpBloc: _heroHpBloc,
+      heroExpBloc: _heroExpBloc,
+      dungeonBloc: _dungeonBloc,
+      actionBloc: _actionBloc
+    );
     _tapAnimationBloc = TapAnimationBloc();
     super.initState();
   }
@@ -367,8 +369,9 @@ class DungeonListState extends State<DungeonList>
         behavior: HitTestBehavior.translucent,
         onTap: () {
           if (!isScrolling &&
-              dungeonTiles[1].event.eventType != "fight" &&
-              dungeonTiles[1].event.eventType != "merchant") {
+            dungeonTiles[1].event.eventType != "fight" &&
+            dungeonTiles[1].event.eventType != "merchant") {
+            print("yess");
             _clickerBloc.dispatch(dungeonTiles);
           }
         },
@@ -414,6 +417,9 @@ class DungeonListState extends State<DungeonList>
                       BlocBuilder(
                           bloc: _goldBloc,
                           builder: (BuildContext context, int newGold) {
+                            if (newGold != 0) {
+                              _goldBloc.dispatch(0);
+                            }
                             return Column(
                               children: <Widget>[
                                 Row(
@@ -424,13 +430,13 @@ class DungeonListState extends State<DungeonList>
                                         image: AssetImage("assets/coin.gif"),
                                       )
                                     ]),
-                                FadeTransition(
+                                newGold != 0 ? FadeTransition(
                                   opacity: goldAnimation,
                                   child: Text(
                                     "${newGold > -1 ? "+" : ""} " + newGold.toString(),
                                     style: TextStyle(color: Colors.amber),
                                   ),
-                                )
+                                ) : Container()
                               ],
                             );
                           }),
@@ -466,7 +472,7 @@ class DungeonListState extends State<DungeonList>
                           bloc: _heroExpBloc,
                           builder: (BuildContext context, double value) {
                             return Padding(
-                              padding: EdgeInsets.all(4.0),
+                              padding: EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0, bottom: 4.0),
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: <Widget>[
@@ -499,7 +505,7 @@ class DungeonListState extends State<DungeonList>
                         child: Column(
                           children: <Widget>[
                             Flexible( // dungeon tile listview
-                              flex: 3,
+                              flex: 2,
                               child: BlocBuilder(
                                 bloc: _dungeonBloc,
                                 builder: (BuildContext context,
@@ -534,7 +540,7 @@ class DungeonListState extends State<DungeonList>
                                   }
                                 }),
                             Flexible(
-                              flex: 1,
+                              flex: 0,
                               child: BlocBuilder(
                                   bloc: _clickerBloc,
                                   builder:
@@ -591,7 +597,7 @@ class DungeonListState extends State<DungeonList>
                         ),
                       ),
                       Flexible(
-                        flex: 1,
+                        flex: 2,
                         child: BlocBuilder(
                             bloc: _actionBloc,
                             builder: (BuildContext context, String event) {
@@ -714,8 +720,8 @@ class DungeonListState extends State<DungeonList>
                   }
                 }),
             Positioned(
-              top: MediaQuery.of(context).size.height / 4.0,
-              left: MediaQuery.of(context).size.width / 3.4,
+              top: MediaQuery.of(context).size.height / 4.5,
+              left: MediaQuery.of(context).size.width / 4.0,
               child: Image(
                 image: AssetImage("assets/idle.gif"),
                 width: 128.0,
@@ -1147,7 +1153,10 @@ class ShopScreen extends StatelessWidget {
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[Text("Shop")],
+            children: <Widget>[Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Shop"),
+            )],
           ),
           ListView.builder(
               shrinkWrap: true,
@@ -1156,7 +1165,7 @@ class ShopScreen extends StatelessWidget {
                 leading: Image(image: AssetImage("assets/${shopItems[index].id}.png"),),
                 title: Text(shopItems[index].name),
                 trailing: MaterialButton(
-                  color: Colors.yellowAccent,
+                  color: Colors.white,
                   onPressed: () {
                     if (player.gold >= shopItems[index].cost) {
                       player.gold -= shopItems[index].cost;
@@ -1205,10 +1214,10 @@ class SkillsScreenState extends State<SkillsScreen> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Image(image: AssetImage("assets/skills/${skill.id}.png"),),
-          Text(skill.description),
+          Text(skill.description, style: TextStyle(fontFamily: "Centurion", fontSize: 12.0)),
           player.skillProgress[treeIndex] == index ? MaterialButton(
             color: Colors.blueAccent,
-            child: Text("Unlock Skill"),
+            child: Text("Unlock Skill", ),
             onPressed: () {
               if (player.skillPoints > 0) {
                 useSkill(skill, treeIndex);
@@ -1237,7 +1246,10 @@ class SkillsScreenState extends State<SkillsScreen> {
       ),
       child: Column(
         children: <Widget>[
-          Text("Skill Points: ${player.skillPoints}"),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text("Skill Points: ${player.skillPoints}"),
+          ),
           Expanded(
             child: Row(
               mainAxisSize: MainAxisSize.max,
@@ -1267,13 +1279,15 @@ class SkillTree extends StatelessWidget {
     return Expanded(
       child: Column(
         children: <Widget>[
-          Text(treeName),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(treeName.toUpperCase()),
+          ),
           Expanded(
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: skills[treeName].length,
               separatorBuilder: (BuildContext context, int index) {
-                print("YO");
                 return Column(
                   children: <Widget>[
                     CustomPaint(
@@ -1389,51 +1403,65 @@ class Merchant extends StatelessWidget {
     Item randomItem = merchantItems[Random().nextInt(merchantItems.length)];
     ClickerBloc _clickerBloc = BlocProvider.of<ClickerBloc>(context);
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
-    return Card(
-      child: Stack(
-        children: <Widget>[
-          Image(
-            width: double.infinity,
-            height: double.infinity,
-            image: AssetImage("assets/uibackground.png"), repeat: ImageRepeat.repeat,),
-          Column(
-            children: <Widget>[
-              ListTile(
-                leading: Image(image: AssetImage("assets/${randomItem.id}.png"), width: 64.0, height: 64.0,),
-                title: Text(randomItem.name),
-                trailing: FlatButton(
-                  color: Colors.white,
-                  child: Text("Buy (${randomItem.cost} Gold)"),
-                  onPressed: () {
-                    if (player.gold >= randomItem.cost) {
-                      player.inventory.add(randomItem.id);
-                      print("PLAYER INVENTORY IS" + player.inventory.toString());
-                      _goldBloc.dispatch(-randomItem.cost);
-                      _clickerBloc.dispatch(dungeonTiles);
-                    }
-                  },
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Card(
+        child: Stack(
+          children: <Widget>[
+            Image(
+              width: double.infinity,
+              height: double.infinity,
+              image: AssetImage("assets/uibackground.png"), repeat: ImageRepeat.repeat,),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ListTile(
+                  leading: Image(image: AssetImage("assets/${randomItem.id}.png"), width: 64.0, height: 64.0,),
+                  title: Text(randomItem.name),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  randomItem.description,
-                  style: TextStyle(fontFamily: "Centurion", fontSize: 12.0),
-                )
-              ),
-              Row(
-                children: <Widget>[
-                  FlatButton(
-                    child: Text("Leave"),
-                    onPressed: () {
-                      _clickerBloc.dispatch(dungeonTiles);
-                    },
-                  )
-                ],
-              ),
-            ],
-          )
-        ],
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
+                    child: Text(
+                      randomItem.description,
+                      style: TextStyle(fontFamily: "Centurion", fontSize: 12.0),
+                    )
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FlatButton(
+                        color: Colors.white,
+                        child: Text("Buy (${randomItem.cost} Gold)"),
+                        onPressed: () {
+                          if (player.gold >= randomItem.cost) {
+                            player.inventory.add(randomItem.id);
+                            print("PLAYER INVENTORY IS" + player.inventory.toString());
+                            _goldBloc.dispatch(-randomItem.cost);
+                            _clickerBloc.dispatch(dungeonTiles);
+                          }
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FlatButton(
+                        color: Colors.white,
+                        child: Text("Leave"),
+                        onPressed: () {
+                          _clickerBloc.dispatch(dungeonTiles);
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

@@ -19,14 +19,17 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   DungeonTile generateDungeon() {
     int randomRange(int min, int max) => min + Random().nextInt(max - min);
     String dungeonType = eventTypes[Random().nextInt(eventTypes.length)];
-    int lootAmount = (randomRange(1, 10) * player.lootModifierPercentage).floor() + player.lootModifierRaw;
-    int length = randomRange(10, 20);
+    int lootAmount = (randomRange(1, 10) *
+        player.lootModifierPercentage).floor() *
+        player.dungeonLevel +
+        player.lootModifierRaw;
+    int length = randomRange(10, 20) * player.dungeonLevel;
     Enemy randomEnemy;
     if (dungeonType == "fight") {
       // generate a random enemy
       String randomEnemyType = monsters.keys.toList()[Random().nextInt(monsters.keys.toList().length)];
       randomEnemy = monsters[randomEnemyType];
-      length = randomEnemy.hp;
+      length = randomEnemy.hp * player.dungeonLevel;
     }
 
     return DungeonTile(event: DungeonEvent(
@@ -94,8 +97,9 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
   final HeroHpBloc heroHpBloc;
   final HeroExpBloc heroExpBloc;
   final DungeonBloc dungeonBloc;
+  final ActionBloc actionBloc;
 
-  ClickerBloc({this.goldBloc, this.heroHpBloc, this.heroExpBloc, this.dungeonBloc});
+  ClickerBloc({this.goldBloc, this.heroHpBloc, this.heroExpBloc, this.dungeonBloc, this.actionBloc});
 
   @override
   Stream<double> mapEventToState(List<DungeonTile> event) async* {
@@ -110,12 +114,14 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
       case "fight":
         double r = Random().nextDouble();
         if (player.dodgeChance < r) { // if the player doesn't dodge
+          // if the player dies
+          if (currEvent.enemy.attack >= player.hp) {
+            actionBloc.dispatch("death");
+            await wait(3);
+            heroHpBloc.dispatch(-currEvent.enemy.attack);
+            yield 0.0;
+          }
           heroHpBloc.dispatch(-currEvent.enemy.attack);
-        }
-        // if the player dies
-        if (currEvent.enemy.attack >= player.hp) {
-          await wait(3);
-          yield 0.0; // this should fix death bug
         }
         r = Random().nextDouble();
         if (player.criticalHitChance >= r) { // if the player lands a critical hit

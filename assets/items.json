@@ -26,7 +26,7 @@
       "name": "Apple",
       "equip": null,
       "changeHp" : {
-        "value": 5,
+        "value": 40,
         "percentage": false
       },
       "description": "Increases Hp by 40 points.",
@@ -48,7 +48,11 @@
       "name": "Tender Meat",
       "equip": null,
       "changeHp" : {
-        "value": 5,
+        "value": 40,
+        "percentage": false
+      },
+      "changeHpCap" : {
+        "value": 40,
         "percentage": false
       },
       "description": "Increases Hp and Hp Cap by 40 points for 5 minutes.",
