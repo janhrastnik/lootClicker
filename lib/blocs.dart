@@ -116,12 +116,14 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         if (player.dodgeChance < r) { // if the player doesn't dodge
           // if the player dies
           if (currEvent.enemy.attack >= player.hp) {
+            heroHpBloc.dispatch(-currEvent.enemy.attack);
             actionBloc.dispatch("death");
             await wait(3);
+            yield 1;
+          } else
+          if (player.hp >= 0) {
             heroHpBloc.dispatch(-currEvent.enemy.attack);
-            yield 0.0;
           }
-          heroHpBloc.dispatch(-currEvent.enemy.attack);
         }
         r = Random().nextDouble();
         if (player.criticalHitChance >= r) { // if the player lands a critical hit
@@ -238,20 +240,21 @@ class HeroHpBloc extends Bloc<int, double> {
     }
     yield player.hp / player.hpCap;
     if (player.hp <= 0) {
-      yield 0.0;
       isDead = true;
       print("hero hp dropped to zero.");
       player.gold = (player.gold / 2).round();
       player.hp = player.hpCap;
-      wait(3).then((data) {
-        dungeonBloc.dispatch(<DungeonTile>[]);
-        deathAnimationController.reverse();
-        wait(3).then((data) {
-          isScrolling = false;
-        });
-      });
       isScrolling = true;
       deathAnimationController.forward();
+      yield 0.0;
+      await wait(3);
+      print("yoooo");
+      deathAnimationController.value = 1.0;
+      deathAnimationController.reverse();
+      dungeonBloc.dispatch(<DungeonTile>[]);
+      yield 1.0;
+      await wait(3);
+      isScrolling = false;
     }
   }
 }

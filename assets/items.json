@@ -67,7 +67,7 @@
         "percentage": false
       },
       "description": "Increases Atk by 1.",
-      "cost": 0,
+      "cost": 55,
       "time": 0
     },
     "woodShield": {
@@ -78,7 +78,7 @@
         "percentage": false
       },
       "description": "Increases Hp Cap by 10.",
-      "cost": 0,
+      "cost": 80,
       "time": 0
     },
     "leatherHelmet": {
@@ -89,7 +89,7 @@
         "percentage": false
       },
       "description": "Increases Hp Cap by 10.",
-      "cost": 0,
+      "cost": 70,
       "time": 0
     },
     "commonShirt": {
@@ -100,7 +100,7 @@
         "percentage": false
       },
       "description": "Increases Hp Cap by 5.",
-      "cost": 0,
+      "cost": 40,
       "time": 0
     },
     "atkPotion": {
@@ -173,6 +173,39 @@
       },
       "description": "Increases Atk by 3.",
       "cost": 300,
+      "time": 0
+    },
+    "steelChest": {
+      "name": "Steel Breastplate",
+      "equip": "body",
+      "changeHpCap": {
+        "value": 25,
+        "percentage": false
+      },
+      "description": "Increases Hp Cap by 25.",
+      "cost": 400,
+      "time": 0
+    },
+    "steelHelm": {
+      "name": "Steel Helmet",
+      "equip": "helmet",
+      "changeHpCap": {
+        "value": 15,
+        "percentage": false
+      },
+      "description": "Increases Hp Cap by 15.",
+      "cost": 200,
+      "time": 0
+    },
+    "steelShield": {
+      "name": "Steel Shield",
+      "equip": "shield",
+      "changeHpCap": {
+        "value": 15,
+        "percentage": false
+      },
+      "description": "Increases Hp Cap by 15.",
+      "cost": 225,
       "time": 0
     }
   }

@@ -510,16 +510,27 @@ class DungeonListState extends State<DungeonList>
                                 bloc: _dungeonBloc,
                                 builder: (BuildContext context,
                                     List<DungeonTile> l) {
-                                  return ListView.builder(
-                                    physics: NeverScrollableScrollPhysics(),
-                                    controller: scrollController,
-                                    padding: EdgeInsets.all(0.0),
-                                    scrollDirection: Axis.horizontal,
-                                    shrinkWrap: true,
-                                    itemCount: l.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) =>
-                                            l[index],
+                                  return Stack(
+                                    children: <Widget>[
+                                      ListView.builder(
+                                        physics: NeverScrollableScrollPhysics(),
+                                        controller: scrollController,
+                                        padding: EdgeInsets.all(0.0),
+                                        scrollDirection: Axis.horizontal,
+                                        shrinkWrap: true,
+                                        itemCount: l.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) =>
+                                        l[index],
+                                      ),
+                                      Positioned(
+                                        width: 128.0,
+                                        height: 128.0,
+                                        top: 40.0,
+                                        left: MediaQuery.of(context).size.width / 4,
+                                        child: Image(image: AssetImage("assets/idle.gif"),),
+                                      )
+                                    ],
                                   );
                                 },
                               ),
@@ -602,72 +613,77 @@ class DungeonListState extends State<DungeonList>
                             bloc: _actionBloc,
                             builder: (BuildContext context, String event) {
                               if (event == "fight") {
-                                return Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Container(
-                                      width: 95.0,
-                                      height: 95.0,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12.0),
-                                        color: Colors.white
-                                      ),
-                                      child: MaterialButton(
-                                        child: Center(child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                              width: 64.0,
-                                              height: 64.0,
-                                              child: FittedBox(
-                                                fit: BoxFit.fill,
-                                                child: Image(image: AssetImage("assets/attack.png")),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(4.0),
-                                              child: Text("Attack"),
-                                            )
-                                          ],
-                                        )),
-                                        onPressed: () {
-                                          if (!isScrolling) {
-                                            _clickerBloc.dispatch(dungeonTiles);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 95.0,
-                                      height: 95.0,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(12.0),
-                                          color: Colors.white
-                                      ),
-                                      child: MaterialButton(
-                                        child: Center(child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                              width: 64.0,
-                                              height: 64.0,
-                                              child: FittedBox(
-                                                fit: BoxFit.fill,
-                                                child: Image(image: AssetImage("assets/flee.png")),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(4.0),
-                                              child: Text("Flee"),
-                                            )
-                                          ],
-                                        )),
-                                        onPressed: () {
-                                          scrollDungeon(_dungeonBloc,
-                                              _clickerBloc); // updates text
-                                        },
-                                      ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        Container(
+                                          width: 95.0,
+                                          height: 95.0,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12.0),
+                                            color: Colors.white
+                                          ),
+                                          child: MaterialButton(
+                                            child: Center(child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  width: 64.0,
+                                                  height: 64.0,
+                                                  child: FittedBox(
+                                                    fit: BoxFit.fill,
+                                                    child: Image(image: AssetImage("assets/attack.png")),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(4.0),
+                                                  child: Text("Attack"),
+                                                )
+                                              ],
+                                            )),
+                                            onPressed: () {
+                                              if (!isScrolling) {
+                                                _clickerBloc.dispatch(dungeonTiles);
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 95.0,
+                                          height: 95.0,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                              color: Colors.white
+                                          ),
+                                          child: MaterialButton(
+                                            child: Center(child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  width: 64.0,
+                                                  height: 64.0,
+                                                  child: FittedBox(
+                                                    fit: BoxFit.fill,
+                                                    child: Image(image: AssetImage("assets/flee.png")),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(4.0),
+                                                  child: Text("Flee"),
+                                                )
+                                              ],
+                                            )),
+                                            onPressed: () {
+                                              scrollDungeon(_dungeonBloc,
+                                                  _clickerBloc); // updates text
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 );
@@ -700,7 +716,7 @@ class DungeonListState extends State<DungeonList>
                     return Container(child: null);
                   }
                 }),
-            BlocBuilder(
+            BlocBuilder( // death animation
                 bloc: _heroHpBloc,
                 builder: (BuildContext context, double health) {
                   if (health != 0.0) {
@@ -719,15 +735,6 @@ class DungeonListState extends State<DungeonList>
                     );
                   }
                 }),
-            Positioned(
-              top: MediaQuery.of(context).size.height / 4.5,
-              left: MediaQuery.of(context).size.width / 4.0,
-              child: Image(
-                image: AssetImage("assets/idle.gif"),
-                width: 128.0,
-                height: 128.0,
-              ),
-            )
           ],
         ),
       );
