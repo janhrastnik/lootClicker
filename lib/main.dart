@@ -217,6 +217,7 @@ class SplashPageState extends State<SplashPage> {
     readProgress().then((data) {
       if (data != 0) {
         player = data;
+        print("Found json");
       } else {
         player = Player(
             inventory: [],
@@ -236,7 +237,11 @@ class SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Text("Splash Page");
+    return Scaffold(
+      body: Center(
+        child: Image(image: AssetImage("icon.png"), width: 96.0, height: 96.0,),
+      ),
+    );
   }
 }
 
@@ -309,7 +314,7 @@ class Panels extends StatelessWidget {
           frontLayer: model.activePanel,
           backLayer: DungeonList(),
           panelVisible: frontPanelVisible,
-          frontPanelOpenHeight: 20.0,
+          frontPanelOpenHeight: 30.0,
           frontHeaderHeight: 0.0,
         ),
       ),
@@ -529,6 +534,16 @@ class DungeonListState extends State<DungeonList>
                                         top: 40.0,
                                         left: MediaQuery.of(context).size.width / 4,
                                         child: Image(image: AssetImage("assets/idle.gif"),),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8.0),
+                                        child: Container(
+                                          alignment: Alignment.topCenter,
+                                          child: Text(
+                                            "Dungeon Level ${player.dungeonLevel}",
+                                            style: TextStyle(wordSpacing: 2.0, letterSpacing: 2.0),
+                                          ),
+                                        ),
                                       )
                                     ],
                                   );
@@ -1049,26 +1064,28 @@ class CharacterScreenState extends State<CharacterScreen> {
             ),
           ),
           Text("Inventory"),
-          Padding(
-            padding: EdgeInsets.only(bottom: 10.0),
-            child: Stack(
-              children: <Widget>[
-                GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 6,
-                  children: List.generate(30, (int index) => ItemSlot()),
-                ),
-                GridView.builder(
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 30.0),
+              child: Stack(
+                children: <Widget>[
+                  GridView.count(
                     shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 6),
-                    itemCount: player.inventory.length,
-                    itemBuilder: (BuildContext context, int index) => ItemSlot(
-                          index: index,
-                          item: items[player.inventory[index]],
-                          showDescription: showDescription,
-                        )),
-              ],
+                    crossAxisCount: 6,
+                    children: List.generate(30, (int index) => ItemSlot()),
+                  ),
+                  GridView.builder(
+                      shrinkWrap: true,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 6),
+                      itemCount: player.inventory.length,
+                      itemBuilder: (BuildContext context, int index) => ItemSlot(
+                            index: index,
+                            item: items[player.inventory[index]],
+                            showDescription: showDescription,
+                          )),
+                ],
+              ),
             ),
           )
         ],
@@ -1165,26 +1182,51 @@ class ShopScreen extends StatelessWidget {
               child: Text("Shop"),
             )],
           ),
-          ListView.builder(
-              shrinkWrap: true,
-              itemCount: shopItems.length,
-              itemBuilder: (BuildContext context, int index) => ListTile(
-                leading: Image(image: AssetImage("assets/${shopItems[index].id}.png"),),
-                title: Text(shopItems[index].name),
-                trailing: MaterialButton(
-                  color: Colors.white,
-                  onPressed: () {
-                    if (player.gold >= shopItems[index].cost) {
-                      player.gold -= shopItems[index].cost;
-                      player.inventory.add(shopItems[index].id);
-                      print("PLAYER INVENTORY IS" +
-                          player.inventory.toString());
-                      _goldBloc.dispatch(0);
-                    }
-                  },
-                  child: Text("${shopItems[index].cost} Gold"),
-                ),
-              ))
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 30.0),
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: shopItems.length + 1,
+                  itemBuilder: (BuildContext context, int index) => index != shopItems.length ? ExpansionTile(
+                    leading: Image(image: AssetImage("assets/${shopItems[index].id}.png"),),
+                    title: Text(shopItems[index].name),
+                    children: <Widget>[
+                      Text(shopItems[index].description, style: TextStyle(fontFamily: "Centurion"),)
+                    ],
+                    trailing: MaterialButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        if (player.gold >= shopItems[index].cost) {
+                          player.gold -= shopItems[index].cost;
+                          player.inventory.add(shopItems[index].id);
+                          print("PLAYER INVENTORY IS" +
+                              player.inventory.toString());
+                          _goldBloc.dispatch(0);
+                        }
+                      },
+                      child: Text("${shopItems[index].cost} Gold"),
+                    ),
+                  ) : ExpansionTile(
+                      leading: Image(image: AssetImage("assets/key.gif"), width: 32.0, height: 32.0,),
+                      title: Text("Dungeon Key"),
+                      children: <Widget>[
+                        Text("Increases Dungeon Level by 1.", style: TextStyle(fontFamily: "Centurion"),)
+                      ],
+                      trailing: MaterialButton(
+                        color: Colors.white,
+                        onPressed: () {
+                          if (player.gold >= player.keyCost) {
+                            player.gold -= player.keyCost;
+                            player.keyCost++;
+                            _goldBloc.dispatch(0);
+                          }
+                        },
+                        child: Text("${player.keyCost} Gold"),
+                      )
+                  )),
+            ),
+          )
         ],
       ),
     );

@@ -28,6 +28,8 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
     bloodSteal: json['bloodSteal'] as bool,
     skillPoints: json['skillPoints'] as int,
     skillProgress: json['skillProgress'] as List,
+    dungeonLevel: json['dungeonLevel'] as int,
+    keyCost: json['keyCost'] as int,
   );
 }
 
@@ -44,6 +46,8 @@ Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'lootModifierRaw': instance.lootModifierRaw,
       'skillPoints': instance.skillPoints,
       'criticalHitDamage': instance.criticalHitDamage,
+      'dungeonLevel': instance.dungeonLevel,
+      'keyCost': instance.keyCost,
       'skillProgress': instance.skillProgress,
       'expModifierPercentage': instance.expModifierPercentage,
       'lootModifierPercentage': instance.lootModifierPercentage,

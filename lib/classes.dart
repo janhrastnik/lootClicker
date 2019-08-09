@@ -25,7 +25,7 @@ class DungeonTile extends StatelessWidget {
             decoration: BoxDecoration(
               image: DecorationImage(image: AssetImage("assets/dungeon2.gif"), fit: BoxFit.cover),
             ),
-            alignment: Alignment(0.8, 0.4),
+            alignment: img != "skeleton" ? Alignment(0.8, 0.4) : Alignment(0.8, 0.3),
             child:  Image(image: AssetImage("assets/$img.gif"), width: 96.0, height: 96.0)
         )
     );
@@ -72,6 +72,7 @@ class Player {
   int skillPoints;
   int criticalHitDamage;
   int dungeonLevel;
+  int keyCost;
   List skillProgress;
   double expModifierPercentage;
   double lootModifierPercentage;
@@ -101,7 +102,8 @@ class Player {
     this.bloodSteal = false,
     this.skillPoints = 2,
     this.skillProgress,
-    this.dungeonLevel = 1
+    this.dungeonLevel = 1,
+    this.keyCost = 500
   });
 
   factory Player.fromJson(Map<String, dynamic> json)  => _$PlayerFromJson(json);
@@ -126,13 +128,15 @@ class Enemy {
   int hp;
   int expValue;
   int attack;
+  double lootChance;
 
   Enemy({
     this.name,
     this.loot,
     this.hp,
     this.expValue,
-    this.attack
+    this.attack,
+    this.lootChance
   });
 }
 
