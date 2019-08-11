@@ -238,8 +238,13 @@ class SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Image(image: AssetImage("icon.png"), width: 96.0, height: 96.0,),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Color.fromARGB(255, 94, 54, 64),
+        child: Center(
+          child: Image(image: AssetImage("assets/icon.png"), width: 96.0, height: 96.0,),
+        ),
       ),
     );
   }
@@ -516,6 +521,7 @@ class DungeonListState extends State<DungeonList>
                                 builder: (BuildContext context,
                                     List<DungeonTile> l) {
                                   return Stack(
+                                    alignment: Alignment.center,
                                     children: <Widget>[
                                       ListView.builder(
                                         physics: NeverScrollableScrollPhysics(),
@@ -528,22 +534,22 @@ class DungeonListState extends State<DungeonList>
                                             (BuildContext context, int index) =>
                                         l[index],
                                       ),
-                                      Positioned(
-                                        width: 128.0,
-                                        height: 128.0,
-                                        top: 40.0,
-                                        left: MediaQuery.of(context).size.width / 4,
-                                        child: Image(image: AssetImage("assets/idle.gif"),),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8.0),
-                                        child: Container(
-                                          alignment: Alignment.topCenter,
-                                          child: Text(
-                                            "Dungeon Level ${player.dungeonLevel}",
-                                            style: TextStyle(wordSpacing: 2.0, letterSpacing: 2.0),
-                                          ),
+                                      Container(
+                                        alignment: Alignment(-0.2, 0.0),
+                                        child: Image(image: AssetImage("assets/idle.gif"),
+                                          width: 128.0,
+                                          height: 128.0,
                                         ),
+                                      ),
+                                      BlocBuilder(
+                                          bloc: _actionBloc,
+                                          builder: (BuildContext context, String event) => Container(
+                                            child: Text(
+                                              "Dungeon Level ${player.dungeonLevel}",
+                                              style: TextStyle(wordSpacing: 2.0, letterSpacing: 2.0),
+                                            ),
+                                            alignment: Alignment(0.0, -0.7),
+                                          )
                                       )
                                     ],
                                   );
@@ -991,7 +997,17 @@ class CharacterScreenState extends State<CharacterScreen> {
                 useItem(item, index, equipped);
                 Navigator.pop(context);
               },
-            )
+            ),
+            equipped != true ? MaterialButton(
+              color: Colors.redAccent,
+              child: Text("Discard Item"),
+              onPressed: () {
+                setState(() {
+                  player.inventory.removeAt(index);
+                  Navigator.pop(context);
+                });
+              },
+            ) : Container()
           ],
         ));
     showDialog(
@@ -1072,7 +1088,7 @@ class CharacterScreenState extends State<CharacterScreen> {
                   GridView.count(
                     shrinkWrap: true,
                     crossAxisCount: 6,
-                    children: List.generate(30, (int index) => ItemSlot()),
+                    children: List.generate(24, (int index) => ItemSlot()),
                   ),
                   GridView.builder(
                       shrinkWrap: true,
@@ -1153,18 +1169,25 @@ class ItemSlot extends StatelessWidget {
 class ShopScreen extends StatelessWidget {
   final List shopItems = [
     items["redPotion"],
-    items["woodSword"],
     items["atkPotion"],
-    items["woodShield"],
-    items["luckyCharm"],
     items["atkGem"],
+    items["luckyCharm"],
+    items["woodSword"],
+    items["woodShield"],
     items["leatherHelmet"],
-    items["commonShirt"]
+    items["commonShirt"],
+    items["steelAxe"],
+    items["steelDagger"],
+    items["steelSword"],
+    items["steelShield"],
+    items["steelHelm"],
+    items["steelChest"],
   ];
 
   @override
   Widget build(BuildContext context) {
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
+    final ActionBloc _actionBloc = BlocProvider.of<ActionBloc>(context);
     return Container(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -1197,12 +1220,12 @@ class ShopScreen extends StatelessWidget {
                     trailing: MaterialButton(
                       color: Colors.white,
                       onPressed: () {
-                        if (player.gold >= shopItems[index].cost) {
-                          player.gold -= shopItems[index].cost;
+                        if (player.gold >= shopItems[index].cost && player.inventory.length < 24) {
+                          // player.gold -= shopItems[index].cost;
                           player.inventory.add(shopItems[index].id);
                           print("PLAYER INVENTORY IS" +
                               player.inventory.toString());
-                          _goldBloc.dispatch(0);
+                          _goldBloc.dispatch(-shopItems[index].cost);
                         }
                       },
                       child: Text("${shopItems[index].cost} Gold"),
@@ -1217,9 +1240,8 @@ class ShopScreen extends StatelessWidget {
                         color: Colors.white,
                         onPressed: () {
                           if (player.gold >= player.keyCost) {
-                            player.gold -= player.keyCost;
-                            player.keyCost++;
-                            _goldBloc.dispatch(0);
+                            _actionBloc.dispatch("dungeonKey");
+                            _goldBloc.dispatch(-player.keyCost);
                           }
                         },
                         child: Text("${player.keyCost} Gold"),

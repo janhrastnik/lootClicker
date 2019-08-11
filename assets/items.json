@@ -8,7 +8,7 @@
         "percentage": true
       },
       "description": "Increases Hp by 10 %.",
-      "cost": 5,
+      "cost": 25,
       "time": 0
     },
     "ratMeat": {
@@ -111,7 +111,7 @@
         "percentage": false
       },
       "description": "Increases Atk by 1 for 2 minutes.",
-      "cost": 0,
+      "cost": 40,
       "time": 120
     },
     "atkGem": {
@@ -122,7 +122,7 @@
         "percentage": true
       },
       "description": "Increases Atk by 100 % for 2 minutes.",
-      "cost": 0,
+      "cost": 100,
       "time": 120
     },
     "luckyCharm": {
@@ -133,11 +133,11 @@
         "percentage": true
       },
       "description": "Increases Gold from looting by 100 % for 1 minute.",
-      "cost": 0,
+      "cost": 10,
       "time": 60
     },
-    "ironAxe": {
-      "name": "Iron Axe",
+    "steelAxe": {
+      "name": "Steel Axe",
       "equip": "weapon",
       "changeAttack": {
         "value": 4,
@@ -150,8 +150,8 @@
       "cost": 400,
       "time": 0
     },
-    "ironDagger": {
-      "name": "Iron Dagger",
+    "steelDagger": {
+      "name": "Steel Dagger",
       "equip": "weapon",
       "changeAttack": {
         "value": 2,
@@ -164,8 +164,8 @@
       "cost": 150,
       "time": 0
     },
-    "ironSword": {
-      "name": "Iron Sword",
+    "steelSword": {
+      "name": "Steel Sword",
       "equip": "weapon",
       "changeAttack": {
         "value": 3,

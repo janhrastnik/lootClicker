@@ -19,15 +19,15 @@ class DungeonTile extends StatelessWidget {
       img = event.eventType;
     }
     return Center(
-        child: Container(
-            width: MediaQuery.of(context).size.width/2,
-            height: 200.0,
-            decoration: BoxDecoration(
-              image: DecorationImage(image: AssetImage("assets/dungeon2.gif"), fit: BoxFit.cover),
-            ),
-            alignment: img != "skeleton" ? Alignment(0.8, 0.4) : Alignment(0.8, 0.3),
-            child:  Image(image: AssetImage("assets/$img.gif"), width: 96.0, height: 96.0)
-        )
+      child: Container(
+          width: MediaQuery.of(context).size.width/2,
+          height: 200.0,
+          decoration: BoxDecoration(
+            image: DecorationImage(image: AssetImage("assets/dungeon2.gif"), fit: BoxFit.cover),
+          ),
+          alignment: img != "skeleton" ? Alignment(0.8, 0.4) : Alignment(0.8, 0.3),
+          child:  Image(image: AssetImage("assets/$img.gif"), width: 96.0, height: 96.0)
+      ),
     );
   }
 

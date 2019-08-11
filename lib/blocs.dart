@@ -205,6 +205,10 @@ class ActionBloc extends Bloc<String, String> {
 
   @override
   Stream<String> mapEventToState(String event) async* {
+    if (event == "dungeonKey") {
+      player.keyCost = player.keyCost * 2;
+      player.dungeonLevel++;
+    }
     yield event;
   }
 
@@ -221,6 +225,8 @@ class GoldBloc extends Bloc<int, int> {
       goldAnimationController.value = 1.0;
       goldAnimationController.reverse();
       player.gold += newGold;
+      yield newGold;
+    } else {
       yield newGold;
     }
   }
