@@ -100,7 +100,7 @@ class Player {
     this.inventory,
     this.equipped,
     this.bloodSteal = false,
-    this.skillPoints = 2,
+    this.skillPoints = 0,
     this.skillProgress,
     this.dungeonLevel = 1,
     this.keyCost = 500
