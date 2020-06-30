@@ -17,7 +17,6 @@ Player player;
 bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
-double TILE_LENGTH;
 int id = 0;
 List<DungeonTile> dungeonTiles = [
   DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
@@ -344,7 +343,6 @@ class DungeonListState extends State<DungeonList>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      TILE_LENGTH = MediaQuery.of(context).size.width / 2;
       return scrollController.jumpTo(MediaQuery.of(context).size.width / 4);
     });
   }
@@ -381,7 +379,6 @@ class DungeonListState extends State<DungeonList>
           if (!isScrolling &&
             dungeonTiles[1].event.eventType != "fight" &&
             dungeonTiles[1].event.eventType != "merchant") {
-            print("yess");
             _clickerBloc.dispatch(dungeonTiles);
           }
         },
