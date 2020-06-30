@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'main.dart';
+import 'globals.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'classes.g.dart';
@@ -9,10 +9,10 @@ class DungeonTile extends StatelessWidget {
   DungeonTile({Key key, @required this.event}) : super(key: key);
 
   final DungeonEvent event;
-  String img;
 
   @override
   Widget build(BuildContext context) {
+    String img;
     if (event.eventType == "fight") {
       img = event.enemy.name;
     } else {
@@ -29,11 +29,6 @@ class DungeonTile extends StatelessWidget {
           child:  Image(image: AssetImage("assets/$img.gif"), width: 96.0, height: 96.0)
       ),
     );
-  }
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return 'DungeonTile { event: $event }';
   }
 }
 

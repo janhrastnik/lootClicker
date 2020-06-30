@@ -1,12 +1,8 @@
 import 'package:bloc/bloc.dart';
-import 'main.dart';
+import 'globals.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'classes.dart';
-
-Future wait(n) async {
-  return Future.delayed(Duration(seconds: n));
-}
 
 class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   @override
@@ -70,7 +66,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
 }
 
 void scrollToMiddle() {
-  scrollController.jumpTo(TILE_LENGTH/2);
+  scrollController.jumpTo(tileLength/2);
 }
 
 Future scrollDungeon(DungeonBloc dbloc, [ClickerBloc cbloc]) async {
@@ -78,7 +74,7 @@ Future scrollDungeon(DungeonBloc dbloc, [ClickerBloc cbloc]) async {
   scrollToMiddle();
   dbloc.dispatch(dungeonTiles);
   await scrollController.animateTo(
-      scrollController.offset + TILE_LENGTH,
+      scrollController.offset + tileLength,
       duration: Duration(seconds: 1),
       curve: Curves.ease
   );
