@@ -84,9 +84,9 @@ class MyAppState extends State<MyApp> {
           primarySwatch: Colors.blue,
           fontFamily: "Boxy",
           textTheme: TextTheme(
-            body1: textStyle(12.0),
+            bodyText1: textStyle(12.0),
             button: textStyle(11.0),
-            subhead: textStyle(11.0),
+            subtitle1: textStyle(11.0),
           )
       ),
       home: SplashPage(),
@@ -380,22 +380,13 @@ class DungeonScreenState extends State<DungeonScreen>
             Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Flexible(
-                  flex: 1,
+                Expanded(
                     child: Image(
                       width: double.infinity,
                       height: double.infinity,
                       repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundbrick.png"),
                     )
                 ),
-                Flexible(
-                    flex: 2,
-                    child: Image(
-                      width: double.infinity,
-                      height: double.infinity,
-                      repeat: ImageRepeat.repeat, image: AssetImage("assets/backgroundbrick.png"),
-                    )
-                )
               ],
             ),
             Column(
@@ -556,12 +547,12 @@ class DungeonScreenState extends State<DungeonScreen>
                                   bloc: _clickerBloc,
                                   builder:
                                       (BuildContext context, double progress) {
-                                    String eventText;
+                                    String eventText = "";
                                     if (dungeonTiles[1].event.eventType ==
                                         "shrine") {
                                       eventText = "Enter The Dungeon";
                                     }
-                                    if (dungeonTiles[1].event.eventType ==
+                                    else if (dungeonTiles[1].event.eventType ==
                                         "merchant") {
                                       eventText = "The merchant offers you a trade.";
                                     }
@@ -589,12 +580,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                                 value: progress,
                                               ),
                                             ),
-                                            dungeonTiles[1].event.eventType ==
-                                                        "shrine" ||
-                                                    dungeonTiles[1]
-                                                            .event
-                                                            .eventType ==
-                                                        "merchant"
+                                            eventText != ""
                                                 ? Text(eventText)
                                                 : Text(
                                                     "${dungeonTiles[1].event.length - dungeonTiles[1].event.progress} / ${dungeonTiles[1].event.length}"),

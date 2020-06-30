@@ -17,7 +17,7 @@ class FrontPanelModel extends Model {
       return CharacterScreen();
     } else if (_activePanel == FrontPanels.shopPage) {
       return ShopScreen();
-    } else if (_activePanel == FrontPanels.skillsPage) {
+    } else {
       return SkillsScreen();
     }
   }

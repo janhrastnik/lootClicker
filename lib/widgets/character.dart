@@ -24,28 +24,25 @@ class CharacterScreenState extends State<CharacterScreen> {
           // we 'unequip' the current item by using it with an opposite value
           player.inventory.add(player.equipped[item.equip].id);
           player.equipped[item.equip].use(
-              BlocProvider.of<HeroHpBloc>(context),
-              BlocProvider.of<HeroExpBloc>(context),
-              BlocProvider.of<GoldBloc>(context),
-              BlocProvider.of<ClickerBloc>(context),
-              true,
-              player.equipped[item.equip].equip,
-              player.equipped[item.equip].behaviours,
-              item.id
+              hpBloc: BlocProvider.of<HeroHpBloc>(context),
+              expBloc: BlocProvider.of<HeroExpBloc>(context),
+              isEquipped: true,
+              equip: item.equip,
+              behaviours: item.behaviours,
+              id: item.id
           );
         }
       } else {
         player.inventory.add(item.id);
       }
+
       item.use(
-          BlocProvider.of<HeroHpBloc>(context),
-          BlocProvider.of<HeroExpBloc>(context),
-          BlocProvider.of<GoldBloc>(context),
-          BlocProvider.of<ClickerBloc>(context),
-          equipped,
-          item.equip,
-          item.behaviours,
-          item.id
+          hpBloc: BlocProvider.of<HeroHpBloc>(context),
+          expBloc: BlocProvider.of<HeroExpBloc>(context),
+          isEquipped: equipped,
+          equip: item.equip,
+          behaviours: item.behaviours,
+          id: item.id
       );
       if (item.time != 0) {
         effects[id] = Effect(
@@ -61,14 +58,12 @@ class CharacterScreenState extends State<CharacterScreen> {
             print("Item effect has ran out.");
             item.use(
               // we use the item as if it were equipped, this reverts the item effects
-                BlocProvider.of<HeroHpBloc>(context),
-                BlocProvider.of<HeroExpBloc>(context),
-                BlocProvider.of<GoldBloc>(context),
-                BlocProvider.of<ClickerBloc>(context),
-                true,
-                item.equip,
-                item.behaviours,
-                item.id
+                hpBloc: BlocProvider.of<HeroHpBloc>(context),
+                expBloc: BlocProvider.of<HeroExpBloc>(context),
+                isEquipped: true,
+                equip: item.equip,
+                behaviours: item.behaviours,
+                id: item.id
             );
           });
         });

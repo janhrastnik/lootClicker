@@ -69,25 +69,26 @@ void scrollToMiddle() {
   scrollController.jumpTo(tileLength/2);
 }
 
-Future scrollDungeon(DungeonBloc dbloc, [ClickerBloc cbloc]) async {
+Future scrollDungeon(DungeonBloc dungeonBloc, [ClickerBloc clickerBloc]) async {
   progressAnimationController.forward();
   scrollToMiddle();
-  dbloc.dispatch(dungeonTiles);
+  dungeonBloc.dispatch(dungeonTiles);
   await scrollController.animateTo(
       scrollController.offset + tileLength,
       duration: Duration(seconds: 1),
       curve: Curves.ease
   );
-  dbloc.dispatch(dungeonTiles);
+  dungeonBloc.dispatch(dungeonTiles);
   scrollToMiddle();
   isScrolling = false;
   progressAnimationController.reset();
-  if (cbloc != null) {
-    cbloc.dispatch(<DungeonTile>[]);
+  if (clickerBloc != null) {
+    clickerBloc.dispatch(<DungeonTile>[]);
   }
 }
 
 class ClickerBloc extends Bloc<List<DungeonTile>, double> {
+  // handle click events
   double get initialState => 1.0;
   final GoldBloc goldBloc;
   final HeroHpBloc heroHpBloc;
@@ -117,7 +118,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
             await wait(3);
             yield 1;
           } else
-          if (player.hp >= 0) {
+          if (player.hp >= 0) { // player takes damage
             heroHpBloc.dispatch(-currEvent.enemy.attack);
           }
         }
@@ -197,11 +198,13 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
 }
 
 class ActionBloc extends Bloc<String, String> {
+  // handle events
   String get initialState => "shrine";
 
   @override
   Stream<String> mapEventToState(String event) async* {
     if (event == "dungeonKey") {
+      // dungeon key usage -> increases dungeon level
       player.keyCost = player.keyCost * 2;
       player.dungeonLevel++;
     }
@@ -211,6 +214,7 @@ class ActionBloc extends Bloc<String, String> {
 }
 
 class GoldBloc extends Bloc<int, int> {
+  // used to increase player gold
   int get initialState => player.gold;
 
   @override
@@ -229,6 +233,7 @@ class GoldBloc extends Bloc<int, int> {
 }
 
 class HeroHpBloc extends Bloc<int, double> {
+  // handle player hp
   double get initialState => player.hp / player.hpCap;
   final DungeonBloc dungeonBloc;
 
@@ -250,7 +255,6 @@ class HeroHpBloc extends Bloc<int, double> {
       deathAnimationController.forward();
       yield 0.0;
       await wait(3);
-      print("yoooo");
       deathAnimationController.value = 1.0;
       deathAnimationController.reverse();
       dungeonBloc.dispatch(<DungeonTile>[]);
@@ -262,6 +266,7 @@ class HeroHpBloc extends Bloc<int, double> {
 }
 
 class HeroExpBloc extends Bloc<int, double> {
+  // handle player exp
   double get initialState => player.exp / player.expCap;
   final HeroHpBloc heroHpBloc;
 
@@ -281,6 +286,7 @@ class HeroExpBloc extends Bloc<int, double> {
 }
 
 class TapAnimationBloc extends Bloc<List, List> {
+  // show tap animation
   List get initialState => [];
 
   @override

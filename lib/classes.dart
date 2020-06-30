@@ -137,12 +137,12 @@ class Enemy {
 
 class Usable {
 
-  void use(hpBloc, expBloc, clickBloc, goldBloc, equipped, equip, behaviours, id) {
+  void use({hpBloc, expBloc, bool isEquipped, equip, behaviours, id}) {
     print(equip);
-    print(equipped);
+    print(isEquipped);
     print(behaviours);
-    if (equipped != null) {
-      if (equipped == false) {// if item isn't equipped then equip it
+    if (isEquipped != null) {
+      if (isEquipped == false) {// if item isn't equipped then equip it
         player.equipped[equip] = items[id];
         print("player.equipped is " + player.equipped.toString());
         print("ITEMS ID IS " + items[id].toString());
@@ -154,31 +154,31 @@ class Usable {
       // if item is equip, then reverse the value to 'unequip' it
       switch(behaviour) {
         case "changeHp":
-          changeHp(equipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
+          changeHp(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
           break;
         case "changeAttack":
-          changeAttack(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          changeAttack(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
           break;
         case "changeHpCap":
-          changeHpCap(equipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
+          changeHpCap(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);
           break;
         case "changeLoot":
-          changeLoot(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          changeLoot(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
           break;
         case "changeIntelligence":
-          changeIntelligence(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          changeIntelligence(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
           break;
         case "changeExpGain":
-          changeExpGain(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          changeExpGain(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
           break;
         case "changeCriticalHitChance":
-          changeCriticalHitChance(equipped == true ? 0 - args["value"] : args["value"]);
+          changeCriticalHitChance(isEquipped == true ? 0 - args["value"] : args["value"]);
           break;
         case "changeCriticalHitDamage":
-          changeCriticalHitDamage(equipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
+          changeCriticalHitDamage(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
           break;
         case "changeDodgeChance":
-          changeDodgeChance(equipped == true ? 0 - args["value"] : args["value"]);
+          changeDodgeChance(isEquipped == true ? 0 - args["value"] : args["value"]);
           break;
       }
     });
@@ -260,7 +260,7 @@ class Item extends Usable {
   String name;
   String id;
   Map behaviours;
-  String equip;
+  String equip; // the equip slot
   String description;
   int cost;
   int time;

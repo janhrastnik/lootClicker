@@ -28,7 +28,7 @@ class Merchant extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 ListTile(
-                  leading: Image(image: AssetImage("assets/${randomItem.id}.png"), width: 64.0, height: 64.0,),
+                  leading: Image(image: AssetImage("assets/items/${randomItem.id}.png"), width: 64.0, height: 64.0,),
                   title: Text(randomItem.name),
                 ),
                 Expanded(
