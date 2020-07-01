@@ -60,7 +60,6 @@ class SkillTreeState extends State<SkillTree> {
     });
   }
 
-
   void showDescription(Skill skill, int treeIndex, int index) {
     AlertDialog description = AlertDialog(
       title: Text(skill.name),
