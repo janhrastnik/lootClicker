@@ -15,17 +15,19 @@ class CharacterScreenState extends State<CharacterScreen> {
     super.initState();
   }
 
-  dynamic useItem(Item item, int index, bool equipped) {
+  useItem(Item item, int index, bool equipped) {
+    dynamic hp = BlocProvider.of<HeroHpBloc>(context);
+    dynamic exp = BlocProvider.of<HeroExpBloc>(context);
     setState(() {
       if (equipped == null || equipped == false) {
         // if the item is unequipped then we remove it
         player.inventory.removeAt(index);
         if (player.equipped[item.equip] != null) {
           // we 'unequip' the current item by using it with an opposite value
-          player.inventory.add(player.equipped[item.equip].id);
-          player.equipped[item.equip].use(
-              hpBloc: BlocProvider.of<HeroHpBloc>(context),
-              expBloc: BlocProvider.of<HeroExpBloc>(context),
+          player.inventory.add(player.equipped[item.equip].id); // add it to the inventory
+          player.equipped[item.equip].use( // unequip it
+              hpBloc: hp,
+              expBloc: exp,
               isEquipped: true,
               equip: item.equip,
               behaviours: item.behaviours,
@@ -37,35 +39,31 @@ class CharacterScreenState extends State<CharacterScreen> {
       }
 
       item.use(
-          hpBloc: BlocProvider.of<HeroHpBloc>(context),
-          expBloc: BlocProvider.of<HeroExpBloc>(context),
+          hpBloc: hp,
+          expBloc: exp,
           isEquipped: equipped,
           equip: item.equip,
           behaviours: item.behaviours,
           id: item.id
       );
-      if (item.time != 0) {
-        effects[id] = Effect(
+      if (item.time != 0) { // item is a consumable with a temporary effect
+        effectsStream.sink.add(Effect(
           desc: item.name,
           time: item.time,
-          id: id,
-        );
-        id++;
-        effectsStream.sink.add(1);
+        ));
         wait(item.time).then((data) {
           // we wait for the effect to run out
-          setState(() {
-            print("Item effect has ran out.");
+            print("Item effect has ran out. Item equip was ${item.equip}");
+            print("INVENTORY IS ${player.inventory}");
             item.use(
               // we use the item as if it were equipped, this reverts the item effects
-                hpBloc: BlocProvider.of<HeroHpBloc>(context),
-                expBloc: BlocProvider.of<HeroExpBloc>(context),
+                hpBloc: hp,
+                expBloc: exp,
                 isEquipped: true,
                 equip: item.equip,
                 behaviours: item.behaviours,
                 id: item.id
             );
-          });
         });
       }
     });
@@ -84,7 +82,7 @@ class CharacterScreenState extends State<CharacterScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Image(
-                  image: AssetImage("assets/${item.id}.png"),
+                  image: AssetImage("assets/items/${item.id}.png"),
                 )
               ],
             ),
@@ -258,7 +256,7 @@ class ItemSlot extends StatelessWidget {
             child: item != null
                 ? Center(
               child: Image(
-                image: AssetImage("assets/${item.id}.png"),
+                image: AssetImage("assets/items/${item.id}.png"),
               ),
             )
                 : null),

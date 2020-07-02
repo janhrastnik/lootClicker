@@ -137,7 +137,7 @@ class Enemy {
 
 class Usable {
 
-  void use({hpBloc, expBloc, bool isEquipped, equip, behaviours, id}) {
+  use({hpBloc, expBloc, bool isEquipped, equip, behaviours, id}) {
     print(equip);
     print(isEquipped);
     print(behaviours);
@@ -146,12 +146,12 @@ class Usable {
         player.equipped[equip] = items[id];
         print("player.equipped is " + player.equipped.toString());
         print("ITEMS ID IS " + items[id].toString());
-      } else { // if item is equipped then unequip it
+      } else if (equip != null) { // if item is equipped then unequip it
         player.equipped[equip] = null;
       }
     }
     behaviours.forEach((behaviour, args) {
-      // if item is equip, then reverse the value to 'unequip' it
+      // if item is equipped, then reverse the value to 'unequip' it
       switch(behaviour) {
         case "changeHp":
           changeHp(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"], hpBloc);

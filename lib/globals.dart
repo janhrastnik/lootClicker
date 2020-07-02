@@ -9,7 +9,6 @@ bool isMenu = false;
 bool isScrolling = false;
 bool isDead = false;
 double tileLength;
-int id = 0;
 List<DungeonTile> dungeonTiles = [
   DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
   DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
@@ -24,7 +23,7 @@ Map items = {};
 Map skills = {"strength" : [], "endurance": [], "wisdom": []};
 List assetNames = [];
 Map<int, Effect> effects = {};
-final StreamController effectsStream = StreamController<dynamic>();
+final StreamController effectsStream = StreamController<Effect>();
 
 Future wait(n) async {
   return Future.delayed(Duration(seconds: n));
