@@ -385,7 +385,7 @@ class DungeonScreenState extends State<DungeonScreen>
                 } else {
                   return Container(child: null);
                 }
-              }),
+          }),
           BlocBuilder( // death animation
               bloc: _heroHpBloc,
               builder: (BuildContext context, double health) {
@@ -404,23 +404,8 @@ class DungeonScreenState extends State<DungeonScreen>
                         )),
                   );
                 }
-              }),
-          StreamBuilder(
-              initialData: 0,
-              stream: effectsStream.stream,
-              builder:
-                  (BuildContext context, AsyncSnapshot snapshot) {
-                print("EFFECTS: " + effects.toString());
-                print(snapshot.data);
-                if (!snapshot.hasData) {
-                  return Container();
-                } else if (snapshot.data == 0) {
-                  return Container();
-                } else {
-                  return EffectsList(
-                      effectsList: effects.values.toList());
-                }
-              })
+          }),
+          EffectsList()
         ],
       ),
     );

@@ -84,6 +84,7 @@ class MyAppState extends State<MyApp> {
           fontFamily: "Boxy",
           textTheme: TextTheme(
             bodyText1: textStyle(12.0),
+            bodyText2: textStyle(12.0),
             button: textStyle(11.0),
             subtitle1: textStyle(11.0),
           )

@@ -22,7 +22,6 @@ Map monsters = {};
 Map items = {};
 Map skills = {"strength" : [], "endurance": [], "wisdom": []};
 List assetNames = [];
-Map<int, Effect> effects = {};
 final StreamController effectsStream = StreamController<Effect>();
 
 Future wait(n) async {
