@@ -155,7 +155,6 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           currEvent.progress = 0;
           currEvent.length = event[2].event.length;
           goldBloc.dispatch(currEvent.loot);
-          goldBloc.dispatch(0); // fixes bug where gold counter doesn't update
           if (isMenu == false) {
             isScrolling = true;
             await scrollDungeon(dungeonBloc);
@@ -215,7 +214,7 @@ class ActionBloc extends Bloc<String, String> {
 
 class GoldBloc extends Bloc<int, int> {
   // used to increase player gold
-  int get initialState => player.gold;
+  int get initialState => 0;
 
   @override
   Stream<int> mapEventToState(int gold) async* {

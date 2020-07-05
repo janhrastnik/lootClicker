@@ -24,7 +24,6 @@ class MyBlocDelegate extends BlocDelegate {
   @override
   void onTransition(Transition transition) {
     super.onTransition(transition);
-    print(dungeonTiles[1].event.eventType);
   }
 }
 
@@ -164,7 +163,6 @@ class SplashPageState extends State<SplashPage> {
             attack: value["attack"],
             loot: value["loot"]);
       });
-      print(monsters.keys.toList().toString());
     });
     await readData("assets/items.json").then((data) {
       Map _data = data["items"];
@@ -192,7 +190,6 @@ class SplashPageState extends State<SplashPage> {
           skills[tree] = temp;
         });
       });
-      print(skills);
     });
     readProgress().then((data) {
       if (data != 0) {

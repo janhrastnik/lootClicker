@@ -13,7 +13,8 @@ class DungeonScreen extends StatefulWidget {
 
 class DungeonScreenState extends State<DungeonScreen>
     with TickerProviderStateMixin {
-  _onTapUp(TapUpDetails details) {
+
+  List getTapCoords(TapUpDetails details) {
     var x = details.globalPosition.dx;
     var y = details.globalPosition.dy;
     return <dynamic>[x, y];
@@ -68,10 +69,7 @@ class DungeonScreenState extends State<DungeonScreen>
             dungeonTiles[1].event.eventType != "fight"&&
             dungeonTiles[1].event.eventType != "merchant") {
           tapAnimationController.reset();
-          List<dynamic> data = _onTapUp(details);
-          dynamic event = dungeonTiles[1].event.eventType;
-          data.add(event);
-          _tapAnimationBloc.dispatch(data);
+          _tapAnimationBloc.dispatch(getTapCoords(details)+[dungeonTiles[1].event.eventType]);
         }
       },
       child: Stack(
@@ -96,26 +94,16 @@ class DungeonScreenState extends State<DungeonScreen>
                     BlocBuilder(
                         bloc: _goldBloc,
                         builder: (BuildContext context, int newGold) {
-                          if (newGold != 0) {
-                            _goldBloc.dispatch(0);
-                          }
                           return Column(
                             children: <Widget>[
                               Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Text("${player.gold}"),
+                                    Text("${player.gold}"), // TODO: fix bug where gold count doesn't update on same consecutive gold gains
                                     Image(
                                       image: AssetImage("assets/coin.gif"),
                                     )
                                   ]),
-                              newGold != 0 ? FadeTransition(
-                                opacity: goldAnimation,
-                                child: Text(
-                                  "${newGold > -1 ? "+" : ""} " + newGold.toString(),
-                                  style: TextStyle(color: Colors.amber),
-                                ),
-                              ) : Container()
                             ],
                           );
                         }),
@@ -203,7 +191,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                           (BuildContext context, int index) =>
                                       l[index],
                                     ),
-                                    Container(
+                                    Container( // player
                                       alignment: Alignment(-0.2, 0.0),
                                       child: Image(image: AssetImage("assets/idle.gif"),
                                         width: 128.0,
@@ -405,7 +393,36 @@ class DungeonScreenState extends State<DungeonScreen>
                   );
                 }
           }),
-          EffectsList()
+          Positioned( // show current effects
+            left: 0,
+            top: 0,
+            child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: 80.0,
+                child: EffectsList()
+            )
+          ),
+          BlocBuilder(
+            bloc: _goldBloc,
+            builder: (BuildContext context, int newGold) {
+              return Positioned(
+                  left: MediaQuery.of(context).size.width/2.2,
+                  top: MediaQuery.of(context).size.height/3,
+                  child: AnimatedBuilder(
+                    animation: goldAnimation,
+                    builder: (BuildContext context, _) {
+                      return Transform(
+                        transform: Matrix4.identity()..translate(0.0, -  100.0 / (1+goldAnimation.value)),
+                        child: FadeTransition(
+                          opacity: goldAnimation,
+                          child: Text("+ $newGold", style: TextStyle(color: Colors.orangeAccent),),
+                        ),
+                      );
+                    },
+                  )
+              );
+            },
+          )
         ],
       ),
     );
