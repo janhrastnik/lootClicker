@@ -249,6 +249,7 @@ class ItemSlot extends StatelessWidget {
         },
         child: Container(
             decoration: BoxDecoration(
+              color: Colors.white,
               border: Border.all(color: Colors.black54),
             ),
             width: 55.0,

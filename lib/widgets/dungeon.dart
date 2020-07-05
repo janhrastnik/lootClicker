@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'progressbar.dart';
 import '../blocs.dart';
 import '../classes.dart';
 import '../globals.dart';
@@ -39,10 +40,10 @@ class DungeonScreenState extends State<DungeonScreen>
     final HeroExpBloc _heroExpBloc = BlocProvider.of<HeroExpBloc>(context);
     final TapAnimationBloc _tapAnimationBloc =
     BlocProvider.of<TapAnimationBloc>(context);
-    final tapAnimationController =
+    tapAnimationController =
     AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     final tapAnimation =
-    Tween(begin: 1.0, end: 0.0).animate(tapAnimationController);
+    Tween(begin: 0.0, end: 1.0).animate(tapAnimationController);
     goldAnimationController =
         AnimationController(vsync: this, duration: Duration(seconds: 2));
     final goldAnimation =
@@ -68,7 +69,6 @@ class DungeonScreenState extends State<DungeonScreen>
         if (!isScrolling &&
             dungeonTiles[1].event.eventType != "fight"&&
             dungeonTiles[1].event.eventType != "merchant") {
-          tapAnimationController.reset();
           _tapAnimationBloc.dispatch(getTapCoords(details)+[dungeonTiles[1].event.eventType]);
         }
       },
@@ -179,7 +179,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                   List<DungeonTile> l) {
                                 return Stack(
                                   alignment: Alignment.center,
-                                  children: <Widget>[
+                                  children: <Widget>[ // the dungeon list
                                     ListView.builder(
                                       physics: NeverScrollableScrollPhysics(),
                                       controller: scrollController,
@@ -198,7 +198,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                         height: 128.0,
                                       ),
                                     ),
-                                    BlocBuilder(
+                                    BlocBuilder( // dungeon level display
                                         bloc: _actionBloc,
                                         builder: (BuildContext context, String event) => Container(
                                           child: Text(
@@ -213,55 +213,6 @@ class DungeonScreenState extends State<DungeonScreen>
                               },
                             ),
                           ),
-                          Flexible(
-                            flex: 0,
-                            child: BlocBuilder(
-                                bloc: _clickerBloc,
-                                builder:
-                                    (BuildContext context, double progress) {
-                                  String eventText = "";
-                                  if (dungeonTiles[1].event.eventType ==
-                                      "shrine") {
-                                    eventText = "Enter The Dungeon";
-                                  }
-                                  else if (dungeonTiles[1].event.eventType ==
-                                      "merchant") {
-                                    eventText = "The merchant offers you a trade.";
-                                  }
-                                  if (isDead) {
-                                    progress = 1.0;
-                                    eventText = "Enter The Dungeon";
-                                    isDead = false;
-                                  }
-                                  if (progress == 0.0) {
-                                    progress = 1.0;
-                                  }
-                                  return Container(
-                                    child: FadeTransition(
-                                      opacity: progressAnimation,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: <Widget>[
-                                          Container(
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Colors.black54)),
-                                            width: MediaQuery.of(context).size.width / 1.10,
-                                            height: 30.0,
-                                            child: LinearProgressIndicator(
-                                              value: progress,
-                                            ),
-                                          ),
-                                          eventText != ""
-                                              ? Text(eventText)
-                                              : Text(
-                                              "${dungeonTiles[1].event.length - dungeonTiles[1].event.progress} / ${dungeonTiles[1].event.length}"),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }),
-                          )
                         ],
                       ),
                     ),
@@ -272,83 +223,100 @@ class DungeonScreenState extends State<DungeonScreen>
                           builder: (BuildContext context, String event) {
                             if (event == "fight") { // show fight prompt
                               return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      Container(
-                                        width: 95.0,
-                                        height: 95.0,
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(12.0),
-                                            color: Colors.white
-                                        ),
-                                        child: MaterialButton(
-                                          child: Center(child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: <Widget>[
-                                              Container(
-                                                width: 64.0,
-                                                height: 64.0,
-                                                child: FittedBox(
-                                                  fit: BoxFit.fill,
-                                                  child: Image(image: AssetImage("assets/attack.png")),
+                                  ProgressBar(_clickerBloc),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        Container(
+                                          width: 95.0,
+                                          height: 95.0,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                              color: Colors.white
+                                          ),
+                                          child: MaterialButton(
+                                            child: Center(child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  width: 64.0,
+                                                  height: 64.0,
+                                                  child: FittedBox(
+                                                    fit: BoxFit.fill,
+                                                    child: Image(image: AssetImage("assets/attack.png")),
+                                                  ),
                                                 ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.all(4.0),
-                                                child: Text("Attack"),
-                                              )
-                                            ],
-                                          )),
-                                          onPressed: () {
-                                            if (!isScrolling) {
-                                              _clickerBloc.dispatch(dungeonTiles);
-                                            }
-                                          },
+                                                Padding(
+                                                  padding: const EdgeInsets.all(4.0),
+                                                  child: Text("Attack"),
+                                                )
+                                              ],
+                                            )),
+                                            onPressed: () {
+                                              if (!isScrolling) {
+                                                _clickerBloc.dispatch(dungeonTiles);
+                                              }
+                                            },
+                                          ),
                                         ),
-                                      ),
-                                      Container(
-                                        width: 95.0,
-                                        height: 95.0,
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(12.0),
-                                            color: Colors.white
-                                        ),
-                                        child: MaterialButton(
-                                          child: Center(child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: <Widget>[
-                                              Container(
-                                                width: 64.0,
-                                                height: 64.0,
-                                                child: FittedBox(
-                                                  fit: BoxFit.fill,
-                                                  child: Image(image: AssetImage("assets/flee.png")),
+                                        Container(
+                                          width: 95.0,
+                                          height: 95.0,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                              color: Colors.white
+                                          ),
+                                          child: MaterialButton(
+                                            child: Center(child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  width: 64.0,
+                                                  height: 64.0,
+                                                  child: FittedBox(
+                                                    fit: BoxFit.fill,
+                                                    child: Image(image: AssetImage("assets/flee.png")),
+                                                  ),
                                                 ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.all(4.0),
-                                                child: Text("Flee"),
-                                              )
-                                            ],
-                                          )),
-                                          onPressed: () {
-                                            scrollDungeon(_dungeonBloc,
-                                                _clickerBloc); // updates text
-                                          },
+                                                Padding(
+                                                  padding: const EdgeInsets.all(4.0),
+                                                  child: Text("Flee"),
+                                                )
+                                              ],
+                                            )),
+                                            onPressed: () {
+                                              if (!isScrolling) {
+                                                print("shouldnt see this twice");
+                                                scrollDungeon(
+                                                    _dungeonBloc,
+                                                    _clickerBloc,
+                                                    _actionBloc
+                                                ); // updates text
+                                              }
+                                            },
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ],
                               );
                             } else if (event == "merchant") {
-                              return Merchant();
-                            } else {
+                              return Column(
+                                children: <Widget>[
+                                  ProgressBar(_clickerBloc),
+                                  Expanded(
+                                    child: Merchant(_dungeonBloc, _clickerBloc, _actionBloc),
+                                  )
+                                ],
+                              );
+                            } else if (event == "transition") {
                               return Container();
+                            } else {
+                              return ProgressBar(_clickerBloc);
                             }
                           }),
                     )
@@ -361,7 +329,6 @@ class DungeonScreenState extends State<DungeonScreen>
               bloc: _tapAnimationBloc,
               builder: (BuildContext context, List tapData) {
                 if (tapData.length == 3) {
-                  tapAnimationController.forward();
                   return Positioned(
                     left: tapData[0],
                     top: tapData[1],

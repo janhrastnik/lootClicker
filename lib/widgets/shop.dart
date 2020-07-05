@@ -49,7 +49,18 @@ class ShopScreen extends StatelessWidget {
                   shrinkWrap: true,
                   itemCount: shopItems.length + 1,
                   itemBuilder: (BuildContext context, int index) => index != shopItems.length ? ExpansionTile(
-                    leading: Image(image: AssetImage("assets/items/${shopItems[index].id}.png"),),
+                    leading: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black54),
+                        ),
+                        width: 55.0,
+                        height: 55.0,
+                        child: Center(
+                          child: Image(
+                            image: AssetImage("assets/items/${shopItems[index].id}.png"),
+                          ),
+                        )),
                     title: Text(shopItems[index].name),
                     children: <Widget>[
                       Text(shopItems[index].description, style: TextStyle(fontFamily: "Centurion"),)
@@ -68,7 +79,20 @@ class ShopScreen extends StatelessWidget {
                       child: Text("${shopItems[index].cost} Gold"),
                     ),
                   ) : ExpansionTile(
-                      leading: Image(image: AssetImage("assets/items/key.gif"), width: 32.0, height: 32.0,),
+                      leading: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black54),
+                          ),
+                          width: 55.0,
+                          height: 55.0,
+                          child: Center(
+                            child: Image(
+                              image: AssetImage("assets/items/key.gif"),
+                              width: 32.0,
+                              height: 32.0,
+                            ),
+                          )),
                       title: Text("Dungeon Key"),
                       children: <Widget>[
                         Text("Increases Dungeon Level by 1.", style: TextStyle(fontFamily: "Centurion"),)

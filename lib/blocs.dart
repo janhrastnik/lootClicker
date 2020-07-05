@@ -69,7 +69,11 @@ void scrollToMiddle() {
   scrollController.jumpTo(tileLength/2);
 }
 
-Future scrollDungeon(DungeonBloc dungeonBloc, [ClickerBloc clickerBloc]) async {
+Future scrollDungeon(DungeonBloc dungeonBloc, [ClickerBloc clickerBloc, ActionBloc actionBloc]) async {
+  if (actionBloc != null) {
+    actionBloc.dispatch("transition");
+  }
+  isScrolling = true;
   progressAnimationController.forward();
   scrollToMiddle();
   dungeonBloc.dispatch(dungeonTiles);
@@ -141,8 +145,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           }
           currEvent.length = event[2].event.length;
           if (isMenu == false) {
-            isScrolling = true;
-            await scrollDungeon(dungeonBloc);
+            await scrollDungeon(dungeonBloc, null, actionBloc);
           }
           yield 1;
         } else {
@@ -156,8 +159,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           currEvent.length = event[2].event.length;
           goldBloc.dispatch(currEvent.loot);
           if (isMenu == false) {
-            isScrolling = true;
-            await scrollDungeon(dungeonBloc);
+            await scrollDungeon(dungeonBloc, null, actionBloc);
           }
           yield 1;
         } else {
@@ -170,8 +172,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           currEvent.progress = 0;
           currEvent.length = event[2].event.length;
           if (isMenu == false) {
-            isScrolling = true;
-            await scrollDungeon(dungeonBloc);
+            await scrollDungeon(dungeonBloc, null, actionBloc);
           }
           yield 1;
         } else {
@@ -180,17 +181,9 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         break;
       case "shrine":
         if (isMenu == false) {
-          isScrolling = true;
-          await scrollDungeon(dungeonBloc);
+          await scrollDungeon(dungeonBloc, null, actionBloc);
         }
         yield 2; // needs to be different than 1 otherwise doesn't yield
-        break;
-      case "merchant":
-        if (isMenu == false) {
-          isScrolling = true;
-          await scrollDungeon(dungeonBloc);
-          yield 1;
-        }
         break;
     }
   }
@@ -290,6 +283,9 @@ class TapAnimationBloc extends Bloc<List, List> {
 
   @override
   Stream<List> mapEventToState(List event) async* {
+    tapAnimationController.reset();
+    tapAnimationController.value = 1;
+    tapAnimationController.reverse();
     switch(event[2]) {
       case "fight":
         final List newList = List.from(event, growable: true);

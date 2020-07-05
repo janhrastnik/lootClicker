@@ -7,8 +7,11 @@ import 'dart:math';
 
 class Merchant extends StatelessWidget {
   List<Item> merchantItems = [items["apple"], items["tomato"], items["meat"]];
+  ClickerBloc clickerBloc;
+  DungeonBloc dungeonBloc;
+  ActionBloc actionBloc;
 
-  Merchant({Key key, ClickerBloc clickerBloc}) : super(key: key);
+  Merchant(this.dungeonBloc, this.clickerBloc, this.actionBloc);
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +67,11 @@ class Merchant extends StatelessWidget {
                         color: Colors.white,
                         child: Text("Leave"),
                         onPressed: () {
-                          _clickerBloc.dispatch(dungeonTiles);
+                          scrollDungeon(
+                              dungeonBloc,
+                              clickerBloc,
+                              actionBloc
+                          );
                         },
                       ),
                     )

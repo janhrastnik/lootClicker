@@ -15,6 +15,7 @@ List<DungeonTile> dungeonTiles = [
   DungeonTile(event: DungeonEvent(eventType: "merchant", length: null))
 ];
 ScrollController scrollController = ScrollController();
+AnimationController tapAnimationController;
 AnimationController progressAnimationController;
 AnimationController deathAnimationController;
 AnimationController goldAnimationController;
