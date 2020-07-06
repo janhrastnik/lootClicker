@@ -4,6 +4,7 @@ import 'classes.dart';
 import 'dart:async';
 
 enum FrontPanels { characterPage, shopPage, skillsPage }
+enum CharacterStates { idle, attack, run }
 Player player;
 bool isMenu = false;
 bool isScrolling = false;
@@ -24,7 +25,7 @@ Map items = {};
 Map skills = {"strength" : [], "endurance": [], "wisdom": []};
 List assetNames = [];
 final StreamController effectsStream = StreamController<Effect>();
-
+final StreamController characterStream = StreamController<CharacterStates>();
 Future wait(n) async {
   return Future.delayed(Duration(seconds: n));
 }

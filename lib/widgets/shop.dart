@@ -54,8 +54,8 @@ class ShopScreen extends StatelessWidget {
                           color: Colors.white,
                           border: Border.all(color: Colors.black54),
                         ),
-                        width: 55.0,
-                        height: 55.0,
+                        width: 48.0,
+                        height: 48.0,
                         child: Center(
                           child: Image(
                             image: AssetImage("assets/items/${shopItems[index].id}.png"),

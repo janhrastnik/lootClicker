@@ -78,8 +78,8 @@ class Player {
   bool bloodSteal;
 
   Player({this.gold = 0,
-    this.hp = 100,
-    this.hpCap = 100,
+    this.hp = 5,
+    this.hpCap = 5,
     this.attack = 1,
     this.intelligence = 1,
     this.looting = 1,

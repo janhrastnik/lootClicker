@@ -31,7 +31,14 @@ class Merchant extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 ListTile(
-                  leading: Image(image: AssetImage("assets/items/${randomItem.id}.png"), width: 64.0, height: 64.0,),
+                  leading: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black54),
+                      ),
+                      width: 48.0,
+                      height: 48.0,
+                      child: Image(image: AssetImage("assets/items/${randomItem.id}.png"), width: 32.0, height: 32.0,)),
                   title: Text(randomItem.name),
                 ),
                 Expanded(
@@ -69,7 +76,6 @@ class Merchant extends StatelessWidget {
                         onPressed: () {
                           scrollDungeon(
                               dungeonBloc,
-                              clickerBloc,
                               actionBloc
                           );
                         },

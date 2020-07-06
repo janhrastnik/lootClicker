@@ -150,7 +150,7 @@ class CharacterScreenState extends State<CharacterScreen> {
                 Column(
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.only(top: 10.0),
+                      padding: EdgeInsets.only(top: 30.0),
                       child: Text("Equipment"),
                     ),
                     ItemSlot(
@@ -181,7 +181,7 @@ class CharacterScreenState extends State<CharacterScreen> {
           Text("Inventory"),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: 30.0),
+              padding: EdgeInsets.only(bottom: 20.0),
               child: Stack(
                 children: <Widget>[
                   GridView.count(

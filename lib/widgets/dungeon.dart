@@ -191,12 +191,26 @@ class DungeonScreenState extends State<DungeonScreen>
                                           (BuildContext context, int index) =>
                                       l[index],
                                     ),
-                                    Container( // player
-                                      alignment: Alignment(-0.2, 0.0),
-                                      child: Image(image: AssetImage("assets/idle.gif"),
-                                        width: 128.0,
-                                        height: 128.0,
-                                      ),
+                                    StreamBuilder(
+                                      initialData: CharacterStates.idle,
+                                      stream: characterStream.stream,
+                                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                        String characterImage;
+                                        if (snapshot.data == CharacterStates.idle) {
+                                          characterImage = "assets/idle.gif";
+                                        } else if (snapshot.data == CharacterStates.attack) {
+                                          characterImage = "assets/attack.gif";
+                                        } else if (snapshot.data == CharacterStates.run) {
+                                          characterImage = "assets/run.gif";
+                                        }
+                                        return Container( // player
+                                          alignment: Alignment(-0.2, 0.0),
+                                          child: Image(image: AssetImage(characterImage),
+                                            width: 128.0,
+                                            height: 128.0,
+                                          ),
+                                        );
+                                      },
                                     ),
                                     BlocBuilder( // dungeon level display
                                         bloc: _actionBloc,
@@ -258,6 +272,8 @@ class DungeonScreenState extends State<DungeonScreen>
                                             onPressed: () {
                                               if (!isScrolling) {
                                                 _clickerBloc.dispatch(dungeonTiles);
+                                                characterStream.sink.add(CharacterStates.attack);
+                                                wait(1).then((value) => characterStream.sink.add(CharacterStates.idle));
                                               }
                                             },
                                           ),
@@ -289,11 +305,10 @@ class DungeonScreenState extends State<DungeonScreen>
                                             )),
                                             onPressed: () {
                                               if (!isScrolling) {
-                                                print("shouldnt see this twice");
                                                 scrollDungeon(
                                                     _dungeonBloc,
-                                                    _clickerBloc,
-                                                    _actionBloc
+                                                    _actionBloc,
+                                                  _clickerBloc
                                                 ); // updates text
                                               }
                                             },
@@ -313,7 +328,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                   )
                                 ],
                               );
-                            } else if (event == "transition") {
+                            } else if (event == "transition" || event == "death") {
                               return Container();
                             } else {
                               return ProgressBar(_clickerBloc);

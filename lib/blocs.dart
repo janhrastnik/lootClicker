@@ -69,10 +69,11 @@ void scrollToMiddle() {
   scrollController.jumpTo(tileLength/2);
 }
 
-Future scrollDungeon(DungeonBloc dungeonBloc, [ClickerBloc clickerBloc, ActionBloc actionBloc]) async {
+Future scrollDungeon(DungeonBloc dungeonBloc, [ActionBloc actionBloc, ClickerBloc clickerBloc]) async {
   if (actionBloc != null) {
     actionBloc.dispatch("transition");
   }
+  characterStream.sink.add(CharacterStates.run);
   isScrolling = true;
   progressAnimationController.forward();
   scrollToMiddle();
@@ -85,9 +86,10 @@ Future scrollDungeon(DungeonBloc dungeonBloc, [ClickerBloc clickerBloc, ActionBl
   dungeonBloc.dispatch(dungeonTiles);
   scrollToMiddle();
   isScrolling = false;
+  characterStream.sink.add(CharacterStates.idle);
   progressAnimationController.reset();
   if (clickerBloc != null) {
-    clickerBloc.dispatch(<DungeonTile>[]);
+    clickerBloc.dispatch([]);
   }
 }
 
@@ -120,7 +122,9 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
             heroHpBloc.dispatch(-currEvent.enemy.attack);
             actionBloc.dispatch("death");
             await wait(3);
-            yield 1;
+            actionBloc.dispatch("shrine");
+            yield 1.0;
+            break;
           } else
           if (player.hp >= 0) { // player takes damage
             heroHpBloc.dispatch(-currEvent.enemy.attack);
@@ -145,10 +149,11 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           }
           currEvent.length = event[2].event.length;
           if (isMenu == false) {
-            await scrollDungeon(dungeonBloc, null, actionBloc);
+            await scrollDungeon(dungeonBloc, actionBloc);
           }
           yield 1;
         } else {
+          print("else block gets run");
           yield 1 - (currEvent.progress / currEvent.length);
         }
         break;
@@ -159,7 +164,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           currEvent.length = event[2].event.length;
           goldBloc.dispatch(currEvent.loot);
           if (isMenu == false) {
-            await scrollDungeon(dungeonBloc, null, actionBloc);
+            await scrollDungeon(dungeonBloc, actionBloc);
           }
           yield 1;
         } else {
@@ -172,7 +177,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           currEvent.progress = 0;
           currEvent.length = event[2].event.length;
           if (isMenu == false) {
-            await scrollDungeon(dungeonBloc, null, actionBloc);
+            await scrollDungeon(dungeonBloc, actionBloc);
           }
           yield 1;
         } else {
@@ -181,7 +186,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
         break;
       case "shrine":
         if (isMenu == false) {
-          await scrollDungeon(dungeonBloc, null, actionBloc);
+          await scrollDungeon(dungeonBloc, actionBloc);
         }
         yield 2; // needs to be different than 1 otherwise doesn't yield
         break;
