@@ -9,9 +9,9 @@ class Merchant extends StatelessWidget {
   List<Item> merchantItems = [items["apple"], items["tomato"], items["meat"]];
   ClickerBloc clickerBloc;
   DungeonBloc dungeonBloc;
-  ActionBloc actionBloc;
+  PromptBloc promptBloc;
 
-  Merchant(this.dungeonBloc, this.clickerBloc, this.actionBloc);
+  Merchant(this.dungeonBloc, this.clickerBloc, this.promptBloc);
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class Merchant extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: FlatButton(
-                        color: Colors.white,
+                        color: Colors.blueAccent,
                         child: Text("Buy (${randomItem.cost} Gold)"),
                         onPressed: () {
                           if (player.gold >= randomItem.cost) {
@@ -71,12 +71,12 @@ class Merchant extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: FlatButton(
-                        color: Colors.white,
+                        color: Colors.redAccent,
                         child: Text("Leave"),
                         onPressed: () {
                           scrollDungeon(
                               dungeonBloc,
-                              actionBloc
+                              promptBloc
                           );
                         },
                       ),

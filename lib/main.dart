@@ -158,10 +158,12 @@ class SplashPageState extends State<SplashPage> {
       data.forEach((key, value) {
         monsters[key] = Enemy(
             name: key,
+            displayName: value["displayName"],
             hp: value["hp"],
             expValue: value["expValue"],
             attack: value["attack"],
-            loot: value["loot"]);
+            loot: value["loot"],
+            );
       });
     });
     await readData("assets/items.json").then((data) {
@@ -238,13 +240,13 @@ class BlocPageState extends State<BlocPage> {
   TapAnimationBloc _tapAnimationBloc;
   HeroHpBloc _heroHpBloc;
   HeroExpBloc _heroExpBloc;
-  ActionBloc _actionBloc;
+  PromptBloc _promptBloc;
 
   @override
   void initState() {
-    _actionBloc = ActionBloc();
+    _promptBloc = PromptBloc();
     _goldBloc = GoldBloc();
-    _dungeonBloc = DungeonBloc(actionBloc: _actionBloc);
+    _dungeonBloc = DungeonBloc(promptBloc: _promptBloc);
     _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);
     _heroExpBloc = HeroExpBloc(heroHpBloc: _heroHpBloc);
     _clickerBloc = ClickerBloc(
@@ -252,7 +254,7 @@ class BlocPageState extends State<BlocPage> {
       heroHpBloc: _heroHpBloc,
       heroExpBloc: _heroExpBloc,
       dungeonBloc: _dungeonBloc,
-      actionBloc: _actionBloc
+      promptBloc: _promptBloc
     );
     _tapAnimationBloc = TapAnimationBloc();
     super.initState();
@@ -262,7 +264,7 @@ class BlocPageState extends State<BlocPage> {
   Widget build(BuildContext context) {
     return BlocProviderTree(
       blocProviders: <BlocProvider>[
-        BlocProvider<ActionBloc>(bloc: _actionBloc),
+        BlocProvider<PromptBloc>(bloc: _promptBloc),
         BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
         BlocProvider<ClickerBloc>(bloc: _clickerBloc),
         BlocProvider<GoldBloc>(bloc: _goldBloc),

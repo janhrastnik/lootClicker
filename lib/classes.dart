@@ -118,6 +118,7 @@ class Player {
 }
 
 class Enemy {
+  String displayName;
   String name;
   String loot;
   int hp;
@@ -127,6 +128,7 @@ class Enemy {
 
   Enemy({
     this.name,
+    this.displayName,
     this.loot,
     this.hp,
     this.expValue,

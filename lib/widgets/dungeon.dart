@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'progressbar.dart';
 import '../blocs.dart';
 import '../classes.dart';
 import '../globals.dart';
 import 'effect.dart';
-import 'merchant.dart';
+import 'prompt.dart';
 
 class DungeonScreen extends StatefulWidget {
   @override
@@ -32,7 +31,7 @@ class DungeonScreenState extends State<DungeonScreen>
 
   @override
   Widget build(BuildContext context) {
-    final ActionBloc _actionBloc = BlocProvider.of<ActionBloc>(context);
+    final PromptBloc _promptBloc = BlocProvider.of<PromptBloc>(context);
     final DungeonBloc _dungeonBloc = BlocProvider.of<DungeonBloc>(context);
     final ClickerBloc _clickerBloc = BlocProvider.of<ClickerBloc>(context);
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
@@ -48,10 +47,6 @@ class DungeonScreenState extends State<DungeonScreen>
         AnimationController(vsync: this, duration: Duration(seconds: 2));
     final goldAnimation =
     Tween(begin: 0.0, end: 1.0).animate(goldAnimationController);
-    progressAnimationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 1));
-    final progressAnimation =
-    Tween(begin: 1.0, end: 0.0).animate(progressAnimationController);
     deathAnimationController =
         AnimationController(vsync: this, duration: Duration(seconds: 3));
     final deathAnimation =
@@ -171,8 +166,7 @@ class DungeonScreenState extends State<DungeonScreen>
                       flex: 2,
                       child: Column(
                         children: <Widget>[
-                          Flexible( // dungeon tile listview
-                            flex: 2,
+                          Expanded(
                             child: BlocBuilder(
                               bloc: _dungeonBloc,
                               builder: (BuildContext context,
@@ -213,7 +207,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                       },
                                     ),
                                     BlocBuilder( // dungeon level display
-                                        bloc: _actionBloc,
+                                        bloc: _promptBloc,
                                         builder: (BuildContext context, String event) => Container(
                                           child: Text(
                                             "Dungeon Level ${player.dungeonLevel}",
@@ -232,108 +226,11 @@ class DungeonScreenState extends State<DungeonScreen>
                     ),
                     Flexible(
                       flex: 2,
-                      child: BlocBuilder(
-                          bloc: _actionBloc,
-                          builder: (BuildContext context, String event) {
-                            if (event == "fight") { // show fight prompt
-                              return Column(
-                                children: <Widget>[
-                                  ProgressBar(_clickerBloc),
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                      children: <Widget>[
-                                        Container(
-                                          width: 95.0,
-                                          height: 95.0,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(12.0),
-                                              color: Colors.white
-                                          ),
-                                          child: MaterialButton(
-                                            child: Center(child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                Container(
-                                                  width: 64.0,
-                                                  height: 64.0,
-                                                  child: FittedBox(
-                                                    fit: BoxFit.fill,
-                                                    child: Image(image: AssetImage("assets/attack.png")),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(4.0),
-                                                  child: Text("Attack"),
-                                                )
-                                              ],
-                                            )),
-                                            onPressed: () {
-                                              if (!isScrolling) {
-                                                _clickerBloc.dispatch(dungeonTiles);
-                                                characterStream.sink.add(CharacterStates.attack);
-                                                wait(1).then((value) => characterStream.sink.add(CharacterStates.idle));
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 95.0,
-                                          height: 95.0,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(12.0),
-                                              color: Colors.white
-                                          ),
-                                          child: MaterialButton(
-                                            child: Center(child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                Container(
-                                                  width: 64.0,
-                                                  height: 64.0,
-                                                  child: FittedBox(
-                                                    fit: BoxFit.fill,
-                                                    child: Image(image: AssetImage("assets/flee.png")),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(4.0),
-                                                  child: Text("Flee"),
-                                                )
-                                              ],
-                                            )),
-                                            onPressed: () {
-                                              if (!isScrolling) {
-                                                scrollDungeon(
-                                                    _dungeonBloc,
-                                                    _actionBloc,
-                                                  _clickerBloc
-                                                ); // updates text
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            } else if (event == "merchant") {
-                              return Column(
-                                children: <Widget>[
-                                  ProgressBar(_clickerBloc),
-                                  Expanded(
-                                    child: Merchant(_dungeonBloc, _clickerBloc, _actionBloc),
-                                  )
-                                ],
-                              );
-                            } else if (event == "transition" || event == "death") {
-                              return Container();
-                            } else {
-                              return ProgressBar(_clickerBloc);
-                            }
-                          }),
+                      child: Prompt(
+                        promptBloc: _promptBloc,
+                        dungeonBloc: _dungeonBloc,
+                        clickerBloc: _clickerBloc,
+                      ),
                     )
                   ],
                 ),

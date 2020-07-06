@@ -24,7 +24,7 @@ class ShopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
-    final ActionBloc _actionBloc = BlocProvider.of<ActionBloc>(context);
+    final PromptBloc _promptBloc = BlocProvider.of<PromptBloc>(context);
     return Container(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -101,7 +101,7 @@ class ShopScreen extends StatelessWidget {
                         color: Colors.white,
                         onPressed: () {
                           if (player.gold >= player.keyCost) {
-                            _actionBloc.dispatch("dungeonKey");
+                            _promptBloc.dispatch("dungeonKey");
                             _goldBloc.dispatch(-player.keyCost);
                           }
                         },

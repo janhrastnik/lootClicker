@@ -11,13 +11,12 @@ bool isScrolling = false;
 bool isDead = false;
 double tileLength;
 List<DungeonTile> dungeonTiles = [
-  DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
-  DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
-  DungeonTile(event: DungeonEvent(eventType: "merchant", length: null))
+    DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
+    DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
+    DungeonTile(event: DungeonEvent(eventType: "merchant", length: null))
 ];
 ScrollController scrollController = ScrollController();
 AnimationController tapAnimationController;
-AnimationController progressAnimationController;
 AnimationController deathAnimationController;
 AnimationController goldAnimationController;
 Map monsters = {};

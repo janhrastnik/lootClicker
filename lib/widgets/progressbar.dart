@@ -20,6 +20,10 @@ class ProgressBar extends StatelessWidget {
     }
   }
 
+  MaterialAccentColor getColor() {
+    return Colors.lightBlueAccent;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder(
@@ -45,6 +49,7 @@ class ProgressBar extends StatelessWidget {
                   width: MediaQuery.of(context).size.width / 1.10,
                   height: 30.0,
                   child: LinearProgressIndicator(
+                    backgroundColor: getColor(),
                     value: progress,
                   ),
                 ),

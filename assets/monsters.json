@@ -1,29 +1,34 @@
 {
   "rat": {
+    "displayName": "Rat",
     "hp": 10,
     "expValue": 10,
     "attack": 1,
     "loot": "ratMeat"
   },
   "skeleton": {
+    "displayName": "Skeleton",
     "hp": 20,
     "expValue": 15,
     "attack": 1,
     "loot": null
   },
   "wolf": {
+    "displayName": "Wolf",
     "hp": 15,
     "expValue": 15,
     "attack": 2,
     "loot": null
   },
   "ghost": {
+    "displayName": "Ghost",
     "hp": 25,
     "expValue": 20,
     "attack": 2,
     "loot": null
   },
   "slime": {
+    "displayName": "Slime",
     "hp": 5,
     "expValue": 5,
     "attack": 1,
