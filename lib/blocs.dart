@@ -132,9 +132,11 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           }
         }
         r = Random().nextDouble();
-        if (player.criticalHitChance >= r) { // if the player lands a critical hit
+        if (player.criticalHitChance >= r) {// if the player lands a critical hit
+          damageStream.sink.add([currEvent.enemy.attack, player.attack * player.criticalHitDamage]);
           currEvent.progress = currEvent.progress + (player.attack * player.criticalHitDamage);
         } else {
+          damageStream.sink.add([currEvent.enemy.attack, player.attack]);
           currEvent.progress = currEvent.progress + player.attack;
         }
         // if the player beats the monster
