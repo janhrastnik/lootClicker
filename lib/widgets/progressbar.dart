@@ -20,8 +20,12 @@ class ProgressBar extends StatelessWidget {
     }
   }
 
-  MaterialAccentColor getColor() {
-    return Colors.lightBlueAccent;
+  List<dynamic> getColors() {
+    if (dungeonTiles[1].event.eventType == "fight") {
+      return [AlwaysStoppedAnimation<Color>(Colors.red), Colors.brown];
+    } else {
+      return [AlwaysStoppedAnimation<Color>(Colors.blue), Colors.lightBlueAccent];
+    }
   }
 
   @override
@@ -31,6 +35,7 @@ class ProgressBar extends StatelessWidget {
         builder:
             (BuildContext context, double progress) {
           String eventText = getText();
+          List<dynamic> colors = getColors();
           if (isDead) {
             progress = 1.0;
             isDead = false;
@@ -49,7 +54,8 @@ class ProgressBar extends StatelessWidget {
                   width: MediaQuery.of(context).size.width / 1.10,
                   height: 30.0,
                   child: LinearProgressIndicator(
-                    backgroundColor: getColor(),
+                    valueColor: colors[0],
+                    backgroundColor: colors[1],
                     value: progress,
                   ),
                 ),

@@ -25,6 +25,7 @@ Map skills = {"strength" : [], "endurance": [], "wisdom": []};
 List assetNames = [];
 final StreamController effectsStream = StreamController<Effect>();
 final StreamController characterStream = StreamController<CharacterStates>();
+final StreamController damageStream = StreamController<List<int>>();
 Future wait(n) async {
   return Future.delayed(Duration(seconds: n));
 }

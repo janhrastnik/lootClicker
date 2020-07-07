@@ -171,7 +171,7 @@ class DungeonScreenState extends State<DungeonScreen>
                               bloc: _dungeonBloc,
                               builder: (BuildContext context,
                                   List<DungeonTile> l) {
-                                return Stack(
+                                return Stack( // dungeon
                                   alignment: Alignment.center,
                                   children: <Widget>[ // the dungeon list
                                     ListView.builder(
@@ -215,6 +215,21 @@ class DungeonScreenState extends State<DungeonScreen>
                                           ),
                                           alignment: Alignment(0.0, -0.7),
                                         )
+                                    ),
+                                    StreamBuilder( // damage animations
+                                      stream: damageStream.stream,
+                                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                        AnimationController damageAnimationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+                                        Animation<double> damageAnimation = Tween(begin: 0.0, end: 1.0).animate(deathAnimationController);
+                                        return Container(
+                                          child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: <Widget>[
+                                                Text("test1"),
+                                                Text("test2")
+                                          ]),
+                                        );
+                                      },
                                     )
                                   ],
                                 );
