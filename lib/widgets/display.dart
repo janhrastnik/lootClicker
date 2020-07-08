@@ -91,7 +91,7 @@ class DamageDisplayState extends State<DamageDisplay>
         return AnimatedBuilder(
           animation: damageAnimation,
           builder: (BuildContext context, _) {
-            return snapshot.hasData ? Transform(
+            return snapshot.hasData && !isMenu ? Transform(
               transform: Matrix4.identity()
                 ..translate(0.0, -50.0 / (1 + damageAnimation.value)),
               child: FadeTransition(

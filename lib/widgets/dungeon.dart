@@ -96,7 +96,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Text(
-                                          "${player.gold}"), // TODO: fix bug where gold count doesn't update on same consecutive gold gains
+                                          "${player.gold}"),
                                       Image(
                                         image: AssetImage("assets/coin.gif"),
                                       )
@@ -236,7 +236,7 @@ class DungeonScreenState extends State<DungeonScreen>
           BlocBuilder(
             bloc: _goldBloc,
             builder: (BuildContext context, int newGold) {
-              return Positioned(
+              return newGold > 0 ? Positioned(
                   left: MediaQuery.of(context).size.width / 2.2,
                   top: MediaQuery.of(context).size.height / 3,
                   child: AnimatedBuilder(
@@ -254,7 +254,7 @@ class DungeonScreenState extends State<DungeonScreen>
                         ),
                       );
                     },
-                  ));
+                  )) : Container();
             },
           )
         ],

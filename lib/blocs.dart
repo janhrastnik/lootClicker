@@ -15,7 +15,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   DungeonTile generateDungeon() {
     int randomRange(int min, int max) => min + Random().nextInt(max - min);
     String dungeonType = eventTypes[Random().nextInt(eventTypes.length)];
-    int lootAmount = (randomRange(10, 10) *
+    int lootAmount = (randomRange(1, 11) *
         player.lootModifierPercentage).floor() *
         player.dungeonLevel +
         player.lootModifierRaw;
@@ -123,6 +123,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
             heroHpBloc.dispatch(-currEvent.enemy.attack);
             promptBloc.dispatch("death");
             await wait(3);
+            goldBloc.dispatch(-(player.gold/2).floor()); // updates gold counter
             promptBloc.dispatch("shrine");
             yield 1.0;
             break;
@@ -220,6 +221,7 @@ class GoldBloc extends Bloc<int, int> {
   @override
   Stream<int> mapEventToState(int gold) async* {
     int newGold = gold;
+    yield 0; // we must yield 0 so that the bloc builds on same consecutive gold yields
     if (newGold != 0) {
       goldAnimationController.reset();
       goldAnimationController.value = 1.0;
@@ -249,7 +251,6 @@ class HeroHpBloc extends Bloc<int, double> {
     if (player.hp <= 0) {
       isDead = true;
       print("hero hp dropped to zero.");
-      player.gold = (player.gold / 2).round();
       player.hp = player.hpCap;
       isScrolling = true;
       deathAnimationController.forward();
