@@ -15,7 +15,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   DungeonTile generateDungeon() {
     int randomRange(int min, int max) => min + Random().nextInt(max - min);
     String dungeonType = eventTypes[Random().nextInt(eventTypes.length)];
-    int lootAmount = (randomRange(1, 10) *
+    int lootAmount = (randomRange(10, 10) *
         player.lootModifierPercentage).floor() *
         player.dungeonLevel +
         player.lootModifierRaw;

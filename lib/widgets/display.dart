@@ -83,7 +83,7 @@ class DamageDisplayState extends State<DamageDisplay>
       stream: damageStream.stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         AnimationController damageAnimationController = AnimationController(
-            vsync: this, duration: Duration(milliseconds: 2000));
+            vsync: this, duration: Duration(milliseconds: 500));
         Animation<double> damageAnimation =
             Tween(begin: 1.0, end: 0.0).animate(damageAnimationController);
         damageAnimationController.forward();
@@ -91,11 +91,18 @@ class DamageDisplayState extends State<DamageDisplay>
         return AnimatedBuilder(
           animation: damageAnimation,
           builder: (BuildContext context, _) {
-            return snapshot.hasData ? FadeTransition(
-                opacity: damageAnimation,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[Text(snapshot.data[0].toString()), Text(snapshot.data[1].toString())])) : Container();
+            return snapshot.hasData ? Transform(
+              transform: Matrix4.identity()
+                ..translate(0.0, -50.0 / (1 + damageAnimation.value)),
+              child: FadeTransition(
+                  opacity: damageAnimation,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Text("- ${snapshot.data[0]}", style: TextStyle(color: Colors.red)),
+                        Text("- ${snapshot.data[1]}", style: TextStyle(color: Colors.red))
+                      ])),
+            ) : Container();
           },
         );
       },
