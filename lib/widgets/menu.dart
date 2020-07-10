@@ -78,9 +78,9 @@ class MenuRowState extends State<MenuRow> {
                           model._activePanel == FrontPanels.characterPage) {
                         toggleBackdropPanelVisibility(
                             widget.frontPanelOpen.value);
-                        isMenu = false;
+                        gameData.isMenu = false;
                       } else {
-                        isMenu = true;
+                        gameData.isMenu = true;
                         model.activate(FrontPanels.characterPage);
                         widget.frontPanelOpen.value = true;
                       }
@@ -102,9 +102,9 @@ class MenuRowState extends State<MenuRow> {
                           model._activePanel == FrontPanels.shopPage) {
                         toggleBackdropPanelVisibility(
                             widget.frontPanelOpen.value);
-                        isMenu = false;
+                        gameData.isMenu = false;
                       } else {
-                        isMenu = true;
+                        gameData.isMenu = true;
                         model.activate(FrontPanels.shopPage);
                         widget.frontPanelOpen.value = true;
                       }
@@ -126,9 +126,9 @@ class MenuRowState extends State<MenuRow> {
                           model._activePanel == FrontPanels.skillsPage) {
                         toggleBackdropPanelVisibility(
                             widget.frontPanelOpen.value);
-                        isMenu = false;
+                        gameData.isMenu = false;
                       } else {
-                        isMenu = true;
+                        gameData.isMenu = true;
                         model.activate(FrontPanels.skillsPage);
                         widget.frontPanelOpen.value = true;
                       }

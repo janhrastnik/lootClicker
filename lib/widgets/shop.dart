@@ -5,20 +5,20 @@ import '../globals.dart';
 
 class ShopScreen extends StatelessWidget {
   final List shopItems = [
-    items["redPotion"],
-    items["atkPotion"],
-    items["atkGem"],
-    items["luckyCharm"],
-    items["woodSword"],
-    items["woodShield"],
-    items["leatherHelmet"],
-    items["commonShirt"],
-    items["steelAxe"],
-    items["steelDagger"],
-    items["steelSword"],
-    items["steelShield"],
-    items["steelHelm"],
-    items["steelChest"],
+    gameData.items["redPotion"],
+    gameData.items["atkPotion"],
+    gameData.items["atkGem"],
+    gameData.items["luckyCharm"],
+    gameData.items["woodSword"],
+    gameData.items["woodShield"],
+    gameData.items["leatherHelmet"],
+    gameData.items["commonShirt"],
+    gameData.items["steelAxe"],
+    gameData.items["steelDagger"],
+    gameData.items["steelSword"],
+    gameData.items["steelShield"],
+    gameData.items["steelHelm"],
+    gameData.items["steelChest"],
   ];
 
   @override

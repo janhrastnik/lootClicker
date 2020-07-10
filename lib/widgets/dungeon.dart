@@ -23,7 +23,7 @@ class DungeonScreenState extends State<DungeonScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      tileLength = MediaQuery.of(context).size.width / 2;
+      gameData.tileLength = MediaQuery.of(context).size.width / 2;
       return scrollController.jumpTo(MediaQuery.of(context).size.width / 4);
     });
   }
@@ -53,18 +53,18 @@ class DungeonScreenState extends State<DungeonScreen>
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        if (!isScrolling &&
-            dungeonTiles[1].event.eventType != "fight" &&
-            dungeonTiles[1].event.eventType != "merchant") {
-          _clickerBloc.dispatch(dungeonTiles);
+        if (!gameData.isScrolling &&
+            gameData.dungeonTiles[1].event.eventType != "fight" &&
+            gameData.dungeonTiles[1].event.eventType != "merchant") {
+          _clickerBloc.dispatch(gameData.dungeonTiles);
         }
       },
       onTapUp: (TapUpDetails details) {
-        if (!isScrolling &&
-            dungeonTiles[1].event.eventType != "fight" &&
-            dungeonTiles[1].event.eventType != "merchant") {
+        if (!gameData.isScrolling &&
+            gameData.dungeonTiles[1].event.eventType != "fight" &&
+            gameData.dungeonTiles[1].event.eventType != "merchant") {
           _tapAnimationBloc.dispatch(
-              getTapCoords(details) + [dungeonTiles[1].event.eventType]);
+              getTapCoords(details) + [gameData.dungeonTiles[1].event.eventType]);
         }
       },
       child: Stack(
@@ -209,7 +209,7 @@ class DungeonScreenState extends State<DungeonScreen>
               // death animation
               bloc: _promptBloc,
               builder: (BuildContext context, String prompt) {
-                if (!isDead) {
+                if (!gameData.isDead) {
                   return Container();
                 } else {
                   return Positioned(

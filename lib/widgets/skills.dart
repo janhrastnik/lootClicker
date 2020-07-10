@@ -107,14 +107,14 @@ class SkillTreeState extends State<SkillTree> {
               ),
               ListView.separated(
                 shrinkWrap: true,
-                itemCount: skills[widget.treeName].length,
+                itemCount: gameData.skills[widget.treeName].length,
                 separatorBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 20.0,
                   );
                 },
                 itemBuilder: (BuildContext context, int index) {
-                  Skill currSkill = skills[widget.treeName][index];
+                  Skill currSkill = gameData.skills[widget.treeName][index];
                   return Center(
                       child: GestureDetector(
                         onTap: () {

@@ -145,9 +145,9 @@ class Usable {
     print(behaviours);
     if (isEquipped != null) {
       if (isEquipped == false) {// if item isn't equipped then equip it
-        player.equipped[equip] = items[id];
+        player.equipped[equip] = gameData.items[id];
         print("player.equipped is " + player.equipped.toString());
-        print("ITEMS ID IS " + items[id].toString());
+        print("ITEMS ID IS " + gameData.items[id].toString());
       } else if (equip != null) { // if item is equipped then unequip it
         player.equipped[equip] = null;
       }
@@ -294,4 +294,20 @@ class Skill extends Usable {
     this.description,
     this.behaviours
   });
+}
+
+class GameData {
+  bool isMenu = false;
+  bool isScrolling = false;
+  bool isDead = false;
+  double tileLength;
+  List<DungeonTile> dungeonTiles = [
+    DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
+    DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
+    DungeonTile(event: DungeonEvent(eventType: "merchant", length: null))
+  ];
+  Map monsters = {};
+  Map items = {};
+  Map skills = {"strength" : [], "endurance": [], "wisdom": []};
+  List assetNames = [];
 }

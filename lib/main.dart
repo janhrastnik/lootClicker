@@ -156,7 +156,7 @@ class SplashPageState extends State<SplashPage> {
     Timer.periodic(Duration(seconds: 5), (Timer t) => saveProgress()); // save game every 5 seconds
     await readData("assets/monsters.json").then((data) {
       data.forEach((key, value) {
-        monsters[key] = Enemy(
+        gameData.monsters[key] = Enemy(
             name: key,
             displayName: value["displayName"],
             hp: value["hp"],
@@ -169,7 +169,7 @@ class SplashPageState extends State<SplashPage> {
     await readData("assets/items.json").then((data) {
       Map _data = data["items"];
       _data.forEach((key, args) {
-        items[key] = Item(
+        gameData.items[key] = Item(
             name: args["name"],
             id: key,
             equip: args["equip"],
@@ -182,14 +182,14 @@ class SplashPageState extends State<SplashPage> {
     await readData("assets/skills.json").then((data) {
       data.forEach((tree, _skills) {
         _skills.forEach((skillName, skillDetail) {
-          List temp = skills[tree];
+          List temp = gameData.skills[tree];
           temp.add(Skill(
               name: skillDetail["name"],
               id: skillName,
               description: skillDetail["description"],
               behaviours: skillDetail
           ));
-          skills[tree] = temp;
+          gameData.skills[tree] = temp;
         });
       });
     });

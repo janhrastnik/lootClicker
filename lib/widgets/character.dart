@@ -196,7 +196,7 @@ class CharacterScreenState extends State<CharacterScreen> {
                       itemCount: player.inventory.length,
                       itemBuilder: (BuildContext context, int index) => ItemSlot(
                         index: index,
-                        item: items[player.inventory[index]],
+                        item: gameData.items[player.inventory[index]],
                         showDescription: showDescription,
                       )),
                 ],

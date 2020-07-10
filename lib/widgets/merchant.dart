@@ -6,10 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
 
 class Merchant extends StatelessWidget {
-  List<Item> merchantItems = [items["apple"], items["tomato"], items["meat"]];
-  ClickerBloc clickerBloc;
-  DungeonBloc dungeonBloc;
-  PromptBloc promptBloc;
+  final List<Item> merchantItems = [gameData.items["apple"], gameData.items["tomato"], gameData.items["meat"]];
+  final ClickerBloc clickerBloc;
+  final DungeonBloc dungeonBloc;
+  final PromptBloc promptBloc;
 
   Merchant(this.dungeonBloc, this.clickerBloc, this.promptBloc);
 
@@ -63,7 +63,7 @@ class Merchant extends StatelessWidget {
                             player.inventory.add(randomItem.id);
                             print("PLAYER INVENTORY IS" + player.inventory.toString());
                             _goldBloc.dispatch(-randomItem.cost);
-                            _clickerBloc.dispatch(dungeonTiles);
+                            _clickerBloc.dispatch(gameData.dungeonTiles);
                           }
                         },
                       ),

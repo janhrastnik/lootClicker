@@ -9,11 +9,11 @@ class ProgressBar extends StatelessWidget {
   ProgressBar(this.clickerBloc);
 
   String getText() {
-    if (dungeonTiles[1].event.eventType == "shrine") {
+    if (gameData.dungeonTiles[1].event.eventType == "shrine") {
       return "Enter The Dungeon";
-    } else if (dungeonTiles[1].event.eventType == "merchant") {
+    } else if (gameData.dungeonTiles[1].event.eventType == "merchant") {
       return "The merchant offers you a trade.";
-    } else if (isDead) {
+    } else if (gameData.isDead) {
       return "Enter The Dungeon";
     } else {
       return "";
@@ -21,7 +21,7 @@ class ProgressBar extends StatelessWidget {
   }
 
   List<dynamic> getColors() {
-    if (dungeonTiles[1].event.eventType == "fight") {
+    if (gameData.dungeonTiles[1].event.eventType == "fight") {
       return [AlwaysStoppedAnimation<Color>(Colors.red), Colors.brown];
     } else {
       return [AlwaysStoppedAnimation<Color>(Colors.blue), Colors.lightBlueAccent];
@@ -36,9 +36,9 @@ class ProgressBar extends StatelessWidget {
             (BuildContext context, double progress) {
           String eventText = getText();
           List<dynamic> colors = getColors();
-          if (isDead) {
+          if (gameData.isDead) {
             progress = 1.0;
-            isDead = false;
+            gameData.isDead = false;
           }
           if (progress == 0.0) {
             progress = 1.0;
@@ -62,7 +62,7 @@ class ProgressBar extends StatelessWidget {
                 eventText != ""
                     ? Text(eventText)
                     : Text(
-                    "${dungeonTiles[1].event.length - dungeonTiles[1].event.progress} / ${dungeonTiles[1].event.length}"),
+                    "${gameData.dungeonTiles[1].event.length - gameData.dungeonTiles[1].event.progress} / ${gameData.dungeonTiles[1].event.length}"),
               ],
             ),
           );
