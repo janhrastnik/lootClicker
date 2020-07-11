@@ -138,7 +138,7 @@ class CharacterScreenState extends State<CharacterScreen> {
                       Text("HP: ${player.hp}/${player.hpCap}"),
                       Text("Attack: ${player.attack}"),
                       Text("Critical Hit Chance: ${player.criticalHitChance}"),
-                      Text("Dodge Chance: ${player.dodgeChance}"),
+                      Text("Agility: ${player.agility}"),
                       Text("Intelligence: ${player.intelligence}"),
                       Text("Looting: ${player.looting}"),
                       Text("Loot Amount: ${player.lootModifierPercentage}"),

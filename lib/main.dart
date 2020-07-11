@@ -153,33 +153,34 @@ class SplashPageState extends State<SplashPage> {
   }
 
   void wrap() async {
-    Timer.periodic(Duration(seconds: 5), (Timer t) => saveProgress()); // save game every 5 seconds
-    await readData("assets/monsters.json").then((data) {
-      data.forEach((key, value) {
-        gameData.monsters[key] = Enemy(
-            name: key,
-            displayName: value["displayName"],
-            hp: value["hp"],
-            expValue: value["expValue"],
-            attack: value["attack"],
-            loot: value["loot"],
+    Timer.periodic(Duration(seconds: 5), (Timer t) => saveProgress()); // save game every 5 seconds // TODO: rework this into a sensible system
+    await readData("assets/data/enemies.json").then((data) {
+      data.forEach((enemyName, enemyData) {
+        gameData.monsters[enemyName] = Enemy(
+            name: enemyName,
+            displayName: enemyData["displayName"],
+            hp: enemyData["hp"],
+            expValue: enemyData["expValue"],
+            attack: enemyData["attack"],
+            agility: enemyData["agility"],
+            loot: enemyData["loot"],
             );
       });
     });
-    await readData("assets/items.json").then((data) {
+    await readData("assets/data/items.json").then((data) {
       Map _data = data["items"];
-      _data.forEach((key, args) {
-        gameData.items[key] = Item(
-            name: args["name"],
-            id: key,
-            equip: args["equip"],
-            behaviours: args,
-            description: args["description"],
-            cost: args["cost"],
-            time: args["time"]);
+      _data.forEach((itemId, itemData) {
+        gameData.items[itemId] = Item(
+            name: itemData["name"],
+            id: itemId,
+            equip: itemData["equip"],
+            behaviours: itemData,
+            description: itemData["description"],
+            cost: itemData["cost"],
+            time: itemData["time"]);
       });
     });
-    await readData("assets/skills.json").then((data) {
+    await readData("assets/data/skills.json").then((data) {
       data.forEach((tree, _skills) {
         _skills.forEach((skillName, skillDetail) {
           List temp = gameData.skills[tree];
@@ -193,9 +194,9 @@ class SplashPageState extends State<SplashPage> {
         });
       });
     });
-    readProgress().then((data) {
-      if (data != 0) {
-        player = data;
+    readProgress().then((playerData) {
+      if (playerData != 0) {
+        player = playerData;
         print("Found json");
       } else {
         player = Player(

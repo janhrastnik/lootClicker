@@ -116,30 +116,36 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
 
     switch(currEvent.eventType) {
       case "fight":
-        double r = Random().nextDouble();
-        if (player.dodgeChance < r) { // if the player doesn't dodge
+        double randFloat = Random().nextDouble(); // TODO: rework dodging
+        double dodgeRoll = Random().nextDouble();
+        int damageTaken = 0;
+        int damageDealt = 0;
+        if (player.agility * dodgeRoll < randFloat) { // if the player doesn't dodge
           // if the player dies
-          if (currEvent.enemy.attack >= player.hp) {
-            heroHpBloc.dispatch(-currEvent.enemy.attack);
+          damageTaken = currEvent.enemy.attack;
+          if (damageTaken >= player.hp) {
+            heroHpBloc.dispatch(-damageTaken);
             promptBloc.dispatch("death");
             await wait(3);
             goldBloc.dispatch(-(player.gold/2).floor()); // updates gold counter
             promptBloc.dispatch("shrine");
             yield 1.0;
             break;
-          } else
-          if (player.hp >= 0) { // player takes damage
-            heroHpBloc.dispatch(-currEvent.enemy.attack);
+          } else {
+            // player takes damage
+            heroHpBloc.dispatch(-damageTaken);
           }
         }
-        r = Random().nextDouble();
-        if (player.criticalHitChance >= r) {// if the player lands a critical hit
-          damageStream.sink.add([currEvent.enemy.attack, player.attack * player.criticalHitDamage]);
-          currEvent.progress = currEvent.progress + (player.attack * player.criticalHitDamage);
+        randFloat = Random().nextDouble();
+        if (player.criticalHitChance >= randFloat) {// if the player lands a critical hit
+          damageDealt = player.attack * player.criticalHitDamage;
         } else {
-          damageStream.sink.add([currEvent.enemy.attack, player.attack]);
-          currEvent.progress = currEvent.progress + player.attack;
+          damageDealt = player.attack;
         }
+        // display the damage
+        damageStream.sink.add([damageTaken, damageDealt]);
+        // progress the event
+        currEvent.progress = currEvent.progress + damageDealt;
         // if the player beats the monster
         if (currEvent.progress >= currEvent.length) {
           if (currEvent.enemy.loot != null) {

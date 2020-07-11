@@ -72,7 +72,7 @@ class Player {
   double expModifierPercentage;
   double lootModifierPercentage;
   double criticalHitChance;
-  double dodgeChance;
+  int agility;
   List inventory;
   Map<dynamic, dynamic> equipped;
   bool bloodSteal;
@@ -91,7 +91,7 @@ class Player {
     this.lootModifierPercentage = 1.00,
     this.criticalHitDamage = 2,
     this.criticalHitChance = 0.01,
-    this.dodgeChance = 0.01,
+    this.agility = 1,
     this.inventory,
     this.equipped,
     this.bloodSteal = false,
@@ -124,6 +124,7 @@ class Enemy {
   int hp;
   int expValue;
   int attack;
+  int agility;
   double lootChance;
 
   Enemy({
@@ -133,6 +134,7 @@ class Enemy {
     this.hp,
     this.expValue,
     this.attack,
+    this.agility,
     this.lootChance
   });
 }
@@ -179,8 +181,8 @@ class Usable {
         case "changeCriticalHitDamage":
           changeCriticalHitDamage(isEquipped == true ? 0 - args["value"] : args["value"], args["percentage"]);
           break;
-        case "changeDodgeChance":
-          changeDodgeChance(isEquipped == true ? 0 - args["value"] : args["value"]);
+        case "changeAgility":
+          changeAgility(isEquipped == true ? 0 - args["value"] : args["value"]);
           break;
       }
     });
@@ -232,8 +234,8 @@ class Usable {
     }
   }
 
-  void changeDodgeChance(n) {
-    player.dodgeChance += n;
+  void changeAgility(n) {
+    player.agility += n;
   }
 
   void changeCriticalHitChance(n) {
@@ -300,6 +302,7 @@ class GameData {
   bool isMenu = false;
   bool isScrolling = false;
   bool isDead = false;
+  bool failedFlee;
   double tileLength;
   List<DungeonTile> dungeonTiles = [
     DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),

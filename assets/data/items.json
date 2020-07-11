@@ -143,10 +143,10 @@
         "value": 4,
         "percentage": false
       },
-      "changeDodgeChance": {
-        "value": -0.05
+      "changeAgility": {
+        "value": -1
       },
-      "description": "Increases Atk by 4, but decreases Dodge Chance by 5 %.",
+      "description": "Increases Atk by 4, but decreases Agility by 1.",
       "cost": 400,
       "time": 0
     },
@@ -157,10 +157,10 @@
         "value": 2,
         "percentage": false
       },
-      "changeDodgeChance": {
-        "value": 0.05
+      "changeAgility": {
+        "value": 1
       },
-      "description": "Increases Atk by 2 and Dodge Chance by 5 %.",
+      "description": "Increases Atk by 2 and Agility by 1",
       "cost": 150,
       "time": 0
     },
