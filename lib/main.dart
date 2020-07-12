@@ -245,7 +245,7 @@ class BlocPageState extends State<BlocPage> {
 
   @override
   void initState() {
-    _promptBloc = PromptBloc();
+    _promptBloc = PromptBloc(dungeonBloc: _dungeonBloc, clickerBloc: _clickerBloc);
     _goldBloc = GoldBloc();
     _dungeonBloc = DungeonBloc(promptBloc: _promptBloc);
     _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);

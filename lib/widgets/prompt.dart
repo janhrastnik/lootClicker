@@ -100,11 +100,7 @@ class Prompt extends StatelessWidget {
                               )),
                               onPressed: () {
                                 if (!gameData.isScrolling) {
-                                  scrollDungeon(
-                                      dungeonBloc,
-                                      promptBloc,
-                                      clickerBloc
-                                  ); // updates text
+                                  promptBloc.dispatch("flee");
                                 }
                               },
                             ),

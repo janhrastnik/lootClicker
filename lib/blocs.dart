@@ -207,6 +207,10 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
 class PromptBloc extends Bloc<String, String> {
   // handle events
   String get initialState => "shrine";
+  DungeonBloc dungeonBloc;
+  ClickerBloc clickerBloc;
+
+  PromptBloc({this.dungeonBloc, this.clickerBloc});
 
   @override
   Stream<String> mapEventToState(String event) async* {
@@ -214,6 +218,12 @@ class PromptBloc extends Bloc<String, String> {
       // dungeon key usage -> increases dungeon level
       player.keyCost = player.keyCost * 2;
       player.dungeonLevel++;
+    } else if (event == "flee") {
+      scrollDungeon(
+          dungeonBloc,
+          this,
+          clickerBloc
+      ); // updates text
     }
     yield event;
   }
