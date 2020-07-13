@@ -36,8 +36,6 @@ class DungeonScreenState extends State<DungeonScreen>
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
     final HeroHpBloc _heroHpBloc = BlocProvider.of<HeroHpBloc>(context);
     final HeroExpBloc _heroExpBloc = BlocProvider.of<HeroExpBloc>(context);
-    final TapAnimationBloc _tapAnimationBloc =
-        BlocProvider.of<TapAnimationBloc>(context);
     tapAnimationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     final tapAnimation =
@@ -63,8 +61,7 @@ class DungeonScreenState extends State<DungeonScreen>
         if (!gameData.isScrolling &&
             gameData.dungeonTiles[1].event.eventType != "fight" &&
             gameData.dungeonTiles[1].event.eventType != "merchant") {
-          _tapAnimationBloc.dispatch(
-              getTapCoords(details) + [gameData.dungeonTiles[1].event.eventType]);
+        tapAnimationStream.sink.add(getTapCoords(details) + [gameData.dungeonTiles[1].event.eventType]);
         }
       },
       child: Stack(
@@ -189,23 +186,6 @@ class DungeonScreenState extends State<DungeonScreen>
             ],
           ),
           BlocBuilder(
-              // show tap animation
-              bloc: _tapAnimationBloc,
-              builder: (BuildContext context, List tapData) {
-                if (tapData.length == 3) {
-                  return Positioned(
-                    left: tapData[0],
-                    top: tapData[1],
-                    child: FadeTransition(
-                      opacity: tapAnimation,
-                      child: Text("+ " + tapData[2].toString()),
-                    ),
-                  );
-                } else {
-                  return Container(child: null);
-                }
-              }),
-          BlocBuilder(
               // death animation
               bloc: _promptBloc,
               builder: (BuildContext context, String prompt) {
@@ -255,6 +235,38 @@ class DungeonScreenState extends State<DungeonScreen>
                       );
                     },
                   )) : Container();
+            },
+          ),
+          StreamBuilder( // shows tap animation
+            stream: tapAnimationStream.stream,
+            builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+              if (snapshot.hasData) {
+                tapAnimationController.reset();
+                tapAnimationController.value = 1;
+                tapAnimationController.reverse();
+                int value;
+                switch(snapshot.data[2]) {
+                  case "fight":
+                    value = player.attack;
+                    break;
+                  case "loot":
+                    value = player.looting;
+                    break;
+                  case "puzzle":
+                    value = player.intelligence;
+                    break;
+                }
+                return Positioned(
+                  left: snapshot.data[0],
+                  top: snapshot.data[1],
+                  child: FadeTransition(
+                    opacity: tapAnimation,
+                    child: Text("+ " + value.toString()),
+                  ),
+                );
+              } else {
+                return Container();
+              }
             },
           )
         ],

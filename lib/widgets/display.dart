@@ -34,7 +34,7 @@ class Display extends StatelessWidget {
         StreamBuilder(
           initialData: CharacterStates.idle,
           stream: characterStream.stream,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<CharacterStates> snapshot) {
             String characterImage;
             if (snapshot.data == CharacterStates.idle) {
               characterImage = "assets/idle.gif";
@@ -81,7 +81,7 @@ class DamageDisplayState extends State<DamageDisplay>
     return StreamBuilder(
       // damage animations
       stream: damageStream.stream,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
         AnimationController damageAnimationController = AnimationController(
             vsync: this, duration: Duration(milliseconds: 1000));
         Animation<double> damageAnimation =

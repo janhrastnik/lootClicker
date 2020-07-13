@@ -7,10 +7,7 @@ import 'classes.dart';
 class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   @override
   List<DungeonTile> get initialState => gameData.dungeonTiles;
-  final PromptBloc promptBloc;
   List eventTypes = ["loot", "fight", "puzzle"];
-
-  DungeonBloc({this.promptBloc});
 
   DungeonTile generateDungeon() {
     int randomRange(int min, int max) => min + Random().nextInt(max - min);
@@ -51,7 +48,6 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
         // we remove the passed room
         final List<DungeonTile> newList = List.from(event);
         newList.removeAt(0);
-        promptBloc.dispatch(newList[1].event.eventType);
         gameData.dungeonTiles = newList;
         yield newList;
         break;
@@ -65,32 +61,6 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
         yield newList;
         break;
     }
-  }
-}
-
-void scrollToMiddle() {
-  scrollController.jumpTo(gameData.tileLength/2);
-}
-
-Future scrollDungeon(DungeonBloc dungeonBloc, [PromptBloc promptBloc, ClickerBloc clickerBloc]) async {
-  if (promptBloc != null) {
-    promptBloc.dispatch("transition");
-  }
-  characterStream.sink.add(CharacterStates.run);
-  gameData.isScrolling = true;
-  scrollToMiddle();
-  dungeonBloc.dispatch(gameData.dungeonTiles);
-  await scrollController.animateTo(
-      scrollController.offset + gameData.tileLength,
-      duration: Duration(seconds: 1),
-      curve: Curves.ease
-  );
-  dungeonBloc.dispatch(gameData.dungeonTiles);
-  scrollToMiddle();
-  gameData.isScrolling = false;
-  characterStream.sink.add(CharacterStates.idle);
-  if (clickerBloc != null) {
-    clickerBloc.dispatch([]);
   }
 }
 
@@ -299,34 +269,5 @@ class HeroExpBloc extends Bloc<int, double> {
       heroHpBloc.dispatch(0); // update new hp on screen
     }
     yield player.exp / player.expCap;
-  }
-}
-
-class TapAnimationBloc extends Bloc<List, List> {
-  // show tap animation
-  List get initialState => [];
-
-  @override
-  Stream<List> mapEventToState(List event) async* {
-    tapAnimationController.reset();
-    tapAnimationController.value = 1;
-    tapAnimationController.reverse();
-    switch(event[2]) {
-      case "fight":
-        final List newList = List.from(event, growable: true);
-        newList[2] = player.attack;
-        yield newList;
-        break;
-      case "loot":
-        final List newList = List.from(event, growable: true);
-        newList[2] = player.looting;
-        yield newList;
-        break;
-      case "puzzle":
-        final List newList = List.from(event, growable: true);
-        newList[2] = player.intelligence;
-        yield newList;
-        break;
-    }
   }
 }

@@ -238,16 +238,15 @@ class BlocPageState extends State<BlocPage> {
   DungeonBloc _dungeonBloc;
   ClickerBloc _clickerBloc;
   GoldBloc _goldBloc;
-  TapAnimationBloc _tapAnimationBloc;
   HeroHpBloc _heroHpBloc;
   HeroExpBloc _heroExpBloc;
   PromptBloc _promptBloc;
 
   @override
   void initState() {
+    _dungeonBloc = DungeonBloc();
     _promptBloc = PromptBloc(dungeonBloc: _dungeonBloc, clickerBloc: _clickerBloc);
     _goldBloc = GoldBloc();
-    _dungeonBloc = DungeonBloc(promptBloc: _promptBloc);
     _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);
     _heroExpBloc = HeroExpBloc(heroHpBloc: _heroHpBloc);
     _clickerBloc = ClickerBloc(
@@ -257,7 +256,6 @@ class BlocPageState extends State<BlocPage> {
       dungeonBloc: _dungeonBloc,
       promptBloc: _promptBloc
     );
-    _tapAnimationBloc = TapAnimationBloc();
     super.initState();
   }
 
@@ -269,7 +267,6 @@ class BlocPageState extends State<BlocPage> {
         BlocProvider<DungeonBloc>(bloc: _dungeonBloc),
         BlocProvider<ClickerBloc>(bloc: _clickerBloc),
         BlocProvider<GoldBloc>(bloc: _goldBloc),
-        BlocProvider<TapAnimationBloc>(bloc: _tapAnimationBloc),
         BlocProvider<HeroHpBloc>(bloc: _heroHpBloc),
         BlocProvider<HeroExpBloc>(bloc: _heroExpBloc),
       ],

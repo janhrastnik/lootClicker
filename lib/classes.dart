@@ -313,4 +313,12 @@ class GameData {
   Map items = {};
   Map skills = {"strength" : [], "endurance": [], "wisdom": []};
   List assetNames = [];
+
+  static final GameData _singleton = GameData._internal();
+
+  factory GameData() {
+    return _singleton;
+  }
+
+  GameData._internal();
 }
