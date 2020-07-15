@@ -8,21 +8,21 @@ import 'skills.dart';
 
 class FrontPanelModel extends Model {
   FrontPanelModel(this._activePanel);
-  FrontPanels _activePanel;
+  FrontPanel _activePanel;
 
-  FrontPanels get activePanelType => _activePanel;
+  FrontPanel get activePanelType => _activePanel;
 
   Widget get activePanel {
-    if (_activePanel == FrontPanels.characterPage) {
+    if (_activePanel == FrontPanel.characterPage) {
       return CharacterScreen();
-    } else if (_activePanel == FrontPanels.shopPage) {
+    } else if (_activePanel == FrontPanel.shopPage) {
       return ShopScreen();
     } else {
       return SkillsScreen();
     }
   }
 
-  void activate(FrontPanels panel) {
+  void activate(FrontPanel panel) {
     _activePanel = panel;
     notifyListeners();
   }
@@ -68,20 +68,20 @@ class MenuRowState extends State<MenuRow> {
                   rebuildOnChange: false,
                   builder: (context, _, model) => MaterialButton(
                     height: 50.0,
-                    color: model._activePanel == FrontPanels.characterPage &&
+                    color: model._activePanel == FrontPanel.characterPage &&
                         widget.frontPanelOpen.value
                         ? Colors.blueGrey
                         : Colors.white,
                     child: Text("Character"),
                     onPressed: () {
                       if (widget.frontPanelOpen.value == true &&
-                          model._activePanel == FrontPanels.characterPage) {
+                          model._activePanel == FrontPanel.characterPage) {
                         toggleBackdropPanelVisibility(
                             widget.frontPanelOpen.value);
                         gameData.isMenu = false;
                       } else {
                         gameData.isMenu = true;
-                        model.activate(FrontPanels.characterPage);
+                        model.activate(FrontPanel.characterPage);
                         widget.frontPanelOpen.value = true;
                       }
                     },
@@ -92,20 +92,20 @@ class MenuRowState extends State<MenuRow> {
                   rebuildOnChange: false,
                   builder: (context, _, model) => MaterialButton(
                     height: 50.0,
-                    color: model._activePanel == FrontPanels.shopPage &&
+                    color: model._activePanel == FrontPanel.shopPage &&
                         widget.frontPanelOpen.value
                         ? Colors.blueGrey
                         : Colors.white,
                     child: Text("Shop"),
                     onPressed: () {
                       if (widget.frontPanelOpen.value == true &&
-                          model._activePanel == FrontPanels.shopPage) {
+                          model._activePanel == FrontPanel.shopPage) {
                         toggleBackdropPanelVisibility(
                             widget.frontPanelOpen.value);
                         gameData.isMenu = false;
                       } else {
                         gameData.isMenu = true;
-                        model.activate(FrontPanels.shopPage);
+                        model.activate(FrontPanel.shopPage);
                         widget.frontPanelOpen.value = true;
                       }
                     },
@@ -116,20 +116,20 @@ class MenuRowState extends State<MenuRow> {
                   rebuildOnChange: false,
                   builder: (context, _, model) => MaterialButton(
                     height: 50.0,
-                    color: model._activePanel == FrontPanels.skillsPage &&
+                    color: model._activePanel == FrontPanel.skillsPage &&
                         widget.frontPanelOpen.value
                         ? Colors.blueGrey
                         : Colors.white,
                     child: Text("Skills"),
                     onPressed: () {
                       if (widget.frontPanelOpen.value == true &&
-                          model._activePanel == FrontPanels.skillsPage) {
+                          model._activePanel == FrontPanel.skillsPage) {
                         toggleBackdropPanelVisibility(
                             widget.frontPanelOpen.value);
                         gameData.isMenu = false;
                       } else {
                         gameData.isMenu = true;
-                        model.activate(FrontPanels.skillsPage);
+                        model.activate(FrontPanel.skillsPage);
                         widget.frontPanelOpen.value = true;
                       }
                     },

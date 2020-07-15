@@ -1,24 +1,22 @@
 import 'package:bloc/bloc.dart';
 import 'globals.dart';
-import 'package:flutter/material.dart';
 import 'dart:math';
 import 'classes.dart';
 
 class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
   @override
   List<DungeonTile> get initialState => gameData.dungeonTiles;
-  List eventTypes = ["loot", "fight", "puzzle"];
 
   DungeonTile generateDungeon() {
     int randomRange(int min, int max) => min + Random().nextInt(max - min);
-    String dungeonType = eventTypes[Random().nextInt(eventTypes.length)];
+    EventType dungeonType = [EventType.loot, EventType.fight, EventType.puzzle][Random().nextInt(2)];
     int lootAmount = (randomRange(1, 11) *
         player.lootModifierPercentage).floor() *
         player.dungeonLevel +
         player.lootModifierRaw;
     int length = randomRange(10, 20) * player.dungeonLevel;
     Enemy randomEnemy;
-    if (dungeonType == "fight") {
+    if (dungeonType == EventType.fight) {
       // generate a random enemy
       String randomEnemyType = gameData.monsters.keys.toList()[Random().nextInt(gameData.monsters.keys.toList().length)];
       randomEnemy = gameData.monsters[randomEnemyType];
@@ -29,7 +27,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
         eventType: dungeonType,
         length: length,
         loot: lootAmount,
-        enemy: dungeonType == "fight" ? randomEnemy : null
+        enemy: dungeonType == EventType.fight ? randomEnemy : null
     ));
   }
 
@@ -54,9 +52,9 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
       case 0:
         // we generate the beginning
         final List<DungeonTile> newList = [];
-        newList.add(DungeonTile(event: DungeonEvent(eventType: "wall", length: null)));
-        newList.add(DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)));
-        newList.add(DungeonTile(event: DungeonEvent(eventType: "merchant", length: null)));
+        newList.add(DungeonTile(event: DungeonEvent(eventType: EventType.wall, length: null)));
+        newList.add(DungeonTile(event: DungeonEvent(eventType: EventType.shrine, length: null)));
+        newList.add(DungeonTile(event: DungeonEvent(eventType: EventType.merchant, length: null)));
         gameData.dungeonTiles = newList;
         yield newList;
         break;
@@ -85,11 +83,12 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
     final DungeonEvent currEvent = event[1].event;
 
     switch(currEvent.eventType) {
-      case "fight":
+      case EventType.fight:
         double randFloat = Random().nextDouble(); // TODO: rework dodging
         double dodgeRoll = Random().nextDouble();
         int damageTaken = 0;
         int damageDealt = 0;
+
         if (player.agility * dodgeRoll < randFloat) { // if the player doesn't dodge
           // if the player dies
           damageTaken = currEvent.enemy.attack;
@@ -106,14 +105,18 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
             heroHpBloc.dispatch(-damageTaken);
           }
         }
-        randFloat = Random().nextDouble();
-        if (player.criticalHitChance >= randFloat) {// if the player lands a critical hit
-          damageDealt = player.attack * player.criticalHitDamage;
-        } else {
-          damageDealt = player.attack;
+        if (gameData.failedFlee == false) {
+          randFloat = Random().nextDouble();
+          if (player.criticalHitChance >= randFloat) {// if the player lands a critical hit
+            damageDealt = player.attack * player.criticalHitDamage;
+          } else {
+            damageDealt = player.attack;
+          }
+        } else { // flee failed, player takes damage whilst dealing no damage
+          gameData.failedFlee = false;
         }
         // display the damage
-        damageStream.sink.add([damageTaken, damageDealt]);
+        damageStream.sink.add([damageTaken.toString(), damageDealt.toString()]);
         // progress the event
         currEvent.progress = currEvent.progress + damageDealt;
         // if the player beats the monster
@@ -122,7 +125,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
             player.inventory.add(currEvent.enemy.loot);
           }
           heroExpBloc.dispatch(currEvent.enemy.expValue);
-          if (event[2].event.eventType == "fight") {
+          if (event[2].event.eventType == EventType.fight) {
             currEvent.progress = 0;
           } else {
             currEvent.progress = event[2].event.length;
@@ -137,7 +140,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           yield 1 - (currEvent.progress / currEvent.length);
         }
         break;
-      case "loot":
+      case EventType.loot:
         currEvent.progress = currEvent.progress + player.looting;
         if (currEvent.progress >= currEvent.length) {
           currEvent.progress = 0;
@@ -151,7 +154,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           yield 1 - (currEvent.progress / currEvent.length);
         }
         break;
-      case "puzzle":
+      case EventType.puzzle:
         currEvent.progress = currEvent.progress + player.intelligence;
         if (currEvent.progress >= currEvent.length) {
           currEvent.progress = 0;
@@ -164,7 +167,7 @@ class ClickerBloc extends Bloc<List<DungeonTile>, double> {
           yield 1 - (currEvent.progress / currEvent.length);
         }
         break;
-      case "shrine":
+      case EventType.shrine:
         if (gameData.isMenu == false) {
           await scrollDungeon(dungeonBloc, promptBloc);
         }
@@ -178,9 +181,8 @@ class PromptBloc extends Bloc<String, String> {
   // handle events
   String get initialState => "shrine";
   DungeonBloc dungeonBloc;
-  ClickerBloc clickerBloc;
 
-  PromptBloc({this.dungeonBloc, this.clickerBloc});
+  PromptBloc({this.dungeonBloc});
 
   @override
   Stream<String> mapEventToState(String event) async* {
@@ -192,7 +194,6 @@ class PromptBloc extends Bloc<String, String> {
       scrollDungeon(
           dungeonBloc,
           this,
-          clickerBloc
       ); // updates text
     }
     yield event;

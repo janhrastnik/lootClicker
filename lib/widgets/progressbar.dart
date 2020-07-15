@@ -4,14 +4,14 @@ import '../globals.dart';
 import '../blocs.dart';
 
 class ProgressBar extends StatelessWidget {
-  ClickerBloc clickerBloc;
+  final ClickerBloc clickerBloc;
 
   ProgressBar(this.clickerBloc);
 
   String getText() {
-    if (gameData.dungeonTiles[1].event.eventType == "shrine") {
+    if (gameData.dungeonTiles[1].event.eventType == EventType.shrine) {
       return "Enter The Dungeon";
-    } else if (gameData.dungeonTiles[1].event.eventType == "merchant") {
+    } else if (gameData.dungeonTiles[1].event.eventType == EventType.merchant) {
       return "The merchant offers you a trade.";
     } else if (gameData.isDead) {
       return "Enter The Dungeon";
@@ -21,7 +21,7 @@ class ProgressBar extends StatelessWidget {
   }
 
   List<dynamic> getColors() {
-    if (gameData.dungeonTiles[1].event.eventType == "fight") {
+    if (gameData.dungeonTiles[1].event.eventType == EventType.fight) {
       return [AlwaysStoppedAnimation<Color>(Colors.red), Colors.brown];
     } else {
       return [AlwaysStoppedAnimation<Color>(Colors.blue), Colors.lightBlueAccent];

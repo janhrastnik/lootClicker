@@ -4,8 +4,9 @@ import 'classes.dart';
 import 'blocs.dart';
 import 'dart:async';
 
-enum FrontPanels { characterPage, shopPage, skillsPage }
-enum CharacterStates { idle, attack, run }
+enum FrontPanel { characterPage, shopPage, skillsPage }
+enum CharacterState { idle, attack, run }
+enum EventType { wall, shrine, merchant, fight, loot, puzzle }
 Player player;
 GameData gameData = GameData();
 ScrollController scrollController = ScrollController();
@@ -13,8 +14,8 @@ AnimationController tapAnimationController;
 AnimationController deathAnimationController;
 AnimationController goldAnimationController;
 final StreamController<Effect> effectsStream = StreamController<Effect>();
-final StreamController<CharacterStates> characterStream = StreamController<CharacterStates>();
-final StreamController<List<int>> damageStream = StreamController<List<int>>();
+final StreamController<CharacterState> characterStream = StreamController<CharacterState>();
+final StreamController<List<String>> damageStream = StreamController<List<String>>();
 final StreamController<List> tapAnimationStream = StreamController<List>();
 
 Future wait(n) async {
@@ -25,11 +26,11 @@ void scrollToMiddle() {
   scrollController.jumpTo(gameData.tileLength/2);
 }
 
-Future scrollDungeon(DungeonBloc dungeonBloc, [PromptBloc promptBloc, ClickerBloc clickerBloc]) async {
+Future scrollDungeon(DungeonBloc dungeonBloc, [PromptBloc promptBloc]) async {
   if (promptBloc != null) {
     promptBloc.dispatch("transition");
   }
-  characterStream.sink.add(CharacterStates.run);
+  characterStream.sink.add(CharacterState.run);
   gameData.isScrolling = true;
   scrollToMiddle();
   dungeonBloc.dispatch(gameData.dungeonTiles);
@@ -39,11 +40,8 @@ Future scrollDungeon(DungeonBloc dungeonBloc, [PromptBloc promptBloc, ClickerBlo
       curve: Curves.ease
   );
   dungeonBloc.dispatch(gameData.dungeonTiles);
-  promptBloc.dispatch(gameData.dungeonTiles[2].event.eventType);
+  promptBloc.dispatch(gameData.dungeonTiles[2].event.eventType.toString());
   scrollToMiddle();
   gameData.isScrolling = false;
-  characterStream.sink.add(CharacterStates.idle);
-  if (clickerBloc != null) {
-    clickerBloc.dispatch([]);
-  }
+  characterStream.sink.add(CharacterState.idle);
 }

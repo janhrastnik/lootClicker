@@ -245,7 +245,7 @@ class BlocPageState extends State<BlocPage> {
   @override
   void initState() {
     _dungeonBloc = DungeonBloc();
-    _promptBloc = PromptBloc(dungeonBloc: _dungeonBloc, clickerBloc: _clickerBloc);
+    _promptBloc = PromptBloc(dungeonBloc: _dungeonBloc);
     _goldBloc = GoldBloc();
     _heroHpBloc = HeroHpBloc(dungeonBloc: _dungeonBloc);
     _heroExpBloc = HeroExpBloc(heroHpBloc: _heroHpBloc);
@@ -278,7 +278,7 @@ class BlocPageState extends State<BlocPage> {
 class ClickerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ScopedModel(
-      model: FrontPanelModel(FrontPanels.characterPage),
+      model: FrontPanelModel(FrontPanel.characterPage),
       child: Scaffold(body: SafeArea(child: Panels())));
 }
 

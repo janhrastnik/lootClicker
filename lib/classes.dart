@@ -13,10 +13,24 @@ class DungeonTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String img;
-    if (event.eventType == "fight") {
-      img = event.enemy.name;
-    } else {
-      img = event.eventType;
+    switch(event.eventType) {
+      case EventType.fight:
+        img = event.enemy.name;
+        break;
+      case EventType.loot:
+        img = "loot";
+        break;
+      case EventType.merchant:
+        img = "merchant";
+        break;
+      case EventType.shrine:
+        img = "shrine";
+        break;
+      case EventType.puzzle:
+        img = "puzzle";
+        break;
+      case EventType.wall:
+        img = "wall";
     }
     return Center(
       child: Container(
@@ -25,7 +39,7 @@ class DungeonTile extends StatelessWidget {
           decoration: BoxDecoration(
             image: DecorationImage(image: AssetImage("assets/dungeon2.gif"), fit: BoxFit.cover),
           ),
-          alignment: img != "skeleton" ? Alignment(0.8, 0.4) : Alignment(0.8, 0.3),
+          alignment: Alignment(0.8, 0.4),
           child:  Image(image: AssetImage("assets/$img.gif"), width: 96.0, height: 96.0)
       ),
     );
@@ -33,7 +47,7 @@ class DungeonTile extends StatelessWidget {
 }
 
 class DungeonEvent {
-  String eventType;
+  EventType eventType;
   int length;
   int progress;
   int loot;
@@ -305,9 +319,9 @@ class GameData {
   bool failedFlee;
   double tileLength;
   List<DungeonTile> dungeonTiles = [
-    DungeonTile(event: DungeonEvent(eventType: "wall", length: null)),
-    DungeonTile(event: DungeonEvent(eventType: "shrine", length: null)),
-    DungeonTile(event: DungeonEvent(eventType: "merchant", length: null))
+    DungeonTile(event: DungeonEvent(eventType: EventType.wall, length: null)),
+    DungeonTile(event: DungeonEvent(eventType: EventType.shrine, length: null)),
+    DungeonTile(event: DungeonEvent(eventType: EventType.merchant, length: null))
   ];
   Map monsters = {};
   Map items = {};

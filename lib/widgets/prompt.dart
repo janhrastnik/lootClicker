@@ -4,6 +4,7 @@ import 'progressbar.dart';
 import '../blocs.dart';
 import '../globals.dart';
 import 'merchant.dart';
+import 'dart:math';
 
 class Prompt extends StatelessWidget {
   final PromptBloc promptBloc;
@@ -17,7 +18,13 @@ class Prompt extends StatelessWidget {
     return BlocBuilder(
         bloc: promptBloc,
         builder: (BuildContext context, String event) {
-          if (event == "fight") { // show fight prompt
+          if (event == "EventType.fight") { // show fight prompt
+            int fleeCalculation = 50 + player.agility * 25 - gameData.dungeonTiles[1].event.enemy.agility * 25;
+            if (fleeCalculation > 100) {
+              fleeCalculation = 100;
+            } else if (fleeCalculation < 25) {
+              fleeCalculation = 25;
+            }
             return Column(
               children: <Widget>[
                 Padding(
@@ -61,8 +68,8 @@ class Prompt extends StatelessWidget {
                               onPressed: () {
                                 if (!gameData.isScrolling) {
                                   clickerBloc.dispatch(gameData.dungeonTiles);
-                                  characterStream.sink.add(CharacterStates.attack);
-                                  wait(1).then((value) => characterStream.sink.add(CharacterStates.idle));
+                                  characterStream.sink.add(CharacterState.attack);
+                                  wait(1).then((value) => characterStream.sink.add(CharacterState.idle));
                                 }
                               },
                             ),
@@ -100,12 +107,21 @@ class Prompt extends StatelessWidget {
                               )),
                               onPressed: () {
                                 if (!gameData.isScrolling) {
-                                  promptBloc.dispatch("flee");
+                                  double fleeRoll = Random().nextDouble();
+                                  print("fleeRoll was $fleeRoll");
+                                  if (fleeRoll < (fleeCalculation / 100)) {
+                                    promptBloc.dispatch("flee");
+                                    clickerBloc.dispatch([]);
+                                  } else {
+                                    gameData.failedFlee = true;
+                                    clickerBloc.dispatch(gameData.dungeonTiles);
+                                    print("fleeRoll failed");
+                                  }
                                 }
                               },
                             ),
                           ),
-                          Text("Flee Chance: ${100} %")
+                          Text("Flee Chance: $fleeCalculation %")
                         ],
                       ),
                     ],
@@ -113,7 +129,7 @@ class Prompt extends StatelessWidget {
                 ),
               ],
             );
-          } else if (event == "merchant") {
+          } else if (event == "EventType.merchant") {
             return Column(
               children: <Widget>[
                 ProgressBar(clickerBloc),

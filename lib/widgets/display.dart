@@ -32,15 +32,15 @@ class Display extends StatelessWidget {
           },
         ),
         StreamBuilder(
-          initialData: CharacterStates.idle,
+          initialData: CharacterState.idle,
           stream: characterStream.stream,
-          builder: (BuildContext context, AsyncSnapshot<CharacterStates> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<CharacterState> snapshot) {
             String characterImage;
-            if (snapshot.data == CharacterStates.idle) {
+            if (snapshot.data == CharacterState.idle) {
               characterImage = "assets/idle.gif";
-            } else if (snapshot.data == CharacterStates.attack) {
+            } else if (snapshot.data == CharacterState.attack) {
               characterImage = "assets/attack.gif";
-            } else if (snapshot.data == CharacterStates.run) {
+            } else if (snapshot.data == CharacterState.run) {
               characterImage = "assets/run.gif";
             }
             return Container(
@@ -81,30 +81,38 @@ class DamageDisplayState extends State<DamageDisplay>
     return StreamBuilder(
       // damage animations
       stream: damageStream.stream,
-      builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
         AnimationController damageAnimationController = AnimationController(
             vsync: this, duration: Duration(milliseconds: 1000));
-        Animation<double> damageAnimation =
-            Tween(begin: 1.0, end: 0.0).animate(damageAnimationController);
-        damageAnimationController.forward();
-        print("stream builder gets run");
-        return AnimatedBuilder(
-          animation: damageAnimation,
-          builder: (BuildContext context, _) {
-            return snapshot.hasData && !gameData.isMenu ? Transform(
-              transform: Matrix4.identity()
-                ..translate(0.0, -50.0 / (1 + damageAnimation.value)),
-              child: FadeTransition(
-                  opacity: damageAnimation,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Text("- ${snapshot.data[0]}", style: TextStyle(color: Colors.red)),
-                        Text("- ${snapshot.data[1]}", style: TextStyle(color: Colors.red))
-                      ])),
-            ) : Container();
-          },
-        );
+        if (snapshot.hasData && !gameData.isMenu) {
+          List damageValues = snapshot.data;
+          if (damageValues[0] == "0") {
+            damageValues[0] = "Dodged!";
+          }
+          Animation<double> damageAnimation =
+          Tween(begin: 1.0, end: 0.0).animate(damageAnimationController);
+          damageAnimationController.forward();
+          print("stream builder gets run");
+          return AnimatedBuilder(
+            animation: damageAnimation,
+            builder: (BuildContext context, _) {
+              return Transform(
+                transform: Matrix4.identity()
+                  ..translate(0.0, -50.0 / (1 + damageAnimation.value)),
+                child: FadeTransition(
+                    opacity: damageAnimation,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text("- ${damageValues[0]}", style: TextStyle(color: Colors.red)),
+                          Text("- ${damageValues[1]}", style: TextStyle(color: Colors.red))
+                        ])),
+              );
+            },
+          );
+        } else {
+          return Container();
+        }
       },
     );
   }

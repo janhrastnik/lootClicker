@@ -52,15 +52,16 @@ class DungeonScreenState extends State<DungeonScreen>
       behavior: HitTestBehavior.translucent,
       onTap: () {
         if (!gameData.isScrolling &&
-            gameData.dungeonTiles[1].event.eventType != "fight" &&
-            gameData.dungeonTiles[1].event.eventType != "merchant") {
+            gameData.dungeonTiles[1].event.eventType != EventType.fight &&
+            gameData.dungeonTiles[1].event.eventType != EventType.merchant) {
           _clickerBloc.dispatch(gameData.dungeonTiles);
         }
       },
       onTapUp: (TapUpDetails details) {
         if (!gameData.isScrolling &&
-            gameData.dungeonTiles[1].event.eventType != "fight" &&
-            gameData.dungeonTiles[1].event.eventType != "merchant") {
+            gameData.dungeonTiles[1].event.eventType != EventType.fight  &&
+            gameData.dungeonTiles[1].event.eventType != EventType.merchant &&
+            gameData.dungeonTiles[1].event.eventType != EventType.shrine) {
         tapAnimationStream.sink.add(getTapCoords(details) + [gameData.dungeonTiles[1].event.eventType]);
         }
       },
@@ -185,8 +186,7 @@ class DungeonScreenState extends State<DungeonScreen>
               ),
             ],
           ),
-          BlocBuilder(
-              // death animation
+          BlocBuilder( // death animation
               bloc: _promptBloc,
               builder: (BuildContext context, String prompt) {
                 if (!gameData.isDead) {
@@ -205,15 +205,14 @@ class DungeonScreenState extends State<DungeonScreen>
                   );
                 }
               }),
-          Positioned(
-              // show current effects
+          Positioned( // show current effects
               left: 0,
               top: 0,
               child: Container(
                   width: MediaQuery.of(context).size.width,
                   height: 80.0,
                   child: EffectsList())),
-          BlocBuilder(
+          BlocBuilder( // shows gold animation
             bloc: _goldBloc,
             builder: (BuildContext context, int newGold) {
               return newGold > 0 ? Positioned(
@@ -240,19 +239,16 @@ class DungeonScreenState extends State<DungeonScreen>
           StreamBuilder( // shows tap animation
             stream: tapAnimationStream.stream,
             builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.hasData && !gameData.isMenu) {
                 tapAnimationController.reset();
                 tapAnimationController.value = 1;
                 tapAnimationController.reverse();
                 int value;
                 switch(snapshot.data[2]) {
-                  case "fight":
-                    value = player.attack;
-                    break;
-                  case "loot":
+                  case EventType.loot:
                     value = player.looting;
                     break;
-                  case "puzzle":
+                  case EventType.puzzle:
                     value = player.intelligence;
                     break;
                 }
