@@ -9,7 +9,7 @@ class DungeonBloc extends Bloc<List<DungeonTile>, List<DungeonTile>> {
 
   DungeonTile generateDungeon() {
     int randomRange(int min, int max) => min + Random().nextInt(max - min);
-    EventType dungeonType = [EventType.loot, EventType.fight, EventType.puzzle][Random().nextInt(2)];
+    EventType dungeonType = [EventType.loot, EventType.fight, EventType.puzzle, EventType.fountain][Random().nextInt(4)];
     int lootAmount = (randomRange(1, 11) *
         player.lootModifierPercentage).floor() *
         player.dungeonLevel +
@@ -190,7 +190,7 @@ class PromptBloc extends Bloc<String, String> {
       // dungeon key usage -> increases dungeon level
       player.keyCost = player.keyCost * 2;
       player.dungeonLevel++;
-    } else if (event == "flee") {
+    } else if (event == "leave") {
       scrollDungeon(
           dungeonBloc,
           this,
@@ -267,6 +267,7 @@ class HeroExpBloc extends Bloc<int, double> {
       player.exp = 0;
       // increase stats
       player.levelUp();
+      callWindow();
       heroHpBloc.dispatch(0); // update new hp on screen
     }
     yield player.exp / player.expCap;

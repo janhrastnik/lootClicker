@@ -10,8 +10,9 @@ class Prompt extends StatelessWidget {
   final PromptBloc promptBloc;
   final ClickerBloc clickerBloc;
   final DungeonBloc dungeonBloc;
+  final HeroHpBloc heroHpBloc;
 
-  Prompt({this.promptBloc, this.clickerBloc, this.dungeonBloc});
+  Prompt({this.promptBloc, this.clickerBloc, this.dungeonBloc, this.heroHpBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,7 @@ class Prompt extends StatelessWidget {
                                 border: Border.all(color: Colors.black)
                             ),
                             child: MaterialButton(
-                              child: Center(child: Column(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                       Container(
@@ -64,7 +65,7 @@ class Prompt extends StatelessWidget {
                                         child: Text("Attack"),
                                       )
                                 ],
-                              )),
+                              ),
                               onPressed: () {
                                 if (!gameData.isScrolling) {
                                   clickerBloc.dispatch(gameData.dungeonTiles);
@@ -88,7 +89,7 @@ class Prompt extends StatelessWidget {
                                 border: Border.all(color: Colors.black)
                             ),
                             child: MaterialButton(
-                              child: Center(child: Column(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   Container(
@@ -104,13 +105,13 @@ class Prompt extends StatelessWidget {
                                     child: Text("Flee"),
                                   )
                                 ],
-                              )),
+                              ),
                               onPressed: () {
                                 if (!gameData.isScrolling) {
                                   double fleeRoll = Random().nextDouble();
                                   print("fleeRoll was $fleeRoll");
                                   if (fleeRoll < (fleeCalculation / 100)) {
-                                    promptBloc.dispatch("flee");
+                                    promptBloc.dispatch("leave");
                                     clickerBloc.dispatch([]);
                                   } else {
                                     gameData.failedFlee = true;
@@ -138,7 +139,97 @@ class Prompt extends StatelessWidget {
                 )
               ],
             );
-          } else if (event == "transition" || event == "death") {
+          } else if (event == "EventType.fountain") {
+            return Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text("Fountain"),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            width: MediaQuery.of(context).size.width/3,
+                            height: MediaQuery.of(context).size.width/3,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(color: Colors.black)
+                            ),
+                            child: MaterialButton(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    width: MediaQuery.of(context).size.width/4,
+                                    height: MediaQuery.of(context).size.width/4,
+                                    child: FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: Image(image: AssetImage("assets/attack.png")),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text("Drink"),
+                                  )
+                                ],
+                              ),
+                              onPressed: () {
+                                heroHpBloc.dispatch(1*player.dungeonLevel);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            width: MediaQuery.of(context).size.width/3,
+                            height: MediaQuery.of(context).size.width/3,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(color: Colors.black)
+                            ),
+                            child: MaterialButton(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    width: MediaQuery.of(context).size.width/4,
+                                    height: MediaQuery.of(context).size.width/4,
+                                    child: FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: Image(image: AssetImage("assets/flee.png")),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text("Leave"),
+                                  )
+                                ],
+                              ),
+                              onPressed: () {
+                                if (!gameData.isScrolling) {
+                                    promptBloc.dispatch("leave");
+                                    clickerBloc.dispatch([]);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+        } else if (event == "transition" || event == "death") {
             return Container();
           } else {
             return ProgressBar(clickerBloc);

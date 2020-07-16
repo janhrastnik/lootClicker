@@ -6,7 +6,7 @@ import 'dart:async';
 
 enum FrontPanel { characterPage, shopPage, skillsPage }
 enum CharacterState { idle, attack, run }
-enum EventType { wall, shrine, merchant, fight, loot, puzzle }
+enum EventType { wall, shrine, merchant, fight, loot, puzzle, fountain }
 Player player;
 GameData gameData = GameData();
 ScrollController scrollController = ScrollController();
@@ -17,6 +17,8 @@ final StreamController<Effect> effectsStream = StreamController<Effect>();
 final StreamController<CharacterState> characterStream = StreamController<CharacterState>();
 final StreamController<List<String>> damageStream = StreamController<List<String>>();
 final StreamController<List> tapAnimationStream = StreamController<List>();
+
+VoidCallback callWindow;
 
 Future wait(n) async {
   return Future.delayed(Duration(seconds: n));

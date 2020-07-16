@@ -31,6 +31,9 @@ class DungeonTile extends StatelessWidget {
         break;
       case EventType.wall:
         img = "wall";
+        break;
+      case EventType.fountain:
+        img = "fountain";
     }
     return Center(
       child: Container(
@@ -80,6 +83,7 @@ class Player {
   int lootModifierRaw;
   int skillPoints;
   int criticalHitDamage;
+  int playerLevel;
   int dungeonLevel;
   int keyCost;
   List skillProgress;
@@ -92,13 +96,13 @@ class Player {
   bool bloodSteal;
 
   Player({this.gold = 0,
-    this.hp = 5,
-    this.hpCap = 5,
+    this.hp = 100,
+    this.hpCap = 100,
     this.attack = 1,
     this.intelligence = 1,
     this.looting = 1,
     this.exp = 0,
-    this.expCap = 100,
+    this.expCap = 10,
     this.expModifierRaw = 0,
     this.lootModifierRaw = 0,
     this.expModifierPercentage = 1.00,
@@ -111,6 +115,7 @@ class Player {
     this.bloodSteal = false,
     this.skillPoints = 0,
     this.skillProgress,
+    this.playerLevel = 1,
     this.dungeonLevel = 1,
     this.keyCost = 500
   });
@@ -317,6 +322,7 @@ class GameData {
   bool isScrolling = false;
   bool isDead = false;
   bool failedFlee;
+  bool isNewLevel;
   double tileLength;
   List<DungeonTile> dungeonTiles = [
     DungeonTile(event: DungeonEvent(eventType: EventType.wall, length: null)),

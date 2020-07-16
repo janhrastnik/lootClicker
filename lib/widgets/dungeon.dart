@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs.dart';
 import '../globals.dart';
@@ -13,10 +14,28 @@ class DungeonScreen extends StatefulWidget {
 
 class DungeonScreenState extends State<DungeonScreen>
     with TickerProviderStateMixin {
+
   List getTapCoords(TapUpDetails details) {
     var x = details.globalPosition.dx;
     var y = details.globalPosition.dy;
     return <dynamic>[x, y];
+  }
+
+  Future<void> levelUpWindow() async {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Hero leveled up!"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text("test")
+              ],
+            ),
+          );
+        }
+    );
   }
 
   @override
@@ -36,6 +55,7 @@ class DungeonScreenState extends State<DungeonScreen>
     final GoldBloc _goldBloc = BlocProvider.of<GoldBloc>(context);
     final HeroHpBloc _heroHpBloc = BlocProvider.of<HeroHpBloc>(context);
     final HeroExpBloc _heroExpBloc = BlocProvider.of<HeroExpBloc>(context);
+    callWindow = levelUpWindow;
     tapAnimationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     final tapAnimation =
@@ -52,16 +72,16 @@ class DungeonScreenState extends State<DungeonScreen>
       behavior: HitTestBehavior.translucent,
       onTap: () {
         if (!gameData.isScrolling &&
-            gameData.dungeonTiles[1].event.eventType != EventType.fight &&
-            gameData.dungeonTiles[1].event.eventType != EventType.merchant) {
+            (gameData.dungeonTiles[1].event.eventType == EventType.shrine ||
+            gameData.dungeonTiles[1].event.eventType == EventType.loot ||
+            gameData.dungeonTiles[1].event.eventType == EventType.puzzle)) {
           _clickerBloc.dispatch(gameData.dungeonTiles);
         }
       },
       onTapUp: (TapUpDetails details) {
         if (!gameData.isScrolling &&
-            gameData.dungeonTiles[1].event.eventType != EventType.fight  &&
-            gameData.dungeonTiles[1].event.eventType != EventType.merchant &&
-            gameData.dungeonTiles[1].event.eventType != EventType.shrine) {
+            (gameData.dungeonTiles[1].event.eventType == EventType.loot ||
+            gameData.dungeonTiles[1].event.eventType == EventType.puzzle)) {
         tapAnimationStream.sink.add(getTapCoords(details) + [gameData.dungeonTiles[1].event.eventType]);
         }
       },
@@ -105,7 +125,6 @@ class DungeonScreenState extends State<DungeonScreen>
                       BlocBuilder(
                           bloc: _heroHpBloc,
                           builder: (BuildContext context, double value) {
-                            print("VALUE IS " + value.toString());
                             return Padding(
                               padding: EdgeInsets.all(4.0),
                               child: Stack(
@@ -145,7 +164,7 @@ class DungeonScreenState extends State<DungeonScreen>
                                         1.10,
                                     decoration: BoxDecoration(
                                         border:
-                                            Border.all(color: Colors.black)),
+                                        Border.all(color: Colors.black)),
                                     height: 20.0,
                                     child: LinearProgressIndicator(
                                       value: value,
@@ -158,7 +177,8 @@ class DungeonScreenState extends State<DungeonScreen>
                                 ],
                               ),
                             );
-                          }),
+                          }
+                          )
                     ],
                   )
                 ],
@@ -179,6 +199,7 @@ class DungeonScreenState extends State<DungeonScreen>
                         promptBloc: _promptBloc,
                         dungeonBloc: _dungeonBloc,
                         clickerBloc: _clickerBloc,
+                        heroHpBloc: _heroHpBloc,
                       ),
                     )
                   ],
